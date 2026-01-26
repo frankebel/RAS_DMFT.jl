@@ -287,7 +287,7 @@ function spectral_function_loggaussian(P::PolesSum, ω::Real, b::Real)
     return result
 end
 
-function spectral_function_loggaussian(P::PolesSum, ω::Vector{<:Real}, b::Real)
+function spectral_function_loggaussian(P::PolesSum, ω::AbstractVector{<:Real}, b::Real)
     # map for each point in given grid
     return map(i -> spectral_function_loggaussian(P, i, b), ω)
 end

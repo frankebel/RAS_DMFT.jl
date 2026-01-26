@@ -313,12 +313,11 @@ using Test
             loc = grid_log(1, Λ, N)
             grid = [-reverse(loc); 0; loc]
             G = greens_function_bethe_grid(grid)
-            W = collect(-2:0.001:2)
-            popat!(W, findfirst(iszero, W)) # exclude ω == 0
+            W = range(-2; stop = 2, length = 4000) # exclude ω == 0
             P = spectral_function_loggaussian(G, W, 0.2)
             P .*= π
             @test all(>=(0), P) # positive semidefinite
-            @test norm(P - reverse(P)) * 0.001 < 10 * eps() # symmetry
+            @test norm(P - reverse(P)) / 4000 < 10 * eps() # symmetry
             @test abs(P[2000] - 2) < 0.01 # Luttinger pinning
             @test first(P) < 1.0e-6 # decay for ω → ±∞
             @test last(P) < 1.0e-6 # decay for ω → ±∞
