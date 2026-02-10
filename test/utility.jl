@@ -80,6 +80,14 @@ using Test
         @test RAS_DMFT.moment(f, W, 2) == 0.2806 / π
     end # moment
 
+    @testset "moments" begin
+        ref = [0.1, 0.2, 0.3, 0.4, 0.5] # must not matter
+        imf = [-0.2, -0.4, 0.0, -0.6, -0.8] # asymmetric input
+        f = ref + im * imf
+        W = [-0.4, -0.1, 0.0, 0.5, 1.0] # non-equidistant grid
+        @test moments(f, W, 0:2) == [0.61, 0.33, 0.2806] ./ π
+    end # moments
+
     @testset "quasiparticle_weight" begin
         # pole
         Σ = PolesSum([-0.25, -0.01, 0.5], [1.0, 2.0, 3.0])

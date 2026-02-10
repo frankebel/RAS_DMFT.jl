@@ -202,6 +202,10 @@ function moment(f::AbstractVector{<:Complex}, W::AbstractVector{<:Real}, n::Int 
     return result
 end
 
+function moments(f::AbstractVector{<:Complex}, W::AbstractVector{<:Real}, ns)
+    return map(i -> moment(f, W, i), ns)
+end
+
 function _derivative(P::PolesSum, ω::R, tol::Real = 0) where {R <: Real}
     tol >= 0 || throw(ArgumentError("tol must be semipositive"))
 
