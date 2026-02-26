@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- lognormal broadening on a grid of type `AbstractVector` ([#163](https://github.com/frankebel/RAS_DMFT.jl/pull/163)) ([2cb92dd](https://github.com/frankebel/RAS_DMFT.jl/commit/2cb92dd3b16ae4f3fbd7e28cdb0f578d422ca229))
+
 ## [0.10.0] - 2025-12-11
 
 ### Changed
