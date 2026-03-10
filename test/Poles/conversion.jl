@@ -3,6 +3,37 @@ using LinearAlgebra
 using Test
 
 @testset "conversion" begin
+    @testset "Anderson matrix" begin
+        # scalar
+        P = PolesSum([-1.0, 0.0, 1.0], [0.4, 0.2, 0.4])
+        b0, HA = anderson_matrix(P)
+        @test b0 ≈ 1 atol = 10 * eps()
+        @test norm(
+            HA - [
+                0 -sqrt(0.4) -sqrt(0.4);
+                -sqrt(0.4) -sqrt(0.2) 0.0;
+                -sqrt(0.4) 0.0 sqrt(0.2)
+            ]
+        ) < 10 * eps()
+        # block
+        P = PolesSumBlock(
+            [-1.0, 0, 1],
+            [
+                [1 0.1; 0.1 0.5],
+                [2.0 0; 0 2],
+                [1 0.1; 0.1 0.5 ],
+            ]
+        )
+        B0, HA = anderson_matrix(P)
+        @test norm(B0 * B0 - sum(weights(P))) < 50 * eps()
+        F = eigen(HA)
+        B = B0 * F.vectors[1:2, :]
+        P_new = PolesSumBlock(copy(F.values), B)
+        merge_degenerate_poles!(P_new, 50 * eps())
+        @test norm(locations(P_new) - locations(P)) < 20 * eps()
+        @test all(i -> i < 20 * eps(), norm.(weights(P_new) .- weights(P))) # norm of each weight difference
+    end # Anderson matrix
+
     @testset "scalar" begin
         P = PolesContinuedFraction(5:10, 0.1:0.1:0.5, 0.25)
         PS = PolesSum(P)

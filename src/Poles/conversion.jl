@@ -1,5 +1,73 @@
 # Conversion between different representations.
 
+"""
+    anderson_matrix(P::PolesSum)
+    anderson_matrix(P::PolesSumBlock)
+
+Calculate scaling factor ``B_0`` and Anderson matrix ``H_\\mathrm{A}``
+given a sum of poles.
+
+Reference: https://doi.org/10.1103/PhysRevB.90.085102, appendix B
+"""
+function anderson_matrix(P::PolesSum)
+    T = eltype(P) <: Real ? Float64 : ComplexF64
+    N = length(P)
+
+    He = Diagonal(locations(P))
+    χ0 = amplitudes(P)
+    b0 = norm(χ0)
+    χ0 ./= b0
+
+    # Create orthonormal basis set using QR decomposition.
+    χ = Matrix{T}(I(N))
+    χ[:, 1] = χ0
+    χ = Matrix(qr(χ).Q)
+    # Eq. B8
+    h = Hermitian(χ' * He * χ)
+
+    # Find transformation matrix for subspace 2-N
+    # U = ( 1 0 )
+    #     ( 0 V )
+    # where V are eigenvectors of h'.
+    U = Matrix{T}(I(N))
+    U[2:end, 2:end] = eigen!(h[2:end, 2:end]).vectors
+    # Anderson matrix
+    HA = U' * h * U
+    hermitianpart!(HA)
+
+    return b0, HA
+end
+
+function anderson_matrix(P::PolesSumBlock)
+    T = eltype(P) <: Real ? Float64 : ComplexF64
+    N = length(P)
+    n = size(P, 1) # block size
+
+    He = Diagonal(repeat(locations(P); inner = n))
+    χ0::Matrix{T} = vcat(amplitudes(P)...)
+    χ0, B0 = RAS_DMFT._orthonormalize_SVD(χ0)
+    RAS_DMFT._orthonormalize_GramSchmidt!(χ0) # numerical instability
+    RAS_DMFT._orthonormalize_GramSchmidt!(χ0) # numerical instability
+
+    # Create orthonormal basis set using QR decomposition.
+    χ = Matrix(UniformScaling(1.0), N * n, N * n)
+    χ[:, 1:n] = χ0
+    χ = Matrix(qr(χ).Q)
+    h = Hermitian(χ' * He * χ)
+
+    # Find transformation matrix for subspace 2-N
+    # U = ( 1 0 )
+    #     ( 0 V )
+    # where V are eigenvectors of h'.
+    U = Matrix{T}(I(N * n))
+    U[(n + 1):end, (n + 1):end] = eigen(h[(n + 1):end, (n + 1):end]).vectors
+    # Anderson matrix
+    HA = U' * h * U
+    hermitianpart!(HA)
+
+    return B0, HA
+end
+
 # scalar form
 
 function PolesSum(P::PolesContinuedFraction)

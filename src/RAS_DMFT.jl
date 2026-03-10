@@ -26,6 +26,7 @@ export
     add_pole_at_zero!,
     amplitude,
     amplitudes,
+    anderson_matrix,
     block_lanczos,
     block_lanczos_full_ortho,
     correlator,
