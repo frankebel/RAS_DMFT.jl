@@ -267,5 +267,5 @@ Base.size(P::PolesSumBlock) = size(first(weights(P)))
 Base.size(P::PolesSumBlock, i) = size(first(weights(P)), i)
 
 function Base.transpose(P::PolesSumBlock)
-    return PolesSumBlock(locations(P), map(transpose, weights(P)))
+    return PolesSumBlock(copy(locations(P)), map(transpose, weights(P)))
 end

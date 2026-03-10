@@ -328,9 +328,10 @@ using Test
         end # sort
 
         @testset "transpose" begin
-            P = PolesSumBlock(0:1, [[5 4 + 8im; 4 - 8im 16], [9 18 + 15im; 18 - 15im 61]])
+            P = PolesSumBlock([0, 1], [[5 4 + 8im; 4 - 8im 16], [9 18 + 15im; 18 - 15im 61]])
             Pt = transpose(P)
-            @test locations(Pt) == 0:1
+            @test locations(Pt) == [0, 1]
+            @test locations(Pt) !== locations(P) # must copy
             @test weights(Pt) == [[5 4 - 8im; 4 + 8im 16], [9 18 - 15im; 18 + 15im 61]]
         end # transpose
     end # base
