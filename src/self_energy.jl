@@ -38,53 +38,76 @@ function self_energy_dyson(
     return Σ_H, Σ
 end
 
-# https://doi.org/10.1103/PhysRevB.105.245132
 """
-    self_energy_IFG(C::PolesSumBlock)
+    self_energy_IFG(C::PolesSumBlock, block::Int = 1)
 
-Calculate self-energy as
-``Σ_ω = I_ω - F^\\mathrm{L}_ω (G_ω)^{-1} F^\\mathrm{R}_ω``.
+Given a block sum of poles ``C``, calculate the self-energy using the Schur complement
+``Σ(ω) = I(ω) - F^\\mathrm{L}(ω) (G(ω))^{-1} F^\\mathrm{R}(ω)``.
 
-Assumes that `C` is given as
+The `block` argument chooses either the top left component (default `1`)
+or bottom right (`2`) component.
 
-```math
-\\begin{pmatrix}
-I             & F^\\mathrm{L} \\\\
-F^\\mathrm{R} & G
-\\end{pmatrix}.
-```
+Returns a `PolesSumBlock` object.
+
+Reference: https://doi.org/10.1103/PhysRevB.105.245132
 """
-function self_energy_IFG(C::PolesSumBlock)
-    # Thank you Aleksandrs Začinskis for showing me the method of
-    # - matrix inversion
-    # - taking [1,1] element
-    # - inversion again
+function self_energy_IFG(C::PolesSumBlock, block::Int = 1)
+    T = eltype(C) <: Real ? Float64 : ComplexF64
+    N = length(C)
+    n = size(C, 1) # block size
+    iseven(n) || throw(DomainError(n, "block size of C must be even"))
+    block in (1, 2) || throw(DomainError(block, "block must be 1 or 2"))
 
-    size(C) == (2, 2) || throw(ArgumentError("C must have size (2, 2)"))
+    B0, HA = anderson_matrix(C)
 
-    # convert C to continued fraction representation
-    C_cf = PolesContinuedFractionBlock(C)
-    iszero(scale(C_cf)[1, 2]) || throw(ArgumentError("`scale(C)` must be diagonal")) # TODO: extend this
-    S_inv = inv(scale(C_cf))
-    A1 = locations(C_cf)[1]
+    # decompose scaling matrix
+    F = eigen(B0)
+    tol = maximum(F.values) * sqrt(eps(real(T)))
+    D = similar(F.values)
+    map!(λ -> λ >= tol ? 1 / λ : zero(λ), D, F.values)
+    B0_inv = Hermitian(F.vectors' * Diagonal(D) * F.vectors) # B0^{-1}
+    map!(λ -> λ >= tol ? 1 / λ^2 : zero(λ), D, F.values)
+    B0_inv_sqr = Hermitian(F.vectors' * Diagonal(D) * F.vectors) # B0^{-2}
 
-    # Shift continued fraction representation by one index and take [1,1] block
-    C_cf_shift = PolesContinuedFractionBlock(
-        locations(C_cf)[2:end], amplitudes(C_cf)[2:end], amplitudes(C_cf)[1]
-    )
-    C_shift = PolesSumBlock(C_cf_shift)
-    T = PolesSum(C_shift, 1, 1) # C_shift_[1,1]
-    # Reduce noise in T by removing all weight smaller than relative ϵ.
-    merge_small_weight!(T, moment(T, 0) * eps())
+    # extract blocks.
+    A1 = Hermitian(HA[1:n, 1:n])
+    A = diag(HA)[(n + 1):end]
+    B = view(HA, 1:n, (n + 1):(n * N)) # column vectors b_i
 
-    # create new sum representation by adding S_[1,1] and [A_1]_[1,1] for Anderson representation.
-    s = inv(S_inv[1, 1]) # new scale, is U/2 for half-filling
-    foo = Array(T)
-    foo[1, 1] = A1[1, 1]
-    F = eigen!(Hermitian(foo))
+    # take inverse
+    A1 = B0_inv * A1 * B0_inv
+    amp = B0_inv * B
+    P = PolesSumBlock(A, amp)
+
+    # take block
+    idx = isone(block) ? (1:(n ÷ 2)) : ((n ÷ 2 + 1):n)
+    B0_inv_sqr = Hermitian(B0_inv_sqr[idx, idx])
+    A1 = Hermitian(A1[idx, idx])
+    for i in eachindex(P)
+        weights(P)[i] = weight(P, i)[idx, idx]
+    end
+
+    # new scaling matrix
+    F = eigen(B0_inv_sqr)
+    D = Diagonal(similar(F.values))
+    map!(λ -> λ >= tol ? 1 / sqrt(λ) : zero(λ), D, F.values)
+    B0 = Hermitian(F.vectors' * D * F.vectors) # B0
+    A1 = B0 * A1 * B0
+    for i in eachindex(P)
+        weights(P)[i] = B0 * Hermitian(weight(P, i)) * B0
+    end
+
+    # diagonalize
+    H = Array(P)
+    H[1:(n ÷ 2), 1:(n ÷ 2)] = A1
+    F = eigen!(H)
     loc = F.values
-    wgt = abs2(s) .* abs2.(view(F.vectors, 1, :))
-    return PolesSum(loc, wgt)
+    B = view(F.vectors, 1:(n ÷ 2), 1:size(H, 2)) # column vectors b_i
+    amp = B0 * B
+    P = PolesSumBlock(loc, amp)
+    merge_degenerate_poles!(P, zero(real(T)))
+
+    return P
 end
 
 """

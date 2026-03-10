@@ -61,9 +61,9 @@ using Test
 
     @testset "IFG" begin
         # on the real axis
-        Σ = self_energy_IFG(C)
+        Σ = PolesSum(self_energy_IFG(C), 1, 1)
         merge_small_weight!(Σ, tol)
-        @test RAS_DMFT.moment(Σ, 0) ≈ U^2 / 4 rtol = 1.0e5 * eps()
+        @test RAS_DMFT.moment(Σ, 0) ≈ U^2 / 4 rtol = 1.0e3 * eps()
         @test RAS_DMFT.moment(Σ, 1) ≈ 0 atol = 1.0e-9
         # broadened
         Σ_IFG_lorentz = self_energy_IFG_lorentzian(Σ_H, C, W, δ)
