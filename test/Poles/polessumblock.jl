@@ -228,6 +228,30 @@ using Test
         end # weights
     end # custom functions
 
+    @testset "Core" begin
+        @testset "Array" begin
+            A = [-7, 9]
+            B1 = [4 3; 3 4]
+            W1 = B1 * B1'
+            B2 = [5 0; 0 1]
+            W2 = B2 * B2'
+            P = PolesSumBlock(A, [W1, W2])
+            m = Array(P)
+            @test typeof(m) == Matrix{Float64}
+            @test norm(
+                m -
+                    [
+                    0 0  4  3 5 0
+                    0 0  3  4 0 1
+                    4 3 -7  0 0 0
+                    3 4  0 -7 0 0
+                    5 0  0  0 9 0
+                    0 1  0  0 0 9
+                ]
+            ) < 50 * eps()
+        end # Array
+    end # Core
+
     @testset "Base" begin
         @testset "+" begin
             # addition must sort and merge poles

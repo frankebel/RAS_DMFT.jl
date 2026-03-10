@@ -216,6 +216,24 @@ function moment(P::PolesSumBlock, n::Int = 0)
     return sum(i -> i[1]^n * i[2], zip(locations(P), weights(P)))
 end
 
+function Core.Array(P::PolesSumBlock)
+    T = eltype(P) <: Real ? Float64 : ComplexF64
+    N = length(P)
+    n = size(P, 1)
+    result = zeros(T, (N + 1) * n, (N + 1) * n)
+    A = locations(P)
+    result[1:n, 1:n] = zeros(T, n, n)
+    for i in 2:(N + 1)
+        i1 = (i - 1) * n + 1
+        i2 = i * n
+        B = amplitude(P, i - 1)
+        result[1:n, i1:i2] = B # first block row
+        result[i1:i2, 1:n] = B # first block column
+        map(j -> result[j, j] = A[i - 1], i1:i2) # main diagonal
+    end
+    return result
+end
+
 function Base.:+(A::PolesSumBlock{<:Any, TA}, B::PolesSumBlock{<:Any, TB}) where {TA, TB}
     loc = [locations(A); locations(B)]
     # copy weights of `A`, `B` to `wgt`
