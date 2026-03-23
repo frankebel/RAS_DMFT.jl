@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - moments of complex function ([#164](https://github.com/frankebel/RAS_DMFT.jl/pull/164)) ([da721d2](https://github.com/frankebel/RAS_DMFT.jl/commit/da721d2607ea8749199a910a9e6d14f8768cc557))
 - transformation from sum of poles to Anderson form ([#166](https://github.com/frankebel/RAS_DMFT.jl/pull/166)) (1729012)
+- generalize self-energy to any 2n×2n block sum of poles ([#167](https://github.com/frankebel/RAS_DMFT.jl/pull/167)) (22f40e7)
 
 ### Fixed
 
