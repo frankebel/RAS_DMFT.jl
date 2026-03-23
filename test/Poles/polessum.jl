@@ -471,15 +471,15 @@ using Test
             @test length(P) === 100 # originally 101 poles
             # poles are symmetric
             @test abs(a0) < eps()
-            @test norm(locations(P) + reverse(locations(P))) < 100 * eps()
-            @test norm(weights(P) - reverse(weights(P))) < 100 * eps()
+            @test norm(locations(P) + reverse(locations(P))) < 50 * eps()
+            @test norm(weights(P) - reverse(weights(P))) < 10 * eps()
             @test RAS_DMFT.moment(P, 0) ≈ 0.25 atol = 1.0e-4 # total weight
             # evaluate
             δ = 0.1
             @test norm(
                 evaluate_lorentzian(G, 0, δ) -
                     1 / (im * δ - a0 - evaluate_lorentzian(P, 0, δ)),
-            ) < 30 * eps()
+            ) < 50 * eps()
             ω = 1.0
             δ = 0.1
             @test norm(
@@ -489,8 +489,8 @@ using Test
             # symmetry
             z1 = 1 / (-0.8 + 0.1im - a0 - evaluate_lorentzian(P, -0.8, 0.1))
             z2 = 1 / (0.8 + 0.1im - a0 - evaluate_lorentzian(P, 0.8, 0.1))
-            @test real(z1) ≈ -real(z2) rtol = 2000 * eps()
-            @test imag(z1) ≈ imag(z2) rtol = 7000 * eps()
+            @test real(z1) ≈ -real(z2) rtol = 20 * eps()
+            @test imag(z1) ≈ imag(z2) rtol = 20 * eps()
         end # inv
 
         @testset "issorted" begin

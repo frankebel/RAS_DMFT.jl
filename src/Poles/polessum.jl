@@ -326,14 +326,12 @@ function Base.inv(P::PolesSum)
     isapprox(moment(P, 0), 1; atol = 1000 * eps()) ||
         throw(ArgumentError("P does not have total weight 1"))
 
-    PCF = PolesContinuedFraction(P)
-    a0 = popfirst!(locations(PCF))
-    b0 = popfirst!(amplitudes(PCF))
-    F = eigen(SymTridiagonal(PCF))
-    weights = b0 * view(F.vectors, 1, :)
-    map!(abs2, weights)
-    P_inv = PolesSum(F.values, weights)
-    return a0, P_inv
+    b0, HA = anderson_matrix(P)
+    loc = diag(HA)
+    a0 = popfirst!(loc)
+    wgt = b0 * HA[1, 2:end]
+    map!(i -> abs2(i), wgt)
+    return a0, PolesSum(loc, wgt)
 end
 
 # create a better show?
