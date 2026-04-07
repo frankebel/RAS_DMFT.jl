@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - transformation from sum of poles to Anderson form ([#166](https://github.com/frankebel/RAS_DMFT.jl/pull/166)) (1729012)
 - generalize self-energy to any 2n×2n block sum of poles ([#167](https://github.com/frankebel/RAS_DMFT.jl/pull/167)) (22f40e7)
 
+### Changed
+
+- add regularization parameter for quasiparticle weight ([#169](https://github.com/frankebel/RAS_DMFT.jl/pull/169)) ([8c3a40b](https://github.com/frankebel/RAS_DMFT.jl/commit/8c3a40bfe9a2e1b2a5df18e1470dabdcb169029c))
+
 ### Fixed
 
 - lognormal broadening on a grid of type `AbstractVector` ([#163](https://github.com/frankebel/RAS_DMFT.jl/pull/163)) ([2cb92dd](https://github.com/frankebel/RAS_DMFT.jl/commit/2cb92dd3b16ae4f3fbd7e28cdb0f578d422ca229))
