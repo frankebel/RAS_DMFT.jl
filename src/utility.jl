@@ -206,35 +206,34 @@ function moments(f::AbstractVector{<:Complex}, W::AbstractVector{<:Real}, ns)
     return map(i -> moment(f, W, i), ns)
 end
 
-function _derivative(P::PolesSum, ω::R, tol::Real = 0) where {R <: Real}
-    tol >= 0 || throw(ArgumentError("tol must be semipositive"))
-
-    result = zero(promote_type(eltype(P), R))
-    for i in eachindex(P)
-        weight(P, i) < tol && continue
-        result -= weight(P, i) / (ω - locations(P)[i])^2
-    end
-    return result
-end
-
 """
-    quasiparticle_weight(Σ::PolesSum, tol::Real=0)
+    quasiparticle_weight(Σ::PolesSum; tol::Real = 0, λ::Real = 0)
 
 Obtain the quasiparticle weight on the real axis.
 
 ```math
-Z = \\left(1 - \\frac{∂\\mathrm{Re}~Σ(0)}{∂ω}\\right)^{-1}
+\\begin{aligned}
+Z &= \\left(1 - \\frac{∂\\mathrm{Re}~Σ(0)}{∂ω}\\right)^{-1} \\\\
+  &= \\left(1 - \\sum_i w_i \\frac{∂}{∂ω}\\left.\\frac{1}{ω-a_i}\\right|_{ω=0}\\right)^{-1} \\\\
+  &= \\left(1 + \\sum_{w_i ≥ \\mathrm{tol}} w_i\\frac{1}{a_i^2 + λ^2}\\right)^{-1} \\\\
+\\end{aligned}
 ```
 
-Skip all weights `< tol`.
+Skip all weights ``w_i< \\mathrm{tol}``.
+The variable ``λ`` serves as a regularization parameter.
 
 See also [`quasiparticle_weight_gaussian`](@ref).
 """
-function quasiparticle_weight(Σ::PolesSum, tol::Real = 0)
+function quasiparticle_weight(Σ::PolesSum; tol::Real = 0, λ::Real = 0)
     tol >= 0 || throw(ArgumentError("tol must be semipositive"))
+    λ >= 0 || throw(ArgumentError("λ must be semipositive"))
 
-    foo = _derivative(Σ, zero(eltype(Σ)), tol)
-    return inv(1 - foo)
+    deriv = zero(Float64)
+    for i in eachindex(Σ)
+        weight(Σ, i) < tol && continue
+        deriv += weight(Σ, i) / (locations(Σ)[i]^2 + λ^2)
+    end
+    return inv(1 + deriv)
 end
 
 """

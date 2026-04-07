@@ -92,8 +92,10 @@ using Test
         # pole
         Σ = PolesSum([-0.25, -0.01, 0.5], [1.0, 2.0, 3.0])
         @test quasiparticle_weight(Σ) == inv(20029)
-        @test quasiparticle_weight(Σ, 1.0) == inv(20029)
-        @test quasiparticle_weight(Σ, 1.1) == inv(20013)
+        @test quasiparticle_weight(Σ; tol = 1.0) == inv(20029)
+        @test quasiparticle_weight(Σ; tol = 1.1) == inv(20013)
+        @test quasiparticle_weight(Σ; λ = 1.0e-2) ≈ inv(10028.9696428138) atol = 10 * eps()
+        @test quasiparticle_weight(Σ; tol = 1.1, λ = 1.0e-2) ≈ inv(10012.995201919231) atol = 10 * eps()
 
         # grid
         W = [-0.5, -0.25, 0.0, 0.25, 0.5]

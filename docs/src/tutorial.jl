@@ -146,6 +146,7 @@ xlims!(ax, first(W), last(W))
 # ### Self-energy
 # Here, we use the improved symmetric estimator[^Kugler2022] ``Σ^\mathrm{IFG}``.
 Σ = self_energy_IFG(C)
+Σ = PolesSum(Σ, 1, 1)
 sigma = evaluate_gaussian(Σ, W, σ)
 f = Figure();
 ax = Axis(f[1, 1]; xlabel = L"ω/D", ylabel = L"Σ(ω)/D")
@@ -170,7 +171,7 @@ xlims!(ax, first(W), last(W))
 # Due to poles at $ϵ_i≈0$ this will diverge,
 # and poles with small weight need to be ignored.
 # This is controlled by the second parameter.
-quasiparticle_weight(Σ, sqrt(eps()))
+quasiparticle_weight(Σ; tol = sqrt(eps()))
 
 # ### Update hybridization
 # At the end of each DMFT step, we have to update the hybridization function
