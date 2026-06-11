@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - lognormal broadening on a grid of type `AbstractVector` ([#163](https://github.com/frankebel/RAS_DMFT.jl/pull/163)) ([2cb92dd](https://github.com/frankebel/RAS_DMFT.jl/commit/2cb92dd3b16ae4f3fbd7e28cdb0f578d422ca229))
+- allow zero length for `AbstractPoles` ([#174](https://github.com/frankebel/RAS_DMFT.jl/pull/174)) ([7167664](https://github.com/frankebel/RAS_DMFT.jl/commit/716766471f8c16e0e6c657ce5be7075673cb3805))
 
 ## [0.10.0] - 2025-12-11
 
