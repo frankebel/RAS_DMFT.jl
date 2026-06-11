@@ -66,4 +66,5 @@ Return the weights of `P`.
 """
 function weights end
 
+Base.isempty(P::AbstractPoles) = iszero(length(P))
 Base.length(P::AbstractPoles) = length(locations(P))

@@ -493,6 +493,11 @@ using Test
             @test imag(z1) ≈ imag(z2) rtol = 20 * eps()
         end # inv
 
+        @testset "isempty" begin
+            @test isempty(PolesSum(Int[], Float64[]))
+            @test !isempty(PolesSum(rand(2), rand(2)))
+        end # isempty
+
         @testset "issorted" begin
             @test issorted(PolesSum([-0.3, 0.0, 0.1], rand(3)))
             @test issorted(PolesSum([-0.0, 0.0, 0.1], rand(3)))
@@ -522,6 +527,15 @@ using Test
             @test weights(P) == [0.3, 0.4]
             @test weights(foo) == [0.4, 0.3]
         end # reverse
+
+        @testset "show" begin
+            P = PolesSum(Int[], Float64[])
+            @test sprint(show, P) == "PolesSum{Int64, Float64} with 0 poles"
+            P = PolesSum(rand(Int, 1), rand(Float64, 1))
+            @test sprint(show, P) == "PolesSum{Int64, Float64} with 1 poles"
+            P = PolesSum(rand(Int, 2), rand(Float64, 2))
+            @test sprint(show, P) == "PolesSum{Int64, Float64} with 2 poles"
+        end # show
 
         @testset "sort!" begin
             loc = [2, 1]

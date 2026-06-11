@@ -277,9 +277,14 @@ using Test
             @test eltype(PolesSumBlock(1.0:2, [[1 0; 0 0], [0 0; 0 0]])) === Float64
         end # eltype
 
+        @testset "isempty" begin
+            @test isempty(PolesSumBlock(Int[], Matrix{Float64}[]))
+            @test !isempty(PolesSumBlock(rand(10), rand(2, 10)))
+        end # isempty
+
         @testset "length" begin
-            P = PolesSumBlock(rand(10), rand(4, 10))
-            @test length(P) === 10
+            @test length(PolesSumBlock(Int[], Matrix{Float64}[])) === 0
+            @test length(PolesSumBlock(rand(10), rand(4, 10))) === 10
         end
 
         @testset "reverse!" begin
@@ -305,6 +310,15 @@ using Test
             @test size(P, 1) === 4
             @test size(P, 2) === 4
         end # size
+
+        @testset "show" begin
+            P = PolesSumBlock(Int[], Matrix{Float64}[])
+            @test sprint(show, P) == "PolesSumBlock{Int64, Float64} with 0 poles"
+            P = PolesSumBlock(rand(Int, 1), [hermitianpart!(rand(Float64, 2, 2))])
+            @test sprint(show, P) == "PolesSumBlock{Int64, Float64} with 1 poles of size 2×2"
+            P = PolesSumBlock(rand(Int, 2), [hermitianpart!(rand(Float64, 3, 3)) for _ in 1:2])
+            @test sprint(show, P) == "PolesSumBlock{Int64, Float64} with 2 poles of size 3×3"
+        end # show
 
         @testset "sort!" begin
             loc = [2, 1]

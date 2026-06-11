@@ -335,7 +335,7 @@ function Base.inv(P::PolesSum)
 end
 
 # create a better show?
-Base.show(io::IO, P::PolesSum) = print(io, length(P), "-element ", summary(P))
+Base.show(io::IO, P::PolesSum) = print(io, summary(P), " with ", length(P), " poles")
 
 function LinearAlgebra.axpby!(α::Number, x::P, β::Number, y::P) where {P <: PolesSum}
     wy = weights(y)
