@@ -16,6 +16,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - add regularization parameter for quasiparticle weight ([#169](https://github.com/frankebel/RAS_DMFT.jl/pull/169)) ([8c3a40b](https://github.com/frankebel/RAS_DMFT.jl/commit/8c3a40bfe9a2e1b2a5df18e1470dabdcb169029c))
+- `PolesSum` and `PolesSumBlock` are always sorted by increasing pole locations.
+  Degenerate poles are automatically merged.
+  ([#175](https://github.com/frankebel/RAS_DMFT.jl/pull/175)) ([4f876e1](https://github.com/frankebel/RAS_DMFT.jl/commit/4f876e11abd33458386e02fc410f7960bf4beb34))
 
 ### Fixed
 
