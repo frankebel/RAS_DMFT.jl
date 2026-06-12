@@ -122,7 +122,6 @@ using Test
             @test length(G) === 101
             @test all(i -> i === 1 / 101, weights(G))
             @test norm(locations(G) + reverse(locations(G))) === 0.0
-            @test issorted(G)
         end # equal weight
     end # Bethe lattice
 

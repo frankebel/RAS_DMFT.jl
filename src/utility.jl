@@ -170,6 +170,14 @@ function _get_filling(
     return -imag(filling) / π / nk * dω
 end
 
+function _issorted_and_unique(grid::AbstractVector{<:Real})
+    issorted(grid) || throw(ArgumentError("grid is not sorted"))
+    allunique(grid) || throw(ArgumentError("grid has degenerate locations"))
+    # isequal() treats -0.0 and 0.0 as unequal although both are zero.
+    count(iszero, grid) <= 1 || throw(ArgumentError("grid has duplicate zeros"))
+    return true
+end
+
 """
     moment(f::AbstractVector{<:Complex}, W::AbstractVector{<:Real}, n::Int=0)
 

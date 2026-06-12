@@ -16,7 +16,10 @@ struct PolesSum{A <: Real, B <: Number} <: AbstractPolesSum
 
     function PolesSum{A, B}(locations, weights) where {A, B}
         length(locations) == length(weights) || throw(DimensionMismatch("length mismatch"))
-        return new{A, B}(locations, weights)
+        result = new{A, B}(locations, weights)
+        sort!(result)
+        merge_degenerate_poles!(result)
+        return result
     end
 end
 
@@ -89,7 +92,6 @@ end
 function merge_degenerate_poles!(P::PolesSum, tol::Real = 0)
     # check input
     tol >= 0 || throw(ArgumentError("tol must not be negative"))
-    issorted(P) || throw(ArgumentError("P must be sorted"))
     # get information from P
     loc = locations(P)
     wgt = weights(P)
@@ -141,8 +143,6 @@ and the first moment changes minimally.
 """
 function merge_negative_weight!(P::PolesSum)
     # check input
-    issorted(P) || throw(ArgumentError("P is not sorted"))
-    allunique(P) || throw(ArgumentError("P has degenerate locations"))
     moment(P, 0) >= 0 || throw(ArgumentError("total weight is negative"))
 
     loc = locations(P)
@@ -205,7 +205,6 @@ end
 function merge_small_weight!(P::PolesSum, tol::Real)
     # check input
     tol >= 0 || throw(ArgumentError("negative tol is invalid"))
-    issorted(P) || throw(ArgumentError("P must be sorted"))
     # loop over all poles
     i = 1
     while i <= length(P)

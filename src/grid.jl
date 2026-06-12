@@ -31,9 +31,7 @@ For each point ``a_i`` linearly interpolate `n` point in the interval
 """
 function grid_interpolate(a::AbstractVector{<:Real}, n::Int)
     # check input
-    issorted(a) || throw(ArgumentError("a is not sorted"))
-    allunique(a) || throw(ArgumentError("a has duplicate locations"))
-    count(iszero, a) <= 1 || throw(ArgumentError("a has duplicate zeros"))
+    _issorted_and_unique(a)
     Base.require_one_based_indexing(a)
     n >= 1 || throw(ArgumentError("n must be positive"))
 

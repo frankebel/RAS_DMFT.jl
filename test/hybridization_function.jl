@@ -112,7 +112,6 @@ using Test
             @test length(Δ) === 101
             @test all(i -> i === 1 / sqrt(101) / 2, amplitudes(Δ))
             @test norm(locations(Δ) + reverse(locations(Δ))) === 0.0
-            @test issorted(Δ)
             # D = 4
             Δ = hybridization_function_bethe_equal_weight(101, 4)
             @test all(i -> i === 2 / sqrt(101), amplitudes(Δ))

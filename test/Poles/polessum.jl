@@ -156,10 +156,6 @@ using Test
             merge_degenerate_poles!(P)
             @test locations(P) == [-0.5, 0.0, 0.05]
             @test weights(P) == [0.625, 2.25, 6.25]
-            # Errors
-            @test_throws ArgumentError merge_degenerate_poles!(
-                PolesSum([0.0, -0.1, 0.5], rand(3))
-            )
         end # merge_degenerate_poles!
 
         @testset "merge_negative_locations_to_zero!" begin
@@ -173,14 +169,10 @@ using Test
             @test locations(P) == [0.0, 0.2]
             @test weights(P) == [7.0625, 1.5]
             # # no negative location
-            P = PolesSum([0.1, 0.1, 0.5, 1.0], [0.5, 0.75, 2.5, 1.5])
+            P = PolesSum([0.1, 0.5, 1.0], [0.5, 2.5, 1.5])
             @test merge_negative_locations_to_zero!(P) === P
-            @test locations(P) == [0.1, 0.1, 0.5, 1.0]
-            @test weights(P) == [0.5, 0.75, 2.5, 1.5]
-            # Errors
-            @test_throws ArgumentError merge_negative_locations_to_zero!(
-                PolesSum([0.0, -0.1, 0.5], rand(3))
-            )
+            @test locations(P) == [0.1, 0.5, 1.0]
+            @test weights(P) == [0.5, 2.5, 1.5]
         end # merge_negative_locations_to_zero!
 
         @testset "merge_negative_weight!" begin
@@ -255,10 +247,6 @@ using Test
             merge_small_weight!(P, 0)
             @test locations(P) == [2]
             @test weights(P) == [1]
-            # Errors
-            @test_throws ArgumentError merge_small_weight!(
-                PolesSum([0.0, -0.1, 0.5], rand(3)), eps()
-            )
         end # merge_small_weight!
 
         @testset "moment" begin
@@ -438,14 +426,6 @@ using Test
             @test weights(P) == [0.1, -0.75]
         end # -
 
-        @testset "allunique" begin
-            @test allunique(PolesSum([0.1, 0.0, -0.5], rand(3)))
-            @test !allunique(PolesSum([0.1, 0.0, 0.1], rand(3)))
-            @test !allunique(PolesSum([-0.1, 0.0, -0.1], rand(3)))
-            @test !allunique(PolesSum([0.0, 0.0, -0.1], rand(3)))
-            @test !allunique(PolesSum([-0.0, 0.0, -0.1], rand(3)))
-        end # allunique
-
         @testset "copy" begin
             loc = 1:5
             wgt = 6:10
@@ -498,15 +478,6 @@ using Test
             @test !isempty(PolesSum(rand(2), rand(2)))
         end # isempty
 
-        @testset "issorted" begin
-            @test issorted(PolesSum([-0.3, 0.0, 0.1], rand(3)))
-            @test issorted(PolesSum([-0.0, 0.0, 0.1], rand(3)))
-            @test issorted(PolesSum([0.0, 0.0, 0.1], rand(3)))
-            @test !issorted(PolesSum([0.0, -0.0, 0.1], rand(3)))
-            @test !issorted(PolesSum([0.0, 0.2, 0.1], rand(3)))
-            @test issorted(PolesSum([0.2, 0.1, 0.0], rand(3)); rev = true)
-        end # issorted
-
         @testset "length" begin
             @test length(PolesSum(rand(10), rand(10))) === 10
         end # length
@@ -541,22 +512,9 @@ using Test
             loc = [2, 1]
             wgt = [9, 16]
             P = PolesSum(loc, wgt)
-            @test sort!(P) === P
             @test locations(P) == [1, 2]
             @test weights(P) == [16, 9]
         end # sort!
-
-        @testset "sort" begin
-            loc = [2, 1]
-            wgt = [3, 4]
-            P = PolesSum(loc, wgt)
-            foo = sort(P)
-            @test foo !== P
-            @test locations(P) == [2, 1]
-            @test locations(foo) == [1, 2]
-            @test weights(P) == [3, 4]
-            @test weights(foo) == [4, 3]
-        end # sort
     end # Base
 
     @testset "LinearAlgebra" begin

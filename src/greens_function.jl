@@ -62,9 +62,7 @@ See also
 """
 function greens_function_bethe_grid(grid::AbstractVector{<:Real}, D::Real = 1.0)
     # check input
-    foo = PolesSum(grid, grid)
-    issorted(foo) || throw(ArgumentError("grid is not sorted"))
-    allunique(foo) || throw(ArgumentError("grid has degenerate locations"))
+    _issorted_and_unique(grid)
     D > 0 || throw(DomainError(D, "negative half-bandwidth"))
 
     s = Semicircle(D)
@@ -110,9 +108,7 @@ function greens_function_bethe_grid_hubbard3(
         grid::AbstractVector{<:Real}, U::Real = 0.0, D::Real = 1.0
     )
     # check input
-    foo = PolesSum(grid, grid)
-    issorted(foo) || throw(ArgumentError("grid is not sorted"))
-    allunique(foo) || throw(ArgumentError("grid has degenerate locations"))
+    _issorted_and_unique(grid)
     D > 0 || throw(DomainError(D, "negative half-bandwidth"))
 
     s = Semicircle(D)

@@ -69,6 +69,13 @@ using Test
         @test filling ≈ n_tot / 2 atol = 2.0e-2
     end # find chemical potential
 
+    @testset "_issorted_and_unique" begin
+        @test RAS_DMFT._issorted_and_unique(1:10)
+        @test_throws ArgumentError RAS_DMFT._issorted_and_unique([1, 0]) # not sorted
+        @test_throws ArgumentError RAS_DMFT._issorted_and_unique([0, 0, 1]) # not unique
+        @test_throws ArgumentError RAS_DMFT._issorted_and_unique([-0.0, 0.0]) # duplicate zeros
+    end # _issorted_and_unique
+
     @testset "moment" begin
         ref = [0.1, 0.2, 0.3, 0.4, 0.5] # must not matter
         imf = [-0.2, -0.4, 0.0, -0.6, -0.8] # asymmetric input

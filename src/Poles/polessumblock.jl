@@ -19,7 +19,10 @@ struct PolesSumBlock{A <: Real, B <: Number} <: AbstractPolesSum
         all(ishermitian, weights) || throw(ArgumentError("weights are not hermitian"))
         allequal(size, weights) ||
             throw(DimensionMismatch("weights do not have matching size"))
-        return new{A, B}(locations, weights)
+        result = new{A, B}(locations, weights)
+        sort!(result)
+        merge_degenerate_poles!(result)
+        return result
     end
 end
 
@@ -126,7 +129,6 @@ end
 function merge_degenerate_poles!(P::PolesSumBlock, tol::Real = 0)
     # check input
     tol >= 0 || throw(ArgumentError("tol must not be negative"))
-    issorted(P) || throw(ArgumentError("P must be sorted"))
     # get information from P
     loc = locations(P)
     wgt = weights(P)
@@ -173,7 +175,6 @@ end
 function merge_small_weight!(P::PolesSumBlock, tol::Real)
     # check input
     tol >= 0 || throw(ArgumentError("negative tol is invalid"))
-    issorted(P) || throw(ArgumentError("P must be sorted"))
     # loop over all poles
     i = 1
     while i <= length(P)
@@ -245,10 +246,7 @@ function Base.:+(A::PolesSumBlock{<:Any, TA}, B::PolesSumBlock{<:Any, TB}) where
             wgt[i] = copy(weight(B, i - length(A)))
         end
     end
-    result = PolesSumBlock(loc, wgt)
-    sort!(result)
-    merge_degenerate_poles!(result, 0)
-    return result
+    return PolesSumBlock(loc, wgt)
 end
 
 function Base.copy(P::PolesSumBlock)

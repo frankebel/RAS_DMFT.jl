@@ -156,10 +156,6 @@ using Test
             merge_small_weight!(P, 0)
             @test locations(P) == [2]
             @test weights(P) == [ones(2, 2)]
-            # Errors
-            @test_throws ArgumentError merge_small_weight!(
-                PolesSumBlock([4.0, 1.0], [W1, W2]), eps()
-            )
         end # merge_small_weight!
 
         @testset "moment" begin
@@ -324,22 +320,9 @@ using Test
             loc = [2, 1]
             wgt = [[1 0; 0 1], [2 1; 1 0]]
             P = PolesSumBlock(loc, wgt)
-            @test sort!(P) === P
             @test locations(P) == [1, 2]
             @test weights(P) == [[2 1; 1 0], [1 0; 0 1]]
         end # sort!
-
-        @testset "sort" begin
-            loc = [2, 1]
-            wgt = [[1 0; 0 1], [2 1; 1 0]]
-            P = PolesSumBlock(loc, wgt)
-            foo = sort(P)
-            @test foo !== P
-            @test locations(P) == [2, 1]
-            @test locations(foo) == [1, 2]
-            @test weights(P) == [[1 0; 0 1], [2 1; 1 0]]
-            @test weights(foo) == [[2 1; 1 0], [1 0; 0 1]]
-        end # sort
 
         @testset "transpose" begin
             P = PolesSumBlock([0, 1], [[5 4 + 8im; 4 - 8im 16], [9 18 + 15im; 18 - 15im 61]])

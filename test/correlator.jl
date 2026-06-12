@@ -34,7 +34,6 @@ using Test
         G_plus = correlator_plus(H, ψ0, d_dag, n_kryl)
         @test typeof(G_plus) === PolesSum{Float64, Float64}
         @test length(G_plus) === 50
-        @test issorted(G_plus)
         @test all(>=(0), locations(G_plus))
         @test all(>=(0), weights(G_plus))
         @test RAS_DMFT.moment(G_plus, 0) ≈ 0.5 atol = 100 * eps()
@@ -42,7 +41,6 @@ using Test
         G_minus = correlator_minus(H, ψ0, d_dag', n_kryl)
         @test typeof(G_minus) === PolesSum{Float64, Float64}
         @test length(G_minus) === 50
-        @test issorted(G_minus)
         @test all(<=(0), locations(G_minus))
         @test all(>=(0), weights(G_minus))
         @test RAS_DMFT.moment(G_minus, 0) ≈ 0.5 atol = 100 * eps()
@@ -55,13 +53,11 @@ using Test
         # C+
         C_plus = correlator_plus(H, ψ0, O, n_kryl)
         @test typeof(C_plus) === PolesSumBlock{Float64, Float64}
-        @test issorted(C_plus)
         @test length(C_plus) == length(O) * n_kryl
         @test all(>=(0), locations(C_plus))
         # C-
         C_minus = correlator_minus(H, ψ0, map(adjoint, O), n_kryl)
         @test typeof(C_minus) === PolesSumBlock{Float64, Float64}
-        @test issorted(C_minus)
         @test length(C_minus) == length(O) * n_kryl
         @test all(<=(0), locations(C_minus))
 

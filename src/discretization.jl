@@ -10,8 +10,6 @@ For the new pole at location zero, all weights of `P` in ``[-δ_0, δ_0]`` are s
 function discretize_similar_weight(P::PolesSum, δ0::Real, n::Integer)
     l_old = locations(P)
     w_old = weights(P)
-    issorted(P) || throw(ArgumentError("P is not sorted"))
-    allunique(P) || throw(ArgumentError("P has degenerate locations"))
     δ0 >= 0 || throw(ArgumentError("negative δ0"))
     n >= 3 || throw(ArgumentError("at least 3 poles necessary"))
     isodd(n) || throw(ArgumentError("number of poles must be odd"))
@@ -19,7 +17,6 @@ function discretize_similar_weight(P::PolesSum, δ0::Real, n::Integer)
     T = eltype(P)
     loc_new = Vector{T}(undef, n)
     wgt_new = Vector{T}(undef, n)
-    result = PolesSum(loc_new, wgt_new)
 
     # weight at zero is weight in [-δ0, -δ0]
     i_minus = searchsortedfirst(l_old, -δ0)
@@ -94,9 +91,7 @@ function discretize_similar_weight(P::PolesSum, δ0::Real, n::Integer)
         end
     end
 
-    # pole locations can be `< eps()` apart and not sorted
-    issorted(result) || sort!(result)
-    return result
+    return PolesSum(loc_new, wgt_new)
 end
 
 """
@@ -214,9 +209,7 @@ function discretize_to_grid(
         f::AbstractVector{<:Real}, W::AbstractVector{<:Real}, grid::AbstractVector{<:R}
     ) where {R <: Real}
     # check input
-    issorted(grid) || throw(ArgumentError("grid is not sorted"))
-    allunique(grid) || throw(ArgumentError("grid has duplicate locations"))
-    count(iszero, grid) <= 1 || throw(ArgumentError("grid has duplicate zeros"))
+    _issorted_and_unique(grid)
     eachindex(f) == eachindex(W) || throw(ArgumentError("f and W must have same indexing"))
     Base.require_one_based_indexing(grid)
 

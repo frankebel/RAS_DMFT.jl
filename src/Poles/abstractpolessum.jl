@@ -43,8 +43,6 @@ function merge_degenerate_poles! end
 Find all `locations(P) <= 0` and merge them.
 """
 function merge_negative_locations_to_zero!(P::AbstractPolesSum)
-    # check input
-    issorted(P) || throw(ArgumentError("P must be sorted"))
     # get information from P
     loc = locations(P)
     wgt = weights(P)
@@ -140,8 +138,7 @@ If a pole is outside of `grid`, only the zeroth moment is conserved.
 """
 function to_grid(P::AbstractPolesSum, grid::AbstractVector{<:Real})
     # check input
-    issorted(grid) || throw(ArgumentError("grid is not sorted"))
-    allunique(grid) || throw(ArgumentError("grid has degenerate locations"))
+    _issorted_and_unique(grid)
 
     # new location and weights
     weights_new = [zero(first(weights(P))) for _ in eachindex(grid)]
@@ -181,17 +178,7 @@ weight(P::AbstractPolesSum, i::Integer) = weights(P)[i]
 
 weights(P::AbstractPolesSum) = P.weights
 
-function Base.allunique(P::AbstractPolesSum)
-    loc = locations(P)
-    # allunique discrimates between ±zero(Float64)
-    return allunique(loc) && length(findall(iszero, loc)) <= 1
-end
-
 Base.eachindex(P::AbstractPolesSum) = eachindex(locations(P))
-
-function Base.issorted(P::AbstractPolesSum, args...; kwargs...)
-    return issorted(locations(P), args...; kwargs...)
-end
 
 Base.reverse(P::AbstractPolesSum) = reverse!(copy(P))
 
@@ -207,5 +194,3 @@ function Base.sort!(P::AbstractPolesSum)
     P.weights[:] = P.weights[p]
     return P
 end
-
-Base.sort(P::AbstractPolesSum) = sort!(copy(P))

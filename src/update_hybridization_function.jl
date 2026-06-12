@@ -21,7 +21,6 @@ function update_hybridization_function(
     n_tot = length(Δ0) * n
     loc_new = Vector{R}(undef, n_tot)
     wgt_new = Vector{R}(undef, n_tot)
-    result = PolesSum(loc_new, wgt_new)
 
     # Create tridiagonal matrix `T` using Householder transformations.
     # These do not touch the (1,1) element of the original matrix,
@@ -40,8 +39,5 @@ function update_hybridization_function(
         wgt_new[idx_low:idx_high] = weight(Δ0, i) .* abs2.(view(U, 1, :)) # multiply new weights with original
     end
 
-    sort!(result)
-    merge_degenerate_poles!(result, eps(R))
-
-    return result
+    return PolesSum(loc_new, wgt_new)
 end
