@@ -47,7 +47,6 @@ export
     greens_function_bethe_grid_hubbard3,
     greens_function_bethe_simple,
     greens_function_local,
-    greens_function_partial,
     grid_interpolate,
     grid_log,
     ground_state!,

@@ -301,25 +301,6 @@ function greens_function_local(
 end
 
 """
-    greens_function_partial(
-        G::AbstractVector{<:AbstractMatrix{<:T}}, indices
-    ) where {T<:Number}
-
-Calculate the partial Green's function my summing over diagonal terms given by `indices`.
-"""
-function greens_function_partial(
-        G::AbstractVector{<:AbstractMatrix{<:T}}, indices
-    ) where {T <: Number}
-    result = zeros(T, length(G))
-    for i in eachindex(G)
-        for idx in indices
-            result[i] += G[i][idx, idx]
-        end
-    end
-    return result
-end
-
-"""
     spectral_function_gauss(
         W::AbstractVector{<:Real}, μ::Real, Hk::AbstractVector{<:AbstractMatrix{<:T}}, σ::Real
     ) where {T<:Number}
