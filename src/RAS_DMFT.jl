@@ -79,6 +79,7 @@ export
     self_energy_IFG_gaussian,
     self_energy_IFG_lorentzian,
     self_energy_dyson,
+    shift_spectrum!,
     slater_start,
     spectral_function_gauss,
     spectral_function_loggaussian,

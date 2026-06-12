@@ -295,6 +295,13 @@ using Test
             @test weights(P) == [0, 7, 0, 9, 0, 0]
         end # remove_zero_weight
 
+        @testset "shift_spectrum!" begin
+            P = PolesSum(1:6, [0, 7, 0, 9, 0, -0.0])
+            @test RAS_DMFT.shift_spectrum!(P, 2) === P
+            @test locations(P) == -1:4
+            @test weights(P) == [0, 7, 0, 9, 0, -0.0]
+        end # shift_spectrum!
+
         @testset "spectral_function_loggauss" begin
             Λ = 1.2
             N = 150

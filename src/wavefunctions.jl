@@ -74,7 +74,7 @@ function ground_state!(
     # initial guess
     ψ0 = copy(ψ_start)
     E0 = dot(ψ0, H, ψ0)
-    shift_spectrum!(H, E0)
+    Fermions.shift_spectrum!(H, E0)
 
     # containers to reduce allocations
     a = Vector{Float64}(undef, n_kryl)
@@ -92,7 +92,7 @@ function ground_state!(
         end
         normalize!(ψ0) # possible orthogonality loss in Lanczos
         E0 = dot(ψ0, H, ψ0)
-        shift_spectrum!(H, E0)
+        Fermions.shift_spectrum!(H, E0)
 
         # calculate variance
         foo = H * ψ0
