@@ -131,6 +131,16 @@ using Test
         Σ = [Diagonal([0, 5 + im]), Diagonal([0, 6 + im])] # self-energy only on [2, 2] index
 
         @testset "non-interacting" begin
+            @inferred greens_function_local(Hk)
+            G0 = greens_function_local(Hk)
+            @test length(G0) == 3
+            @test locations(G0) == [-1, 3, 7]
+            @test norm(RAS_DMFT.moment(G0, 0) - I) < 10 * eps() # normalized
+            @test norm(weight(G0, 1) - [0.5 -0.5; -0.5 0.5]) < 2 * eps()
+            @test norm(weight(G0, 2) - [0.25 0.25; 0.25 0.25]) < 2 * eps()
+            @test norm(weight(G0, 3) - [0.25 0.25; 0.25 0.25]) < 2 * eps()
+
+            # finite broadening
             G0 = greens_function_local(Z, 0, Hk)
             @test length(G0) == 2
             @test norm(
