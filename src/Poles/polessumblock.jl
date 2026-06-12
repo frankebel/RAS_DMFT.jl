@@ -104,7 +104,7 @@ end
 
 function evaluate_gaussian(P::PolesSumBlock, ω::Real, σ::Real)
     d = size(P, 1)
-    real = zeros(Float64, d, d)
+    real = zeros(ComplexF64, d, d) # weights can be complex
     imag = zero(real)
     for i in eachindex(P)
         w = weight(P, i)
