@@ -170,6 +170,24 @@ function _get_filling(
     return -imag(filling) / π / nk * dω
 end
 
+"""
+    get_filling(P::PolesSum{<:Any, B}, μ::Real) where {B}
+
+Get filling
+
+```math
+n(μ) = -\\frac{1}{π} ∫_{-∞}^μ \\mathrm{d}ω~ -\\mathmr{Im}~P(ω).
+```
+"""
+function get_filling(P::PolesSum{<:Any, B}, μ::Real) where {B}
+    result = zero(B)
+    for i in eachindex(P)
+        locations(P)[i] <= μ || break
+        result += weight(P, i)
+    end
+    return result
+end
+
 function _issorted_and_unique(grid::AbstractVector{<:Real})
     issorted(grid) || throw(ArgumentError("grid is not sorted"))
     allunique(grid) || throw(ArgumentError("grid has degenerate locations"))
