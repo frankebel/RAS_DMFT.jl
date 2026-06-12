@@ -194,3 +194,8 @@ function Base.sort!(P::AbstractPolesSum)
     P.weights[:] = P.weights[p]
     return P
 end
+
+function LinearAlgebra.rmul!(P::AbstractPolesSum, α::Number)
+    rmul!(weights(P), α::Number)
+    return P
+end

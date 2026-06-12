@@ -332,4 +332,13 @@ using Test
             @test weights(Pt) == [[5 4 - 8im; 4 + 8im 16], [9 18 - 15im; 18 + 15im 61]]
         end # transpose
     end # base
+
+    @testset "LinearAlgebra" begin
+        @testset "rmul!" begin
+            P = PolesSumBlock([-1.0, 0.0], [[1 2; 2 4], [4 -3; -3 7]])
+            @test rmul!(P, 2) === P
+            @test locations(P) == [-1.0, 0.0] # unchanged
+            @test weights(P) == [[2 4; 4 8], [8 -6; -6 14]]
+        end # rmul!
+    end # LinearAlgebra
 end # PolesSumBlock
