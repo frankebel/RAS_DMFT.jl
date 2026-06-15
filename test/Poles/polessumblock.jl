@@ -398,5 +398,14 @@ using Test
             @test locations(P) == [-1.0, 0.0] # unchanged
             @test weights(P) == [[2 4; 4 8], [8 -6; -6 14]]
         end # rmul!
+
+        @testset "tr" begin
+            P = PolesSumBlock([-1, 0], [[1 + 0.0im 2; 2 4], [4 -3; -3 7]])
+            Ps = tr(P)
+            @test Ps isa PolesSum{Int, Float64}
+            @test locations(Ps) == locations(P)
+            @test locations(Ps) !== locations(P)
+            @test weights(Ps) == [5.0, 11.0]
+        end # tr
     end # LinearAlgebra
 end # PolesSumBlock

@@ -304,3 +304,13 @@ Base.size(P::PolesSumBlock, i) = size(first(weights(P)), i)
 function Base.transpose(P::PolesSumBlock)
     return PolesSumBlock(copy(locations(P)), map(conj, weights(P)))
 end
+
+function LinearAlgebra.tr(P::PolesSumBlock{<:Any, B}) where {B}
+    loc = copy(locations(P))
+    wgt = similar(loc, real(B))
+
+    for i in eachindex(P)
+        wgt[i] = tr(weight(P, i))
+    end
+    return PolesSum(loc, wgt)
+end
