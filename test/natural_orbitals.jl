@@ -435,7 +435,7 @@ using Test
         n_c_bit = 1 # Amount of conduction bath sites in bit component of CIWF
         n_sites = 1 + n_bath
         M_ciwf = UInt64
-        M_wf = BigMask{cld(2 * n_sites, 64), UInt64} # bitmask for Wavefunction
+        M_wf = BigMask{cld(2 * n_sites, 64)} # bitmask for Wavefunction
         e = 2
         niter = 20
         n_bit = 2 + n_v_bit + n_c_bit
