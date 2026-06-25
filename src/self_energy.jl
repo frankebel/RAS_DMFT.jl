@@ -84,7 +84,7 @@ function self_energy_IFG(C::PolesSumBlock, block::Int = 1)
     B0_inv_sqr = Hermitian(B0_inv_sqr[idx, idx])
     A1 = Hermitian(A1[idx, idx])
     for i in eachindex(P)
-        weights(P)[i] = weight(P, i)[idx, idx]
+        weights(P)[i] = Hermitian(weight(P, i)[idx, idx]) # potential 1×1 matrix → Hermitian
     end
 
     # new scaling matrix
@@ -94,7 +94,7 @@ function self_energy_IFG(C::PolesSumBlock, block::Int = 1)
     B0 = Hermitian(F.vectors' * D * F.vectors) # B0
     A1 = B0 * A1 * B0
     for i in eachindex(P)
-        weights(P)[i] = B0 * Hermitian(weight(P, i)) * B0
+        weights(P)[i] = Hermitian(B0 * weight(P, i) * B0)
     end
 
     # diagonalize

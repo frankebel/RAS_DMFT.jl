@@ -96,9 +96,10 @@ end
 function read_hdf5(filename::AbstractString, ::Type{<:PolesSumBlock{A, B}}) where {A, B}
     return h5open(filename, "r") do fid
         locations::Vector{A} = read(fid, "locations")
-        weights = Vector{Matrix{B}}(undef, length(locations))
+        H = Hermitian{B, Matrix{B}}
+        weights = Vector{H}(undef, length(locations))
         for i in eachindex(locations)
-            weights[i] = read(fid, "weights/$i")
+            weights[i] = Hermitian(read(fid, "weights/$i"))
         end
         return PolesSumBlock(locations, weights)
     end
@@ -108,7 +109,7 @@ function write_hdf5(filename::AbstractString, P::PolesSumBlock)
     h5open(filename, "w") do fid
         fid["locations"] = locations(P)
         for i in eachindex(P)
-            fid["weights/$i"] = weight(P, i)
+            fid["weights/$i"] = parent(weight(P, i))
         end
     end
     return nothing

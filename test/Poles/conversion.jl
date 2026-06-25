@@ -51,7 +51,7 @@ using Test
     end # scalar
 
     @testset "block" begin
-        P = PolesSumBlock([1, 2], [[1 0; 0 1], [0 0; 0 1]])
+        P = PolesSumBlock([1, 2], [[1.0 0; 0 1], [0 0; 0 1]])
         PCF = PolesContinuedFractionBlock(P)
         @test RAS_DMFT.scale(PCF) == Diagonal([1, sqrt(2)])
         @test norm(Array(PCF) - [1 0 0 0; 0 1.5 0 0.5; 0 0 0 0; 0 0.5 0 1.5]) < 10 * eps()

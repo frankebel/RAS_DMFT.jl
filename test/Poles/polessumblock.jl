@@ -6,13 +6,14 @@ using Test
     @testset "constructor" begin
         loc = 0:1
         wgt = [[1 2; 2 1], [3 4; 4 3]]
+        wgt_h = map(Hermitian, wgt)
 
         # inner constructor
-        P = PolesSumBlock{Int, Int}(loc, wgt)
+        P = PolesSumBlock{Int, Int}(loc, wgt_h)
         @test P.locations == loc
-        @test P.weights == wgt
+        @test P.weights == wgt_h
         @test_throws DimensionMismatch PolesSumBlock(rand(3), wgt) # length mismatch
-        @test_throws ArgumentError PolesSumBlock([1], [[1 2im; 2im 1]]) # not hermitian
+        PolesSumBlock([1], [[1 2im; 2im 1]]) # Hermiticity is not enforced
         @test_throws DimensionMismatch PolesSumBlock(0:1, [[1 2im; -2im 1], [1;;]]) # wrong size
 
         # outer constructors
@@ -34,7 +35,7 @@ using Test
     @testset "custom functions" begin
         @testset "amplitude" begin
             # real
-            P = PolesSumBlock(0:1, [[2 0; 0 1], [0 0; 0 0]])
+            P = PolesSumBlock(0:1, [[2.0 0; 0 1], [0 0; 0 0]])
             @inferred amplitude(P, 1)
             @test amplitude(P, 1) == [sqrt(2) 0; 0 1]
             # complex
@@ -49,7 +50,7 @@ using Test
         @testset "amplitudes" begin
             v1 = [1 + 2im, 4] # vector from which first weights are constructed
             v2 = [3im, 5 + 6im] # vector from which second weights are constructed
-            P = PolesSumBlock(0:1, [1 + 2im 3im; 4 5 + 6im])
+            P = PolesSumBlock(0:1, [1.0 + 2im 3im; 4 5 + 6im])
             @inferred amplitudes(P)
             amp = amplitudes(P)
             @test norm(amp[1] - 1 / sqrt(21) * v1 * v1') < 20 * eps()
@@ -212,22 +213,22 @@ using Test
             loc = 0:1
             wgt = [[1 2; 2 1], [3 4; 4 3]]
             P = PolesSumBlock(loc, wgt)
-            @test weight(P, 1) === wgt[1]
-            @test weight(P, 2) === wgt[2]
+            @test weight(P, 1) == wgt[1]
+            @test weight(P, 2) == wgt[2]
         end # weight
 
         @testset "weights" begin
             loc = 0:1
             wgt = [[1 2; 2 1], [3 4; 4 3]]
             P = PolesSumBlock(loc, wgt)
-            @test weights(P) === wgt
+            @test weights(P) == wgt
         end # weights
     end # custom functions
 
     @testset "Core" begin
         @testset "Array" begin
             A = [-7, 9]
-            B1 = [4 3; 3 4]
+            B1 = [4.0 3; 3 4]
             W1 = B1 * B1'
             B2 = [5 0; 0 1]
             W2 = B2 * B2'
@@ -259,6 +260,14 @@ using Test
             @test weight(P, 1) !== weight(A, 1)
         end
 
+        @testset "convert" begin
+            P = PolesSumBlock([1, 3], [[1 0; 0 1], [2 1; 1 0]])
+            P_new = convert(PolesSumBlock{Float64, ComplexF64}, P)
+            @test typeof(P_new) === PolesSumBlock{Float64, ComplexF64}
+            @test locations(P_new) == locations(P)
+            @test weights(P_new) == weights(P)
+        end # convert
+
         @testset "copy" begin
             P = PolesSumBlock(rand(2), [rand(1, 1) for _ in 1:2])
             foo = copy(P)
@@ -274,12 +283,12 @@ using Test
         end # eltype
 
         @testset "isempty" begin
-            @test isempty(PolesSumBlock(Int[], Matrix{Float64}[]))
+            @test isempty(PolesSumBlock(Int[], Hermitian{Float64, Matrix{Float64}}[]))
             @test !isempty(PolesSumBlock(rand(10), rand(2, 10)))
         end # isempty
 
         @testset "length" begin
-            @test length(PolesSumBlock(Int[], Matrix{Float64}[])) === 0
+            @test length(PolesSumBlock(Int[], Hermitian{Float64, Matrix{Float64}}[])) === 0
             @test length(PolesSumBlock(rand(10), rand(4, 10))) === 10
         end
 
@@ -308,7 +317,7 @@ using Test
         end # size
 
         @testset "show" begin
-            P = PolesSumBlock(Int[], Matrix{Float64}[])
+            P = PolesSumBlock(Int[], Hermitian{Float64, Matrix{Float64}}[])
             @test sprint(show, P) == "PolesSumBlock{Int64, Float64} with 0 poles"
             P = PolesSumBlock(rand(Int, 1), [hermitianpart!(rand(Float64, 2, 2))])
             @test sprint(show, P) == "PolesSumBlock{Int64, Float64} with 1 poles of size 2×2"
