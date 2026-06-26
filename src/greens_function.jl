@@ -193,6 +193,48 @@ end
 
 """
     greens_function_local(
+        H_k::AbstractVector{<:AbstractMatrix},
+        μ::Real = 0,
+    )
+
+Calculate the non-interacting local Green's function for a dispersion relation ``H_k``.
+
+```math
+G_{\\mathrm{loc},0}(z) = \\frac{1}{N_k} ∑_k \\frac{1}{z + μ - H_k}
+```
+
+Returns a [`PolesSumBlock`](@ref).
+"""
+function greens_function_local(
+        H_k::AbstractVector{<:AbstractMatrix},
+        μ::Real = 0,
+    )
+    # check input
+    isempty(H_k) && throw(ArgumentError("H_k is empty"))
+    allequal(size, H_k)::Bool || throw(DimensionMismatch("different matrix sizes in H_k"))
+    all(ishermitian, H_k) || throw(ArgumentError("H_k is not Hermitian"))
+
+    T = eltype(eltype(H_k)) <: Real ? Float64 : ComplexF64
+    loc = real(T)[]
+    wgt = Hermitian{T, Matrix{T}}[]
+    for H in H_k
+        E, U = eigen(Hermitian(H))
+        append!(loc, E)
+        for i in axes(U, 2)
+            u = view(U, :, i)
+            push!(wgt, Hermitian(u * u'))
+        end
+    end
+
+    G_loc = PolesSumBlock(loc, wgt)
+    rmul!(G_loc, inv(length(H_k))) # prefactor 1/N_k
+    shift_spectrum!(G_loc, μ)
+    return G_loc
+end
+
+# TODO: remove finite broadening methods
+"""
+    greens_function_local(
         W::AbstractVector{<:Number},
         μ::Real,
         Hk::AbstractVector{<:AbstractMatrix{<:Number}},

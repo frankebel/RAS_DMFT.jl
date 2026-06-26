@@ -126,12 +126,22 @@ using Test
     end # Bethe lattice
 
     @testset "user supplied dispersion" begin
-        Hk = [[1 + 0.0im 2; 2 1], [3 4; 4 3]]
+        H_k = [[1 + 0.0im 2; 2 1], [3 4; 4 3]]
         Z = (-10:-9) .+ 0.1im
         Σ = [Diagonal([0, 5 + im]), Diagonal([0, 6 + im])] # self-energy only on [2, 2] index
 
         @testset "non-interacting" begin
-            G0 = greens_function_local(Z, 0, Hk)
+            @inferred greens_function_local(H_k, 0.5)
+            G0 = greens_function_local(H_k, 0.5)
+            @test length(G0) == 3
+            @test locations(G0) == [-1, 3, 7] .- 0.5
+            @test norm(moment(G0, 0) - I) < 10 * eps() # normalized
+            @test norm(weight(G0, 1) - [0.5 -0.5; -0.5 0.5]) < 2 * eps()
+            @test norm(weight(G0, 2) - [0.25 0.25; 0.25 0.25]) < 2 * eps()
+            @test norm(weight(G0, 3) - [0.25 0.25; 0.25 0.25]) < 2 * eps()
+
+            # finite broadening
+            G0 = greens_function_local(Z, 0, H_k)
             @test length(G0) == 2
             @test norm(
                 G0[1] - [
@@ -148,7 +158,7 @@ using Test
         end # non-interacting
 
         @testset "interacting" begin
-            G = greens_function_local(Z, 0, Hk, Σ)
+            G = greens_function_local(Z, 0, H_k, Σ)
             @test length(G) == 2
             @test norm(
                 G[1] - [
@@ -174,7 +184,7 @@ using Test
 
         @testset "spectrum Gauss" begin
             W = [-1, 1]
-            A = spectral_function_gauss(W, 0, Hk, 0.05)
+            A = spectral_function_gauss(W, 0, H_k, 0.05)
             @test typeof(A) === Vector{Matrix{Float64}}
             @test norm(
                 A[1] - [
