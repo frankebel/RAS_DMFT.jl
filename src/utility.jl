@@ -239,7 +239,7 @@ function quasiparticle_weight(Σ::PolesSum; tol::Real = 0, λ::Real = 0)
     deriv = zero(Float64)
     for i in eachindex(Σ)
         weight(Σ, i) < tol && continue
-        deriv += weight(Σ, i) / (locations(Σ)[i]^2 + λ^2)
+        deriv += weight(Σ, i) / (location(Σ, i)^2 + λ^2)
     end
     return inv(1 + deriv)
 end

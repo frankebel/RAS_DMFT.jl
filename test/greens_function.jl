@@ -31,7 +31,7 @@ using Test
             @test typeof(G) === PolesSum{Float64, Float64}
             @test length(G) === 101
             @test RAS_DMFT.moment(G, 0) ≈ 1 rtol = 10 * eps()
-            @test locations(G)[51] ≈ 0 atol = 10 * eps()
+            @test location(G, 51) ≈ 0 atol = 10 * eps()
             @test norm(locations(G) + reverse(locations(G))) < 50 * eps()
             @test norm(weights(G) - reverse(weights(G))) < 600 * eps()
             # 100 poles

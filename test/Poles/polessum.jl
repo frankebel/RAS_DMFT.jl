@@ -1,5 +1,5 @@
 using RAS_DMFT
-using Distributions
+using Distributions: Semicircle, pdf
 using LinearAlgebra
 using Test
 
@@ -117,6 +117,17 @@ using Test
             @test locations(foo) == [-0.2, -0.1]
             @test weights(foo) == [0.4, 0.3]
         end # flip_spectrum
+
+        @testset "location" begin
+            P = PolesSum(0:5, 5:10)
+            @test location(P, 1) == 0
+            @test location(P, 2) == 1
+            @test location(P, 3) == 2
+            @test location(P, 4) == 3
+            @test location(P, 5) == 4
+            @test location(P, 6) == 5
+            @test_throws BoundsError location(P, 7)
+        end # location
 
         @testset "locations" begin
             P = PolesSum(0:5, 5:10)

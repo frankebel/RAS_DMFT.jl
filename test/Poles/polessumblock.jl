@@ -101,6 +101,25 @@ using Test
                 [[1.25 1.5; 1.5 3.0], [0.75 1.0; 1.0 2.0], [0.0 0.25; 0.25 0.5]]
         end # flip_spectrum!
 
+        @testset "location" begin
+            P = PolesSumBlock(
+                [0.0, 0.25, 0.3],
+                [[0.0 0.25; 0.25 0.5], [0.75 1.0; 1.0 2.0], [1.25 1.5; 1.5 3.0]],
+            )
+            @test location(P, 1) == 0.0
+            @test location(P, 2) == 0.25
+            @test location(P, 3) == 0.3
+            @test_throws BoundsError location(P, 4)
+        end # location
+
+        @testset "locations" begin
+            P = PolesSumBlock(
+                [0.0, 0.25, 0.3],
+                [[0.0 0.25; 0.25 0.5], [0.75 1.0; 1.0 2.0], [1.25 1.5; 1.5 3.0]],
+            )
+            @test locations(P) == [0.0, 0.25, 0.3]
+        end # locations
+
         @testset "merge_degenerate_poles!" begin
             loc = [0.2, 0.3, 0.6]
             wgt = [[1 0; 0 1], [1 0; 0 0], [2 1; 1 2]]

@@ -80,7 +80,7 @@ function evaluate_lorentzian(P::PolesContinuedFractionBlock, ω::Real, δ::Real)
     for (A, B) in zip(loc, amp)
         result = B * inv((ω + im * δ) * I - A - result) * B
     end
-    result = scale(P) * inv((ω + im * δ) * I - locations(P)[1] - result) * scale(P)
+    result = scale(P) * inv((ω + im * δ) * I - location(P, 1) - result) * scale(P)
     return result
 end
 
@@ -93,10 +93,10 @@ function Core.Array(P::PolesContinuedFractionBlock)
         i1 = 1 + (i - 1) * n2
         i2 = i * n2
         result[i1:i2, (i1 + n2):(i2 + n2)] = amplitudes(P)[i] # upper diagonal
-        result[i1:i2, i1:i2] = locations(P)[i] # main diagonal
+        result[i1:i2, i1:i2] = location(P, i) # main diagonal
         result[(i1 + n2):(i2 + n2), i1:i2] = amplitudes(P)[i] # lower diagonal
     end
-    result[(end - n2 + 1):end, (end - n2 + 1):end] = locations(P)[end] # last element
+    result[(end - n2 + 1):end, (end - n2 + 1):end] = location(P, n1) # last element
     return result
 end
 

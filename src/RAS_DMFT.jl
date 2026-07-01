@@ -1,6 +1,6 @@
 module RAS_DMFT
 
-using Distributions
+using Distributions: Normal, Semicircle, cdf, pdf, quantile
 using Fermions
 using Fermions.Bits
 using Fermions.Lanczos
@@ -58,6 +58,7 @@ export
     hybridization_function_bethe_simple,
     imagKK,
     init_system,
+    location,
     locations,
     mask_fe,
     merge_degenerate_poles!,

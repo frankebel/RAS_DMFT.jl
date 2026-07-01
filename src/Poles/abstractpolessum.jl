@@ -99,7 +99,7 @@ See also [`remove_zero_weight`](@ref).
 function remove_zero_weight!(P::AbstractPolesSum, remove_zero::Bool = true)
     i = 1
     while i <= length(P)
-        if iszero(locations(P)[i]) && !remove_zero
+        if iszero(location(P, i)) && !remove_zero
             # keep pole at origin
             i += 1
             continue
@@ -145,7 +145,7 @@ function to_grid(P::AbstractPolesSum, grid::AbstractVector{<:Real})
 
     # run through each existing pole and split weight to new locations
     @inbounds for i in eachindex(P)
-        loc = locations(P)[i]
+        loc = location(P, i)
         w = weight(P, i)
         if loc <= first(grid)
             # no pole to the left

@@ -114,8 +114,8 @@ function evaluate_gaussian(P::PolesSumBlock, ω::Real, σ::Real)
     imag = zero(real)
     for i in eachindex(P)
         w = weight(P, i)
-        real .+= w .* sqrt(2) ./ (π * σ) .* dawson((ω - locations(P)[i]) / (sqrt(2) * σ))
-        imag .+= w .* pdf(Normal(locations(P)[i], σ), ω)
+        real .+= w .* sqrt(2) ./ (π * σ) .* dawson((ω - location(P, i)) / (sqrt(2) * σ))
+        imag .+= w .* pdf(Normal(location(P, i), σ), ω)
     end
     result = real - im * imag
     result .*= π # not spectral function
@@ -127,7 +127,7 @@ function evaluate_lorentzian(P::PolesSumBlock, ω::Real, δ::Real)
     result = zeros(ComplexF64, d, d)
     for i in eachindex(P)
         w = weight(P, i)
-        result .+= w ./ (ω + im * δ - locations(P)[i])
+        result .+= w ./ (ω + im * δ - location(P, i))
     end
     return result
 end
@@ -189,7 +189,7 @@ function merge_small_weight!(P::PolesSumBlock, tol::Real)
     # loop over all poles
     i = 1
     while i <= length(P)
-        loc = locations(P)[i]
+        loc = location(P, i)
         wgt = weight(P, i)
         if norm(wgt, Inf) > tol
             # enough weight, go to next
@@ -210,8 +210,8 @@ function merge_small_weight!(P::PolesSumBlock, tol::Real)
             pop!(weights(P))
         else
             # split weight such that zeroth and first moment is conserved
-            loc_prev = locations(P)[i - 1]
-            loc_next = locations(P)[i + 1]
+            loc_prev = location(P, i - 1)
+            loc_next = location(P, i + 1)
             wgt_prev = weight(P, i - 1)
             wgt_next = weight(P, i + 1)
             α = (loc_next - loc) / (loc_next - loc_prev)

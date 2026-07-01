@@ -33,7 +33,7 @@ using Test
             @test typeof(Δ) == PolesSum{Float64, Float64}
             @test length(Δ) === 101
             @test RAS_DMFT.moment(Δ, 0) ≈ 0.25 rtol = 10 * eps()
-            @test locations(Δ)[51] ≈ 0 atol = 10 * eps()
+            @test location(Δ, 51) ≈ 0 atol = 10 * eps()
             @test norm(locations(Δ) + reverse(locations(Δ))) < 50 * eps()
             @test norm(weights(Δ) - reverse(weights(Δ))) < 600 * eps()
             # 100 poles

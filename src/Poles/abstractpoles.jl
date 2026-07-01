@@ -44,9 +44,20 @@ function evaluate_lorentzian(P::AbstractPoles, ω::AbstractVector{<:Real}, δ)
 end
 
 """
+    location(P::AbstractPoles, i::Integer)
+
+Return the location of `P` at index `i`.
+
+See also [`locations`](@ref).
+"""
+location(P::AbstractPoles, i::Integer) = locations(P)[i]
+
+"""
     locations(P::AbstractPoles)
 
 Return the locations of `P`.
+
+See also [`location`](@ref).
 """
 locations(P::AbstractPoles) = P.locations
 
@@ -63,6 +74,8 @@ function weight end
     weights(P::AbstractPoles)
 
 Return the weights of `P`.
+
+See also [`weight`](@ref).
 """
 function weights end
 

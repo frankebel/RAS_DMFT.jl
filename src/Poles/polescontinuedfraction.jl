@@ -52,7 +52,7 @@ function evaluate_lorentzian(P::PolesContinuedFraction, ω::Real, δ::Real)
     for (a, b) in zip(loc, amp)
         result = abs2(b) / (ω + im * δ - a - result)
     end
-    result = abs2(scale(P)) / (ω + im * δ - locations(P)[1] - result)
+    result = abs2(scale(P)) / (ω + im * δ - location(P, 1) - result)
     return result
 end
 

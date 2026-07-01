@@ -51,7 +51,7 @@ using Test
         Δ_new = discretize_similar_weight(Δ, sqrt(eps()), n_bath)
 
         @test length(Δ_new) == 101
-        @test iszero(locations(Δ_new)[51])
+        @test iszero(location(Δ_new, 51))
         @test weight(Δ_new, 51) ≈ 0.0020833288949242113 atol = 1.0e-7
         @test RAS_DMFT.moment(Δ_new, 0) ≈ 0.25 atol = 10 * eps()
         @test RAS_DMFT.moment(Δ_new, 1) ≈ 0.0 atol = sqrt(eps())
@@ -60,8 +60,8 @@ using Test
         P = PolesSum([rand(100) .- 2; rand(100) .+ 1], rand(200))
         sort!(P)
         foo = discretize_similar_weight(P, 0.01, 11)
-        @test iszero(locations(foo)[6])
-        @test iszero(weights(foo)[6])
+        @test iszero(location(foo, 6))
+        @test iszero(weight(foo, 6))
     end # Lanczos
 
     @testset "block Lanczos" begin

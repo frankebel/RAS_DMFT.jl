@@ -1,5 +1,4 @@
 using RAS_DMFT
-using Distributions
 using Fermions
 using Fermions.Lanczos
 using Fermions.Wavefunctions

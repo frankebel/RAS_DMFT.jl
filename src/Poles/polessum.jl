@@ -74,8 +74,8 @@ function evaluate_gaussian(P::PolesSum, ω::Real, σ::Real)
     imag = zero(ω)
     for i in eachindex(P)
         w = weight(P, i)
-        real += w * sqrt(2) / (π * σ) * dawson((ω - locations(P)[i]) / (sqrt(2) * σ))
-        imag += w * pdf(Normal(locations(P)[i], σ), ω)
+        real += w * sqrt(2) / (π * σ) * dawson((ω - location(P, i)) / (sqrt(2) * σ))
+        imag += w * pdf(Normal(location(P, i), σ), ω)
     end
     result = real - im * imag
     return π * result # not spectral function
@@ -84,7 +84,7 @@ end
 function evaluate_lorentzian(P::PolesSum, ω::Real, δ::Real)
     result = zero(complex(ω))
     for i in eachindex(P)
-        result += weight(P, i) / (ω + im * δ - locations(P)[i])
+        result += weight(P, i) / (ω + im * δ - location(P, i))
     end
     return result
 end
@@ -148,7 +148,7 @@ function merge_negative_weight!(P::PolesSum)
     loc = locations(P)
     wgt = weights(P)
     for i in eachindex(P)
-        weight(P, i) >= 0 && continue # no negative weight, go to next
+        (weight(P, i) >= 0) && continue # no negative weight, go to next
         if i == length(P)
             # find previous positive weight
             for j in Iterators.reverse(1:(i - 1))
@@ -208,7 +208,7 @@ function merge_small_weight!(P::PolesSum, tol::Real)
     # loop over all poles
     i = 1
     while i <= length(P)
-        loc = locations(P)[i]
+        loc = location(P, i)
         wgt = weight(P, i)
         if wgt > tol
             # enough weight, go to next
@@ -227,8 +227,8 @@ function merge_small_weight!(P::PolesSum, tol::Real)
             pop!(weights(P))
         else
             # split weight such that zeroth and first moment is conserved
-            loc_prev = locations(P)[i - 1]
-            loc_next = locations(P)[i + 1]
+            loc_prev = location(P, i - 1)
+            loc_next = location(P, i + 1)
             α = (loc_next - loc) / (loc_next - loc_prev)
             weights(P)[i - 1] += α * wgt
             weights(P)[i + 1] += (1 - α) * wgt
@@ -272,10 +272,10 @@ function spectral_function_loggaussian(P::PolesSum, ω::Real, b::Real)
     result = zero(ω)
     iszero(ω) && return result # no weight at ω == 0
     for i in eachindex(P)
-        if sign(ω) == sign(locations(P)[i])
+        if sign(ω) == sign(location(P, i))
             # only contribute weight if on same side of real axis
             w = weight(P, i)
-            loc = locations(P)[i]
+            loc = location(P, i)
         else
             # frequency has opposite sign compared to pole location
             continue

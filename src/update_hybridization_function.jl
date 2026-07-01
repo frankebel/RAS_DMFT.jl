@@ -33,7 +33,7 @@ function update_hybridization_function(
         idx_low = 1 + n * (i - 1)
         idx_high = idx_low + n - 1
         bar = copy(T)
-        bar[1, 1] = Σ_H - μ + locations(Δ0)[i]
+        bar[1, 1] = Σ_H - μ + location(Δ0, i)
         loc_new[idx_low:idx_high], U = eigen!(bar)
         U = h.Q * U # transform back
         wgt_new[idx_low:idx_high] = weight(Δ0, i) .* abs2.(view(U, 1, :)) # multiply new weights with original
