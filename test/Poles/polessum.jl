@@ -489,6 +489,13 @@ using Test
             @test !isempty(PolesSum(rand(2), rand(2)))
         end # isempty
 
+        @testset "iterate" begin
+            P = PolesSum([0.1, 0.2], [0.3, 0.4])
+            @test iterate(P) == ((0.1, 0.3), 1)
+            @test iterate(P, 1) == ((0.2, 0.4), 2)
+            @test iterate(P, 2) === nothing
+        end # iterate
+
         @testset "length" begin
             @test length(PolesSum(rand(10), rand(10))) === 10
         end # length

@@ -306,6 +306,13 @@ using Test
             @test !isempty(PolesSumBlock(rand(10), rand(2, 10)))
         end # isempty
 
+        @testset "iterate" begin
+            P = PolesSumBlock(1:2, [[1 0; 0 0], [0 0; 0 0]])
+            @test iterate(P) == ((1, [1 0; 0 0]), 1)
+            @test iterate(P, 1) == ((2, [0 0; 0 0]), 2)
+            @test iterate(P, 2) === nothing
+        end # iterate
+
         @testset "length" begin
             @test length(PolesSumBlock(Int[], Hermitian{Float64, Matrix{Float64}}[])) === 0
             @test length(PolesSumBlock(rand(10), rand(4, 10))) === 10

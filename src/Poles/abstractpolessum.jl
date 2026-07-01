@@ -180,6 +180,13 @@ weights(P::AbstractPolesSum) = P.weights
 
 Base.eachindex(P::AbstractPolesSum) = eachindex(locations(P))
 
+function Base.iterate(P::AbstractPolesSum, i = 0)
+    @inline
+    next = i + 1
+    (i == length(P)) && return nothing
+    return ((location(P, next), weight(P, next)), next)
+end
+
 Base.reverse(P::AbstractPolesSum) = reverse!(copy(P))
 
 function Base.reverse!(P::AbstractPolesSum)
