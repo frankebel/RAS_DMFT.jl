@@ -19,7 +19,7 @@ struct PolesSumBlock{A <: Real, B <: Number} <: AbstractPolesSum
 
     function PolesSumBlock{A, B}(locations, weights) where {A, B}
         length(locations) == length(weights) || throw(DimensionMismatch("length mismatch"))
-        allequal(size, weights) ||
+        allequal(size, weights)::Bool ||
             throw(DimensionMismatch("weights do not have matching size"))
         result = new{A, B}(locations, weights)
         sort!(result)

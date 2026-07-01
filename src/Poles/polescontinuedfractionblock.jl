@@ -20,16 +20,18 @@ struct PolesContinuedFractionBlock{A <: Number, B <: Number} <: AbstractPolesCon
         length(locations) == length(amplitudes) + 1 ||
             throw(ArgumentError("length mismatch"))
         # hermitian
-        all(ishermitian, locations) || throw(ArgumentError("locations are not hermitian"))
-        all(ishermitian, amplitudes) || throw(ArgumentError("amplitudes are not hermitian"))
+        all(ishermitian, locations)::Bool ||
+            throw(ArgumentError("locations are not hermitian"))
+        all(ishermitian, amplitudes)::Bool ||
+            throw(ArgumentError("amplitudes are not hermitian"))
         ishermitian(scale) || throw(ArgumentError("scale is not hermitian"))
         # size
-        s = size(first(locations))
-        all(i -> size(i) == s, locations) ||
+        allequal(size, locations)::Bool ||
             throw(DimensionMismatch("locations do not have matching size"))
-        all(i -> size(i) == s, amplitudes) ||
+        allequal(size, amplitudes)::Bool ||
             throw(DimensionMismatch("amplitudes do not have matching size"))
-        size(scale) == s || throw(DimensionMismatch("scale does not have matching size"))
+        size(first(locations)) == size(first(amplitudes)) == size(scale) ||
+            throw(DimensionMismatch("matrix size mismatch"))
         return new{A, B}(locations, amplitudes, scale)
     end
 end
