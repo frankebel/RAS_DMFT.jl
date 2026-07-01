@@ -7,35 +7,34 @@
 Calculate scaling factor ``B_0`` and Anderson matrix ``H_\\mathrm{A}``
 given a sum of poles.
 
-Reference: https://doi.org/10.1103/PhysRevB.90.085102, appendix B
+Reference: https://doi.org/10.48550/arXiv.2605.04974, appendix A3d
 """
 function anderson_matrix(P::PolesSum)
     T = eltype(P) <: Real ? Float64 : ComplexF64
     N = length(P)
 
-    He = Diagonal(locations(P))
-    χ0 = amplitudes(P)
-    b0 = norm(χ0)
-    χ0 ./= b0
+    H_LP = Diagonal(locations(P))
+    V = amplitudes(P)
+    b_0 = norm(V)
+    V .*= inv(b_0)
 
-    # Create orthonormal basis set using QR decomposition.
-    χ = Matrix{T}(I(N))
-    χ[:, 1] = χ0
-    χ = Matrix(qr(χ).Q)
-    # Eq. B8
-    h = Hermitian(χ' * He * χ)
+    # Find orthogonal complement and create orthonormal basis set
+    # using QR decomposition (Eq. A41).
+    m = Matrix(one(T) * I(N))
+    m[:, 1] = V
+    U1 = qr(m).Q
+    h = Hermitian(U1' * H_LP * U1)
 
-    # Find transformation matrix for subspace 2-N
-    # U = ( 1 0 )
-    #     ( 0 V )
-    # where V are eigenvectors of h'.
-    U = Matrix{T}(I(N))
-    U[2:end, 2:end] = eigen!(h[2:end, 2:end]).vectors
+    # Diagonalize bottom left subspace
+    U2 = Matrix(one(T) * I(N))
+    F = eigen(Hermitian(h[2:end, 2:end]))
+    U2[2:end, 2:end] = F.vectors
     # Anderson matrix
-    HA = U' * h * U
-    hermitianpart!(HA)
+    HA = U2' * h * U2
+    HA[2:end, 2:end] = Diagonal(F.values)
+    H_A = Hermitian(HA)
 
-    return b0, HA
+    return b_0, H_A
 end
 
 function anderson_matrix(P::PolesSumBlock)
@@ -43,29 +42,29 @@ function anderson_matrix(P::PolesSumBlock)
     N = length(P)
     n = size(P, 1) # block size
 
-    He = Diagonal(repeat(locations(P); inner = n))
-    χ0::Matrix{T} = vcat(amplitudes(P)...)
-    χ0, B0 = RAS_DMFT._orthonormalize_SVD(χ0)
-    RAS_DMFT._orthonormalize_GramSchmidt!(χ0) # numerical instability
-    RAS_DMFT._orthonormalize_GramSchmidt!(χ0) # numerical instability
+    H_LP = Diagonal(repeat(locations(P); inner = n))
+    V::Matrix{T} = vcat(amplitudes(P)...)
+    Ra, B_0 = RAS_DMFT._orthonormalize_SVD(V)
+    RAS_DMFT._orthonormalize_GramSchmidt!(Ra) # numerical instability
+    RAS_DMFT._orthonormalize_GramSchmidt!(Ra) # numerical instability
 
-    # Create orthonormal basis set using QR decomposition.
-    χ = Matrix(UniformScaling(1.0), N * n, N * n)
-    χ[:, 1:n] = χ0
-    χ = Matrix(qr(χ).Q)
-    h = Hermitian(χ' * He * χ)
+    # Find orthogonal complement and create orthonormal basis set
+    # using QR decomposition (Eq. A41).
+    m = Matrix(one(T) * I(N * n))
+    m[:, 1:n] = Ra
+    U1 = qr(m).Q
+    h = Hermitian(U1' * H_LP * U1)
 
-    # Find transformation matrix for subspace 2-N
-    # U = ( 1 0 )
-    #     ( 0 V )
-    # where V are eigenvectors of h'.
-    U = Matrix{T}(I(N * n))
-    U[(n + 1):end, (n + 1):end] = eigen(h[(n + 1):end, (n + 1):end]).vectors
+    # Diagonalize bottom left subspace
+    U2 = Matrix(one(T) * I(N * n))
+    F = eigen(Hermitian(h[(n + 1):end, (n + 1):end]))
+    U2[(n + 1):end, (n + 1):end] = F.vectors
     # Anderson matrix
-    HA = U' * h * U
-    hermitianpart!(HA)
+    HA = U2' * h * U2
+    HA[(n + 1):end, (n + 1):end] = Diagonal(F.values)
+    H_A = Hermitian(HA)
 
-    return B0, HA
+    return B_0, H_A
 end
 
 # scalar form

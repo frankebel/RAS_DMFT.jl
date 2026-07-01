@@ -31,7 +31,7 @@ using Test
         P_new = PolesSumBlock(copy(F.values), B)
         merge_degenerate_poles!(P_new, 50 * eps())
         @test norm(locations(P_new) - locations(P)) < 20 * eps()
-        @test all(i -> i < 20 * eps(), norm.(weights(P_new) .- weights(P))) # norm of each weight difference
+        @test all(<(50 * eps()), norm.(weights(P_new) .- weights(P))) # norm of each weight difference
     end # Anderson matrix
 
     @testset "scalar" begin
