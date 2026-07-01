@@ -30,7 +30,7 @@ using Test
             G = greens_function_bethe_simple(101)
             @test typeof(G) === PolesSum{Float64, Float64}
             @test length(G) === 101
-            @test RAS_DMFT.moment(G, 0) ≈ 1 rtol = 10 * eps()
+            @test moment(G, 0) ≈ 1 rtol = 10 * eps()
             @test location(G, 51) ≈ 0 atol = 10 * eps()
             @test norm(locations(G) + reverse(locations(G))) < 50 * eps()
             @test norm(weights(G) - reverse(weights(G))) < 600 * eps()
@@ -38,12 +38,12 @@ using Test
             G = greens_function_bethe_simple(100)
             @test typeof(G) === PolesSum{Float64, Float64}
             @test length(G) === 100
-            @test RAS_DMFT.moment(G, 0) ≈ 1 rtol = 10 * eps()
+            @test moment(G, 0) ≈ 1 rtol = 10 * eps()
             @test norm(locations(G) + reverse(locations(G))) < 100 * eps()
             @test norm(weights(G) - reverse(weights(G))) < 600 * eps()
             # 101 poles, D = 2
             G = greens_function_bethe_simple(101, 2)
-            @test RAS_DMFT.moment(G, 0) ≈ 1 rtol = 10 * eps()
+            @test moment(G, 0) ≈ 1 rtol = 10 * eps()
         end # simple
 
         @testset "grid" begin
@@ -62,7 +62,7 @@ using Test
             @test length(G) === 101
             @test locations(G) == W
             @test locations(G) !== W
-            @test RAS_DMFT.moment(G, 0) ≈ 1 rtol = 10 * eps()
+            @test moment(G, 0) ≈ 1 rtol = 10 * eps()
             @test norm(weights(G) - reverse(weights(G))) < 10 * eps()
             @test weight(G, 51) ≈ 0.012732183237577577 atol = eps()
             # 100 poles
@@ -72,13 +72,13 @@ using Test
             @test length(G) === 100
             @test locations(G) == W
             @test locations(G) !== W
-            @test RAS_DMFT.moment(G, 0) ≈ 1 rtol = 10 * eps()
+            @test moment(G, 0) ≈ 1 rtol = 10 * eps()
             @test norm(weights(G) - reverse(weights(G))) < 10 * eps()
             @test weight(G, 51) ≈ 0.012860130639746004 atol = eps()
             # 101 poles, D = 2
             W = range(-3, 3; length = 101)
             G = greens_function_bethe_grid(W, 2)
-            @test RAS_DMFT.moment(G, 0) ≈ 1 rtol = 10 * eps()
+            @test moment(G, 0) ≈ 1 rtol = 10 * eps()
             @test norm(weights(G) - reverse(weights(G))) < 10 * eps()
             @test all(iszero, view(weights(G), 1:17))
             @test all(iszero, view(weights(G), 85:101))
@@ -112,7 +112,7 @@ using Test
             @test amplitudes(G)[36] ≈ 0.1783752245364157 atol = 10 * eps()
             @test amplitudes(G)[51] == 0
             @test amplitudes(G)[66] ≈ 0.1783752245364157 atol = 10 * eps()
-            @test RAS_DMFT.moment(G, 0) ≈ 1 atol = 10 * eps()
+            @test moment(G, 0) ≈ 1 atol = 10 * eps()
         end # grid Hubbdard III
 
         @testset "equal weight" begin

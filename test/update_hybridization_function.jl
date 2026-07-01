@@ -68,7 +68,7 @@ using Test
         Δ0 = PolesSum([-0.5, 0.0, 0.5], [0.25, 2.0, 0.25])
         Σ = PolesSum([-2.125, 2.125], [0.7, 0.7])
         Δ = update_hybridization_function(Δ0, μ, Σ_H, Σ)
-        @test RAS_DMFT.moment(Δ, 1) < 100 * eps()
+        @test moment(Δ, 1) < 100 * eps()
 
         # Σ = 0
         Δ0 = PolesSum([1.0, 5.0], [0.1, 0.2])

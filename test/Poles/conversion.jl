@@ -40,20 +40,20 @@ using Test
         PCF = PolesContinuedFraction(PS)
         @test norm(locations(P) - locations(PCF)) < 50 * eps()
         @test norm(amplitudes(P) - amplitudes(PCF)) < 50 * eps()
-        @test RAS_DMFT.scale(P) ≈ RAS_DMFT.scale(PCF) atol = 10 * eps()
+        @test scale(P) ≈ scale(PCF) atol = 10 * eps()
         # early stopping
         PS = PolesSum([0, 1], [1, 0]) # second location has no weight
         PCF = PolesContinuedFraction(PS)
         @test length(PCF) == 1
         @test locations(PCF) == [0.0]
         @test amplitudes(PCF) == Float64[]
-        @test RAS_DMFT.scale(PCF) === 1.0
+        @test scale(PCF) === 1.0
     end # scalar
 
     @testset "block" begin
         P = PolesSumBlock([1, 2], [[1.0 0; 0 1], [0 0; 0 1]])
         PCF = PolesContinuedFractionBlock(P)
-        @test RAS_DMFT.scale(PCF) == Diagonal([1, sqrt(2)])
+        @test scale(PCF) == Diagonal([1, sqrt(2)])
         @test norm(Array(PCF) - [1 0 0 0; 0 1.5 0 0.5; 0 0 0 0; 0 0.5 0 1.5]) < 10 * eps()
         PS = PolesSumBlock(PCF)
         merge_degenerate_poles!(PS, 5 * eps())

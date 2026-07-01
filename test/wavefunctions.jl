@@ -67,21 +67,21 @@ using Test
         ψ_start = CIWavefunction_singlet(Dict{UInt64, Float64}, L_v, L_c, V_v, V_c, p)
 
         # 10 steps total
-        E0, ψ0 = RAS_DMFT.ground_state!(H, ψ_start, n_kryl, 10, 0)
+        E0, ψ0 = ground_state!(H, ψ_start, n_kryl, 10, 0)
         @test E0 ≈ -21.52794995443462 rtol = 2.0e-13
         foo = H * ψ0
         var = foo ⋅ foo
         @test var < 3.0e-8
 
         # 20 steps total
-        E0, ψ0 = RAS_DMFT.ground_state!(H, ψ0, n_kryl, 10, 0)
+        E0, ψ0 = ground_state!(H, ψ0, n_kryl, 10, 0)
         @test E0 ≈ -21.52794999041698 rtol = 2.0e-13
         foo = H * ψ0
         var = foo ⋅ foo
         @test var < 3.0e-13
 
         # 30 steps total
-        E0, ψ0 = RAS_DMFT.ground_state!(H, ψ0, n_kryl, 10, 0)
+        E0, ψ0 = ground_state!(H, ψ0, n_kryl, 10, 0)
         @test E0 ≈ -21.52794999041725 rtol = 2.0e-13
         foo = H * ψ0
         var = foo ⋅ foo

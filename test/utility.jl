@@ -80,10 +80,10 @@ using Test
         imf = [-0.2, -0.4, 0.0, -0.6, -0.8] # asymmetric input
         f = ref + im * imf
         W = [-0.4, -0.1, 0.0, 0.5, 1.0] # non-equidistant grid
-        @test RAS_DMFT.moment(f, W) == 0.61 / π
-        @test RAS_DMFT.moment(f, W, 0) == 0.61 / π
-        @test RAS_DMFT.moment(f, W, 1) == 0.33 / π
-        @test RAS_DMFT.moment(f, W, 2) == 0.2806 / π
+        @test moment(f, W) == 0.61 / π
+        @test moment(f, W, 0) == 0.61 / π
+        @test moment(f, W, 1) == 0.33 / π
+        @test moment(f, W, 2) == 0.2806 / π
     end # moment
 
     @testset "moments" begin

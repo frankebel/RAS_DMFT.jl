@@ -180,8 +180,8 @@ using Test
 
         @testset "moment" begin
             P = PolesSumBlock([-0.5, 0.0, 0.5], [0.25 1.5 0.25; 0.5 0.75 2.5])
-            @test RAS_DMFT.moment(P) == [2.375 1.875; 1.875 7.0625]
-            @test RAS_DMFT.moment(P, 1) == [0.0 0.25; 0.25 3.0]
+            @test moment(P) == [2.375 1.875; 1.875 7.0625]
+            @test moment(P, 1) == [0.0 0.25; 0.25 3.0]
         end # moment
 
         @testset "moments" begin

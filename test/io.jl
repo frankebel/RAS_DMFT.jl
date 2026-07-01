@@ -62,7 +62,7 @@ using Test
         foo = read_hdf5("test.h5", PolesContinuedFraction{Float64, Int})
         @test locations(foo) == [1.0, 2]
         @test amplitudes(foo) == [3]
-        @test RAS_DMFT.scale(foo) == 4
+        @test scale(foo) == 4
     end # PolesContinuedFraction
 
     @testset "PolesContinuedFractionBlock" begin
@@ -74,7 +74,7 @@ using Test
         foo = read_hdf5("test.h5", PolesContinuedFractionBlock{Int, Int})
         @test locations(foo) == [[1 0; 0 1], [2 1; 1 0]]
         @test amplitudes(foo) == [[3 1; 1 0]]
-        @test RAS_DMFT.scale(foo) == [0 0; 0 0]
+        @test scale(foo) == [0 0; 0 0]
     end # PolesContinuedFractionBlock
 
     isfile("test.h5") && rm("test.h5")

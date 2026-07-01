@@ -55,7 +55,7 @@ using Test
 
         Σ_H, Σ = self_energy_dyson(-μ, Δ0, G_imp, -5:0.02:5)
         @test Σ_H ≈ U / 2 atol = 100 * eps() # half-filling
-        @test RAS_DMFT.moment(Σ, 0) ≈ U^2 / 4 atol = 1.0e-5 # bad agreement
+        @test moment(Σ, 0) ≈ U^2 / 4 atol = 1.0e-5 # bad agreement
         @test !any(iszero, locations(Σ)) # no pole at 0 for metal
     end # self_energy_dyson
 
@@ -63,8 +63,8 @@ using Test
         # on the real axis
         Σ = PolesSum(self_energy_IFG(C), 1, 1)
         merge_small_weight!(Σ, tol)
-        @test RAS_DMFT.moment(Σ, 0) ≈ U^2 / 4 rtol = 1.0e3 * eps()
-        @test RAS_DMFT.moment(Σ, 1) ≈ 0 atol = 1.0e-9
+        @test moment(Σ, 0) ≈ U^2 / 4 rtol = 1.0e3 * eps()
+        @test moment(Σ, 1) ≈ 0 atol = 1.0e-9
         # broadened
         Σ_IFG_lorentz = self_energy_IFG_lorentzian(Σ_H, C, W, δ)
         Σ_IFG_gauss = self_energy_IFG_gaussian(Σ_H, C, W, δ)

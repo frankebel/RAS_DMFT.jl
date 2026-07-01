@@ -53,8 +53,8 @@ using Test
         @test length(Δ_new) == 101
         @test iszero(location(Δ_new, 51))
         @test weight(Δ_new, 51) ≈ 0.0020833288949242113 atol = 1.0e-7
-        @test RAS_DMFT.moment(Δ_new, 0) ≈ 0.25 atol = 10 * eps()
-        @test RAS_DMFT.moment(Δ_new, 1) ≈ 0.0 atol = sqrt(eps())
+        @test moment(Δ_new, 0) ≈ 0.25 atol = 10 * eps()
+        @test moment(Δ_new, 1) ≈ 0.0 atol = sqrt(eps())
 
         # insulating solution
         P = PolesSum([rand(100) .- 2; rand(100) .+ 1], rand(200))
@@ -85,8 +85,8 @@ using Test
         @test length(Δ_new_L) === n_bath
         @test all(b -> isapprox(b, 1 / sqrt(n_bath) / 2; rtol = 3.0e-3), amplitudes(Δ_new_L))
         # small weight loss due to truncated interval
-        @test 0.2486 <= RAS_DMFT.moment(Δ_new_L, 0) <= 0.25
-        @test RAS_DMFT.moment(Δ_new_L, 1) < 200 * eps() # PHS
+        @test 0.2486 <= moment(Δ_new_L, 0) <= 0.25
+        @test moment(Δ_new_L, 1) < 200 * eps() # PHS
 
         # Gaussian
         # self-energy
@@ -102,8 +102,8 @@ using Test
         @test all(b -> isapprox(b, inv(4 * n_bath); atol = 2.0e-5), weights_without_zero)
         @test weight(Δ_new_G, cld(n_bath, 2)) ≈ inv(4 * n_bath) atol = 2.0e-4
         # small weight loss due to truncated interval
-        @test 0.2486 <= RAS_DMFT.moment(Δ_new_G, 0) <= 0.25
-        @test RAS_DMFT.moment(Δ_new_G, 1) < 200 * eps() # PHS
+        @test 0.2486 <= moment(Δ_new_G, 0) <= 0.25
+        @test moment(Δ_new_G, 1) < 200 * eps() # PHS
 
         # must not be equal
         @test locations(Δ_new_L) != locations(Δ_new_G)

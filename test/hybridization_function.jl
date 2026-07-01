@@ -32,7 +32,7 @@ using Test
             Δ = hybridization_function_bethe_simple(101)
             @test typeof(Δ) == PolesSum{Float64, Float64}
             @test length(Δ) === 101
-            @test RAS_DMFT.moment(Δ, 0) ≈ 0.25 rtol = 10 * eps()
+            @test moment(Δ, 0) ≈ 0.25 rtol = 10 * eps()
             @test location(Δ, 51) ≈ 0 atol = 10 * eps()
             @test norm(locations(Δ) + reverse(locations(Δ))) < 50 * eps()
             @test norm(weights(Δ) - reverse(weights(Δ))) < 600 * eps()
@@ -40,12 +40,12 @@ using Test
             Δ = hybridization_function_bethe_simple(100)
             @test typeof(Δ) === PolesSum{Float64, Float64}
             @test length(Δ) === 100
-            @test RAS_DMFT.moment(Δ, 0) ≈ 0.25 rtol = 10 * eps()
+            @test moment(Δ, 0) ≈ 0.25 rtol = 10 * eps()
             @test norm(locations(Δ) + reverse(locations(Δ))) < 100 * eps()
             @test norm(weights(Δ) - reverse(weights(Δ))) < 600 * eps()
             # 101 poles, D = 2
             Δ = greens_function_bethe_simple(101, 2)
-            @test RAS_DMFT.moment(Δ, 0) ≈ 1.0 rtol = 10 * eps()
+            @test moment(Δ, 0) ≈ 1.0 rtol = 10 * eps()
         end # simple
 
         @testset "grid Hubbard III" begin
@@ -63,7 +63,7 @@ using Test
             @test amplitudes(Δ)[36] ≈ 0.08918761226820784 atol = 10 * eps()
             @test amplitudes(Δ)[51] == 0
             @test amplitudes(Δ)[66] ≈ 0.08918761226820784 atol = 10 * eps()
-            @test RAS_DMFT.moment(Δ, 0) ≈ 0.25 atol = 10 * eps()
+            @test moment(Δ, 0) ≈ 0.25 atol = 10 * eps()
         end # grid Hubbard III
 
         @testset "grid" begin
@@ -74,7 +74,7 @@ using Test
             @test length(Δ) === 101
             @test locations(Δ) == W
             @test locations(Δ) !== W
-            @test RAS_DMFT.moment(Δ, 0) ≈ 0.25 rtol = 10 * eps()
+            @test moment(Δ, 0) ≈ 0.25 rtol = 10 * eps()
             @test norm(weights(Δ) - reverse(weights(Δ))) < 10 * eps()
             @test amplitudes(Δ)[51] ≈ 0.056418488187777546 atol = eps()
             # 100 poles
@@ -84,7 +84,7 @@ using Test
             @test length(Δ) === 100
             @test locations(Δ) == W
             @test locations(Δ) !== W
-            @test RAS_DMFT.moment(Δ, 0) ≈ 0.25 rtol = 10 * eps()
+            @test moment(Δ, 0) ≈ 0.25 rtol = 10 * eps()
             @test norm(weights(Δ) - reverse(weights(Δ))) < 10 * eps()
             @test amplitudes(Δ)[51] ≈ 0.05670125801017559 atol = eps()
             # 101 poles, D = 2
