@@ -105,7 +105,7 @@ function remove_zero_weight!(P::AbstractPolesSum, remove_zero::Bool = true)
             continue
         end
 
-        if iszero(weights(P)[i])
+        if iszero(weight(P, i))::Bool
             deleteat!(locations(P), i)
             deleteat!(weights(P), i)
         else

@@ -58,8 +58,8 @@ using Test
         PS = PolesSumBlock(PCF)
         merge_degenerate_poles!(PS, 5 * eps())
         @test norm(locations(PS) - [1, 2]) < 10 * eps()
-        @test norm(weights(PS)[1] - [1 0; 0 1]) < 10 * eps()
-        @test norm(weights(PS)[2] - [0 0; 0 1]) < 10 * eps()
+        @test norm(weight(PS, 1) - [1 0; 0 1]) < 10 * eps()
+        @test norm(weight(PS, 2) - [0 0; 0 1]) < 10 * eps()
     end # block
 
     @testset "block → scalar" begin
