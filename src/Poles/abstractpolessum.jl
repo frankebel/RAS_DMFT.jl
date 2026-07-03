@@ -8,6 +8,19 @@ abstract type AbstractPolesSum <: AbstractPoles end
 amplitudes(P::AbstractPolesSum) = map(i -> amplitude(P, i), eachindex(P))
 
 """
+    filling(P::AbstractPolesSum, μ::Real=0)
+
+Calculate
+
+```math
+-\\frac{1}{π} \\int_{-∞}^μ \\mathrm{d}ω~\\mathrm{Im} P(ω+\\mathrm{i}0^+) .
+```
+
+If a pole exists at exactly ``μ``, its weight is counted half.
+"""
+function filling end
+
+"""
     flip_spectrum!(P::AbstractPolesSum)
 
 Reverse `P` and flip the sign of `locations(P)`.

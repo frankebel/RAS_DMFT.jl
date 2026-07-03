@@ -37,6 +37,7 @@ export
     equal_weight_discretization,
     evaluate_gaussian,
     evaluate_lorentzian,
+    filling,
     find_chemical_potential,
     flip_spectrum!,
     flip_spectrum,

@@ -103,6 +103,20 @@ using Test
                 [evaluate_lorentzian(P, 0.1, 0.5), evaluate_lorentzian(P, 0.3, 0.5)]
         end # evaluate_lorentzian
 
+        @testset "filling" begin
+            loc = -1:1
+            wgt = 4:6
+            P = PolesSum(loc, wgt)
+            @test filling(P) === 6.5
+            @test filling(P, -Inf) === 0.0
+            @test filling(P, -1.1) === 0.0
+            @test filling(P, -1) === 2.0
+            @test filling(P, 0) === 6.5
+            @test filling(P, 1) === 12.0
+            @test filling(P, 1.1) === 15.0
+            @test filling(P, Inf) === 15.0
+        end # filling
+
         @testset "flip_spectrum!" begin
             P = PolesSum([0.1, 0.2], [0.3, 0.4])
             @test flip_spectrum!(P) === P

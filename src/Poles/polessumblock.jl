@@ -132,6 +132,22 @@ function evaluate_lorentzian(P::PolesSumBlock, ω::Real, δ::Real)
     return result
 end
 
+function filling(P::PolesSumBlock{<:Any, B}, μ::Real = 0) where {B}
+    result = zeros(B <: Real ? Float64 : ComplexF64, size(P)) # half weight changes Int → Float
+
+    for (loc, wgt) in P
+        if loc < μ
+            result .+= wgt
+        elseif loc == μ
+            result .+= 0.5 .* wgt
+        else
+            break
+        end
+    end
+
+    return Hermitian(result)
+end
+
 function merge_degenerate_poles!(P::PolesSumBlock, tol::Real = 0)
     # check input
     tol >= 0 || throw(ArgumentError("tol must not be negative"))

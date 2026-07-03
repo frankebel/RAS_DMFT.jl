@@ -90,6 +90,22 @@ using Test
                 [evaluate_lorentzian(P, ω[1], δ), evaluate_lorentzian(P, ω[2], δ)]
         end # evaluate_lorentzian
 
+        @testset "filling" begin
+            P = PolesSumBlock(
+                -1:1,
+                [[1 2; 2 3], [4 5; 5 6], [7 8; 8 9]],
+            )
+            @inferred filling(P)
+            @test filling(P) == [3 4.5; 4.5 6]
+            @test filling(P, -Inf) == zeros(2, 2)
+            @test filling(P, -1.1) == zeros(2, 2)
+            @test filling(P, -1) == [0.5 1; 1 1.5]
+            @test filling(P, 0) == [3 4.5; 4.5 6]
+            @test filling(P, 1) == [8.5 11; 11 13.5]
+            @test filling(P, 1.1) == [12 15; 15 18]
+            @test filling(P, Inf) == [12 15; 15 18]
+        end # filling
+
         @testset "flip_spectrum!" begin
             P = PolesSumBlock(
                 [0.0, 0.25, 0.3],
