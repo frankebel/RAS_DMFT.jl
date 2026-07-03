@@ -13,9 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - transformation from sum of poles to Anderson form ([#166](https://github.com/frankebel/RAS_DMFT.jl/pull/166)) (1729012)
 - generalize self-energy to any 2n×2n block sum of poles ([#167](https://github.com/frankebel/RAS_DMFT.jl/pull/167)) (22f40e7)
 - get location of poles directly ([#181](https://github.com/frankebel/RAS_DMFT.jl/pull/181)) (78be1d5)
-- iterate through AbstractPolesSum ([#182](https://github.com/frankebel/RAS_DMFT.jl/pull/182)) (12f5719)
+- iterate through `AbstractPolesSum` ([#182](https://github.com/frankebel/RAS_DMFT.jl/pull/182)) (12f5719)
 - calculate filling for `AbstractPolesSum` ([#183](https://github.com/frankebel/RAS_DMFT.jl/pull/183)) (68c6489)
 - shift spectrum of `AbstractPolesSum` ([#186](https://github.com/frankebel/RAS_DMFT.jl/pull/186)) (d191feb)
+- calculate trace of `AbstractPolesSum` ([#187](https://github.com/frankebel/RAS_DMFT.jl/pull/187)) (5cf51be)
 
 ### Changed
 
