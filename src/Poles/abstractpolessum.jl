@@ -142,6 +142,16 @@ function remove_zero_weight(P::AbstractPolesSum, remove_zero::Bool = true)
 end
 
 """
+    shift_spectrum!(P::AbstractPolesSum, μ::Real)
+
+Shift locations of `P` by ``a_i → a_i - μ``.
+"""
+function shift_spectrum!(P::AbstractPolesSum, μ::Real)
+    locations(P) .-= μ
+    return P
+end
+
+"""
     to_grid(P::AbstractPolesSum, grid::AbstractVector{<:Real})
 
 Create a new [`AbstractPolesSum`](@ref) from `P` with locations given by `grid`.

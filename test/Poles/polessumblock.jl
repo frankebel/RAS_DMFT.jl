@@ -231,6 +231,13 @@ using Test
             @test weights(foo) == [[0 0; 0 0], [1 0; 0 0]]
         end # remove_zero_weight
 
+        @testset "shift_spectrum!" begin
+            P = PolesSumBlock([0, 1], [[0 0; 0 0], [1 0; 0 0]])
+            @test RAS_DMFT.shift_spectrum!(P, 2) === P
+            @test locations(P) == [-2, -1]
+            @test weights(P) == [[0 0; 0 0], [1 0; 0 0]]
+        end # shift_spectrum!
+
         @testset "to_grid" begin
             # all poles within grid, middle pole not centered
             P = PolesSumBlock(

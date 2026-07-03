@@ -92,7 +92,7 @@ using Test
         n = occupations(fs)
         H_int = U * n[1, -1 // 2] * n[1, 1 // 2]
         H_wf = natural_orbital_operator(H_nat, H_int, -μ, fs, n_occ, L_v, L_c)
-        shift_spectrum!(H_wf, E0)
+        Fermions.shift_spectrum!(H_wf, E0)
         ψ0_wf = Wavefunction(ψ0)
         foo = H_wf * ψ0_wf
         var = foo ⋅ foo
