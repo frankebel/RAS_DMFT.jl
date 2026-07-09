@@ -23,6 +23,12 @@ using Test
         P = PolesSumBlock(loc, [1 + 2im 3im; 4 5 + 6im])
         @test P.locations == loc
         @test P.weights == [[5 4 + 8im; 4 - 8im 16], [9 18 + 15im; 18 - 15im 61]]
+        # correct merging of degenerate poles
+        loc_amp = [-3.0, -2.5, -2.75]
+        amp = [1 5 3; 2 6 4]
+        P = PolesSumBlock(loc_amp, amp, 0.25)
+        @test P.locations == [-3.0, -2.5]
+        @test P.weights == [[10 14; 14 20], [25 30; 30 36]]
 
         # conversion of type
         P = PolesSumBlock(loc, wgt)

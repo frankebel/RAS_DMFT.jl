@@ -59,13 +59,20 @@ PolesSumBlock(loc::AbstractVector{A}, wgt::Vector{Hermitian{B, Matrix{B}}}) wher
     PolesSumBlock{A, B}(loc, wgt)
 
 """
-    PolesSumBlock(loc::AbstractVector, amp::AbstractMatrix{B}) where {B}
+    PolesSumBlock(
+        loc::AbstractVector{A},
+        amp::AbstractMatrix{B},
+        tol::Real = 0
+    ) where {A, B}
 
 Create a new instance of [`PolesSumBlock`](@ref) by supplying locations `loc`
 and amplitudes `amp`.
 
 The ``i``-th column of `amp` is interpreted as the vector ``\\vec{b}_i``
 and the weight as the outer product ``W_i = \\vec{b}_i \\vec{b}^†_i``.
+
+The value `tol` determines to tolerance for location degeneracy.
+If `abs(loc[i] - loc[j]) <= tol`, they are deemed to be degenerate.
 
 ```jldoctest
 julia> loc = 0:1;
@@ -82,13 +89,96 @@ julia> weights(P) == [[5 4+8im; 4-8im 16], [9 18+15im; 18-15im 61]]
 true
 ```
 """
-function PolesSumBlock(loc::AbstractVector, amp::AbstractMatrix{B}) where {B}
-    wgt = Vector{Hermitian{B, Matrix{B}}}(undef, size(amp, 2))
-    for i in axes(amp, 2)
-        foo = view(amp, :, i)
-        wgt[i] = Hermitian(foo * foo')
+function PolesSumBlock(
+        loc::AbstractVector{A},
+        amp::AbstractMatrix{B},
+        tol::Real = 0
+    ) where {A, B}
+    # check input
+    Base.require_one_based_indexing(loc, amp)
+    tol < 0 && throw(ArgumentError("negative tol"))
+    length(loc) == size(amp, 2) || throw(DimensionMismatch("loc and amp size mismatch"))
+    isempty(loc) && throw(ArgumentError("no poles specified"))
+
+    n = length(loc)
+
+    # no merging necessary
+    if n == 1
+        b = @view amp[:, 1]
+        return PolesSumBlock(loc, [Hermitian(b * b')])
     end
-    return PolesSumBlock(loc, wgt)
+
+    # sort by location
+    p = sortperm(loc)
+    loc = loc[p]
+    amp = @view amp[:, p]
+
+    loc_new = A[]
+    wgt_new = Hermitian{B, Matrix{B}}[]
+
+    i = 1
+
+    # poles in (-∞, -tol)
+    if i <= n && loc[i] < -tol
+        l = loc[i]
+        b = @view amp[:, i]
+        w = b * b'
+        i += 1
+        while i <= n && loc[i] < -tol
+            if loc[i] - l <= tol
+                b = @view amp[:, i]
+                w .+= b * b'
+            else
+                push!(loc_new, l)
+                push!(wgt_new, Hermitian(w))
+                l = loc[i]
+                b = @view amp[:, i]
+                w = b * b'
+            end
+            i += 1
+        end
+        push!(loc_new, l)
+        push!(wgt_new, Hermitian(w))
+    end
+
+    # poles in [-tol, tol]
+    if i <= n && abs(loc[i]) <= tol
+        m = size(amp, 1)
+        w = zeros(B, m, m)
+        while i <= n && abs(loc[i]) <= tol
+            b = @view amp[:, i]
+            w .+= b * b'
+            i += 1
+        end
+        push!(loc_new, zero(A))
+        push!(wgt_new, Hermitian(w))
+    end
+
+    # poles in (tol, ∞)
+    if i <= n
+        l = loc[i]
+        l = l
+        b = @view amp[:, i]
+        w = b * b'
+        i += 1
+        while i <= n
+            if loc[i] - l <= tol
+                b = @view amp[:, i]
+                w .+= b * b'
+            else
+                push!(loc_new, l)
+                push!(wgt_new, Hermitian(w))
+                l = loc[i]
+                b = @view amp[:, i]
+                w = b * b'
+            end
+            i += 1
+        end
+        push!(loc_new, l)
+        push!(wgt_new, Hermitian(w))
+    end
+
+    return PolesSumBlock(loc_new, wgt_new)
 end
 
 PolesSumBlock{A, B}(P::PolesSumBlock) where {A, B} = convert(PolesSumBlock{A, B}, P)

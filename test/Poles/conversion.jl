@@ -28,8 +28,7 @@ using Test
         @test norm(B0 * B0 - sum(weights(P))) < 50 * eps()
         F = eigen(HA)
         B = B0 * F.vectors[1:2, :]
-        P_new = PolesSumBlock(copy(F.values), B)
-        merge_degenerate_poles!(P_new, 50 * eps())
+        P_new = PolesSumBlock(copy(F.values), B, 50 * eps())
         @test norm(locations(P_new) - locations(P)) < 20 * eps()
         @test all(<(50 * eps()), norm.(weights(P_new) .- weights(P))) # norm of each weight difference
     end # Anderson matrix
