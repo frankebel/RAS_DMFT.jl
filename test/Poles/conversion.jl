@@ -6,13 +6,13 @@ using Test
     @testset "Anderson matrix" begin
         # scalar
         P = PolesSum([-1.0, 0.0, 1.0], [0.4, 0.2, 0.4])
-        b0, HA = anderson_matrix(P)
-        @test b0 ≈ 1 atol = 10 * eps()
+        b_0, H_A = anderson_matrix(P)
+        @test b_0 ≈ 1 atol = 10 * eps()
         @test norm(
-            HA - [
-                0 -sqrt(0.4) -sqrt(0.4);
+            H_A - [
+                0 -sqrt(0.4) sqrt(0.4);
                 -sqrt(0.4) -sqrt(0.2) 0.0;
-                -sqrt(0.4) 0.0 sqrt(0.2)
+                sqrt(0.4) 0.0 sqrt(0.2)
             ]
         ) < 10 * eps()
         # block

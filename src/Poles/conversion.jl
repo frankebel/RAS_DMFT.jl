@@ -13,28 +13,34 @@ function anderson_matrix(P::PolesSum)
     T = eltype(P) <: Real ? Float64 : ComplexF64
     N = length(P)
 
-    H_LP = Diagonal(locations(P))
-    V = amplitudes(P)
-    b_0 = norm(V)
-    V .*= inv(b_0)
+    return _with_blas_threads(Threads.nthreads()) do
+        H_LP = Diagonal(locations(P))
+        V = amplitudes(P)
+        b_0 = norm(V)
+        V .*= inv(b_0)
 
-    # Find orthogonal complement and create orthonormal basis set
-    # using QR decomposition (Eq. A41).
-    m = Matrix(one(T) * I(N))
-    m[:, 1] = V
-    U1 = qr(m).Q
-    h = Hermitian(U1' * H_LP * U1)
+        # Find orthogonal complement to create basis (Eq. A41).
+        U1 = [V nullspace(V')]
+        h = U1' * H_LP * U1
 
-    # Diagonalize bottom left subspace
-    U2 = Matrix(one(T) * I(N))
-    F = eigen(Hermitian(h[2:end, 2:end]))
-    U2[2:end, 2:end] = F.vectors
-    # Anderson matrix
-    HA = U2' * h * U2
-    HA[2:end, 2:end] = Diagonal(F.values)
-    H_A = Hermitian(HA)
+        # Diagonalize bottom left subspace
+        # (1 0   ) * ( h11 h12 ) * ( 1 0  ) = ( h11 h12*U2 )
+        # (0 U2' ) * ( h21 h22 )   ( 0 U2 )   ( U2'*h21  d )
+        # with d diagonal
+        F = eigen!(Hermitian(h[2:end, 2:end]))
+        # Anderson matrix
+        H_A = zero(h)
+        H_A[1, 1] = h[1, 1]
+        for i in 2:N
+            @inline H_A[i, i] = F.values[i - 1]
+        end
+        h21 = @view h[2:end, 1]
+        H_A21 = @view H_A[1, 2:end]
+        mul!(H_A21, F.vectors', h21)
+        H_A[1, 2:end] .= conj.(H_A21) # H_A12
 
-    return b_0, H_A
+        b_0, Hermitian(H_A)
+    end
 end
 
 function anderson_matrix(P::PolesSumBlock)
@@ -42,29 +48,36 @@ function anderson_matrix(P::PolesSumBlock)
     N = length(P)
     n = size(P, 1) # block size
 
-    H_LP = Diagonal(repeat(locations(P); inner = n))
-    V::Matrix{T} = vcat(amplitudes(P)...)
-    Ra, B_0 = RAS_DMFT._orthonormalize_SVD(V)
-    RAS_DMFT._orthonormalize_GramSchmidt!(Ra) # numerical instability
-    RAS_DMFT._orthonormalize_GramSchmidt!(Ra) # numerical instability
+    return _with_blas_threads(Threads.nthreads()) do
+        H_LP = Diagonal(repeat(locations(P); inner = n))
+        V::Matrix{T} = vcat(amplitudes(P)...)
+        R_a, B_0 = RAS_DMFT._orthonormalize_SVD(V)
+        RAS_DMFT._orthonormalize_GramSchmidt!(R_a) # numerical instability
+        RAS_DMFT._orthonormalize_GramSchmidt!(R_a) # numerical instability
 
-    # Find orthogonal complement and create orthonormal basis set
-    # using QR decomposition (Eq. A41).
-    m = Matrix(one(T) * I(N * n))
-    m[:, 1:n] = Ra
-    U1 = qr(m).Q
-    h = Hermitian(U1' * H_LP * U1)
+        # Find orthogonal complement to create basis (Eq. A41).
+        U1 = [R_a nullspace(R_a')]
+        h = U1' * H_LP * U1
 
-    # Diagonalize bottom left subspace
-    U2 = Matrix(one(T) * I(N * n))
-    F = eigen(Hermitian(h[(n + 1):end, (n + 1):end]))
-    U2[(n + 1):end, (n + 1):end] = F.vectors
-    # Anderson matrix
-    HA = U2' * h * U2
-    HA[(n + 1):end, (n + 1):end] = Diagonal(F.values)
-    H_A = Hermitian(HA)
+        # Diagonalize bottom left subspace
+        # (1 0   ) * ( h11 h12 ) * ( 1 0  ) = ( h11 h12*U2 )
+        # (0 U2' ) * ( h21 h22 )   ( 0 U2 )   ( U2'*h21  d )
+        # with d diagonal
+        F = eigen!(Hermitian(h[(n + 1):end, (n + 1):end]))
+        # Anderson matrix
+        H_A = zero(h)
+        H_A[1:n, 1:n] .= @view h[1:n, 1:n]
+        for i in (n + 1):(N * n)
+            @inline H_A[i, i] = F.values[i - n]
+        end
+        h21 = @view h[(n + 1):end, 1:n]
+        H_A21 = @view H_A[(n + 1):end, 1:n]
+        mul!(H_A21, F.vectors', h21)
+        H_A12 = @view H_A[1:n, (n + 1):end] # H_A12
+        adjoint!(H_A12, H_A21)
 
-    return B_0, H_A
+        B_0, Hermitian(H_A)
+    end
 end
 
 # scalar form

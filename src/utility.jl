@@ -1,5 +1,17 @@
 # utility functions
 
+function _with_blas_threads(f, t::Int = 1)
+    t_old = BLAS.get_num_threads()
+    t_old == t && return f()
+
+    BLAS.set_num_threads(t)
+    try
+        return f()
+    finally
+        BLAS.set_num_threads(t_old)
+    end
+end
+
 """
     get_CI_parameters(n_sites::Int, n_occ::Int, n_v_bit::Int, n_c_bit::Int)
 
