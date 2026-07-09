@@ -1,7 +1,7 @@
 name = "RAS_DMFT"
 uuid = "a6c836f4-75b2-4167-a711-17703ee59b5f"
 version = "0.10.0"
-authors = ["Frank Ebel <frank.ebel@student.tuwien.ac.at> and contributors"]
+authors = ["Frank Ebel <frank.ebel@tuwien.ac.at> and contributors"]
 
 [workspace]
 projects = ["docs"]
