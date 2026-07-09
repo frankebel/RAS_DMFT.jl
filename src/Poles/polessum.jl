@@ -59,7 +59,7 @@ end
 Add a pole at location zero with weight 0 inside `P`.
 """
 function add_pole_at_zero!(P::PolesSum)
-    if all(!iszero, locations(P))
+    if all(!iszero, locations(P))::Bool
         push!(locations(P), 0)
         push!(weights(P), 0)
         sort!(P)
@@ -344,7 +344,8 @@ function Base.inv(P::PolesSum)
     loc = diag(HA)
     a0 = popfirst!(loc)
     wgt = b0 * HA[1, 2:end]
-    map!(i -> abs2(i), wgt)
+    map!(abs2, wgt)
+
     return a0, PolesSum(loc, wgt)
 end
 
