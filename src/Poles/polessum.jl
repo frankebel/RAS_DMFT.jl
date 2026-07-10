@@ -30,17 +30,17 @@ Create a new instance of [`PolesSum`](@ref) by supplying the locations `loc`
 and weights `wgt`.
 
 ```jldoctest
-julia> loc = collect(0:5);
+julia> loc = 0:5;
 
-julia> wgt = collect(5:10);
+julia> wgt = 5:10;
 
 julia> P = PolesSum(loc, wgt)
-6-element PolesSum{Int64, Int64}
+PolesSum{Int64, Int64} with 6 poles
 
-julia> locations(P) === loc
+julia> locations(P) == loc
 true
 
-julia> weights(P) === wgt
+julia> weights(P) == wgt
 true
 ```
 """
