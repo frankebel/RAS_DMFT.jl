@@ -6,7 +6,9 @@ Literate = "98b081ad-f1c9-55d3-8b20-4c87d4299306"
 RAS_DMFT = "a6c836f4-75b2-4167-a711-17703ee59b5f"
 
 [compat]
-Changelog = "1"
-Documenter = "1"
-Literate = "2"
-julia = "1"
+Changelog = "1.1.0"
+Documenter = "1.17.0"
+Fermions = "0.12.0"
+Literate = "2.21.0"
+RAS_DMFT = "0.10.0"
+julia = "1.12.6"

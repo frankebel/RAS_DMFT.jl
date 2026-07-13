@@ -1,7 +1,7 @@
 using Changelog
-using RAS_DMFT
 using Documenter
 using Literate
+using RAS_DMFT
 
 DocMeta.setdocmeta!(RAS_DMFT, :DocTestSetup, :(using RAS_DMFT); recursive = true)
 
