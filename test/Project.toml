@@ -11,7 +11,7 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [compat]
 Aqua = "0.8.16"
-Distributions = "0.25.100 - 0.25.127"
+Distributions = "0.25.100"
 Fermions = "0.12.0"
 HDF5 = "0.17.2"
 LinearAlgebra = "1.12.0"
