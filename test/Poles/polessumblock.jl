@@ -44,6 +44,7 @@ using Test
             P = PolesSumBlock(0:1, [[2.0 0; 0 1], [0 0; 0 0]])
             @inferred amplitude(P, 1)
             @test amplitude(P, 1) == [sqrt(2) 0; 0 1]
+
             # complex
             P = PolesSumBlock(0:1, [[1 0.5im; -0.5im 1], [0 0; 0 0]])
             @inferred amplitude(P, 1)
@@ -51,6 +52,17 @@ using Test
                 amplitude(P, 1) -
                     [1 + sqrt(3) (sqrt(3) - 1)im; -(sqrt(3) - 1)im 1 + sqrt(3)] ./ (2 * sqrt(2)),
             ) < 10 * eps()
+
+            # thin with some weights exactly zero
+            w = zeros(10, 10)
+            w[3, 3] = 4
+            w[5, 5] = 9
+            amp = zeros(10, 2)
+            amp[3, 1] = 2
+            amp[5, 2] = 3
+            P = PolesSumBlock(rand(1), [Hermitian(w)])
+            amp2 = amplitude(P, 1, thin = true)
+            @test norm(amp - amp2) == 0
         end # amplitude
 
         @testset "amplitudes" begin
@@ -61,6 +73,19 @@ using Test
             amp = amplitudes(P)
             @test norm(amp[1] - 1 / sqrt(21) * v1 * v1') < 20 * eps()
             @test norm(amp[2] - 1 / sqrt(70) * v2 * v2') < 20 * eps()
+
+            # thin with random values
+            amps = [rand(ComplexF64, 10, i) for i in 1:10]
+            wghts = [Hermitian(amp * amp') for amp in amps]
+            loc = sort!(rand(10))
+            P = PolesSumBlock(loc, wghts)
+            amps2 = amplitudes(P, sqrt(100 * eps()); thin = true)
+            for i in eachindex(amps)
+                w = wghts[i]
+                amp = amps2[i]
+                @test size(amp) == (10, i)
+                @test norm(w - amp * amp') < 1.0e6 * eps()
+            end
         end # amplitudes
 
         @testset "evaluate_gaussian" begin

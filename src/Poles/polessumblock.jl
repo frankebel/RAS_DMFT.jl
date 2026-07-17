@@ -186,15 +186,27 @@ PolesSumBlock{A, B}(P::PolesSumBlock) where {A, B} = convert(PolesSumBlock{A, B}
 # General Julia code does not know about semipositive eigenvalues
 # and gives eltype as union of Float64 and ComplexF64.
 # Therefore, decompose by hand and apply square root in-place.
-function amplitude(P::PolesSumBlock, i::Integer)
-    T = eltype(P)
-    T <: Union{Float64, ComplexF64} ||
-        throw(ArgumentError("amplitude(P, i) only impletmented for eltype(P) <: Union{Float64, ComplexF64}"))
-    F = eigen(weight(P, i))
-    tol = maximum(F.values) * sqrt(eps())
-    map!(i -> i > tol ? sqrt(i) : zero(i), F.values) # set small eigenvalues to zero
-    result = F.vectors * Diagonal(F.values) * F.vectors'
-    return Hermitian(result)
+function amplitude(P::PolesSumBlock, i::Integer, tol_amp::Real = 0; thin::Bool = false)
+    tol_amp >= 0 || throw(DomainError(tol_amp, "negative amplitude"))
+
+    w = weight(P, i)
+    F = eigen(w)
+    map!(i -> i > tol_amp^2 ? sqrt(i) : zero(i), F.values) # set small amplitudes to zero
+    if !thin
+        result = F.vectors * Diagonal(F.values) * F.vectors'
+        hermitianpart!(result)
+    else
+        n = size(w, 2)
+        r = sum(>(tol_amp), F.values) # rank
+        result = Matrix{eltype(F)}(undef, n, r)
+        j = 1
+        for i in 1:n
+            F.values[i] > tol_amp || continue
+            @views result[:, j] .= F.vectors[:, i] .* F.values[i]
+            j += 1
+        end
+    end
+    return result
 end
 
 function evaluate_gaussian(P::PolesSumBlock, ω::Real, σ::Real)
