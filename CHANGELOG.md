@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - calculate filling for `AbstractPolesSum` ([#183](https://github.com/frankebel/RAS_DMFT.jl/pull/183)) (68c6489)
 - shift spectrum of `AbstractPolesSum` ([#186](https://github.com/frankebel/RAS_DMFT.jl/pull/186)) (d191feb)
 - calculate trace of `AbstractPolesSum` ([#187](https://github.com/frankebel/RAS_DMFT.jl/pull/187)) (5cf51be)
+- calculate thin rectangular amplitude ([#195](https://github.com/frankebel/RAS_DMFT.jl/pull/195)) (bfc7348)
 
 ### Changed
 
