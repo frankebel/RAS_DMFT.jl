@@ -8,6 +8,16 @@ abstract type AbstractPolesSum <: AbstractPoles end
 amplitudes(P::AbstractPolesSum, args...; kwargs...) = map(i -> amplitude(P, i, args...; kwargs...), eachindex(P))
 
 """
+    anderson_matrix(P::AbstractPolesSum)
+
+Calculate scaling factor ``B_0`` and Anderson matrix ``H_\\mathrm{A}``
+given a sum of poles `P`.
+
+Reference: [DOI](https://doi.org/10.48550/arXiv.2605.04974), appendix A3d
+"""
+function anderson_matrix end
+
+"""
     arrowhead_matrix(P::AbstractPolesSum, args...; kwargs...)
 
 Calculate the (block) arrowhead matrix representation of

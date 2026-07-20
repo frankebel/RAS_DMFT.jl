@@ -25,10 +25,10 @@ using Test
                 [1 0.1; 0.1 0.5 ],
             ]
         )
-        B0, HA = anderson_matrix(P)
-        @test norm(B0 * B0 - sum(weights(P))) < 50 * eps()
-        F = eigen(HA)
-        B = B0 * F.vectors[1:2, :]
+        B_0, H_A = anderson_matrix(P)
+        @test norm(B_0 * B_0 - sum(weights(P))) < 50 * eps()
+        F = eigen(H_A)
+        B = B_0 * F.vectors[1:2, :]
         P_new = PolesSumBlock(copy(F.values), B, 50 * eps())
         @test norm(locations(P_new) - locations(P)) < 20 * eps()
         @test all(<(50 * eps()), norm.(weights(P_new) .- weights(P))) # norm of each weight difference

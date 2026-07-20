@@ -1,16 +1,6 @@
 # Conversion between different representations.
 
-"""
-    anderson_matrix(P::PolesSum)
-    anderson_matrix(P::PolesSumBlock)
-
-Calculate scaling factor ``B_0`` and Anderson matrix ``H_\\mathrm{A}``
-given a sum of poles.
-
-Reference: https://doi.org/10.48550/arXiv.2605.04974, appendix A3d
-"""
 function anderson_matrix(P::PolesSum)
-    T = eltype(P) <: Real ? Float64 : ComplexF64
     N = length(P)
 
     return _with_blas_threads(Threads.nthreads()) do
@@ -44,13 +34,12 @@ function anderson_matrix(P::PolesSum)
 end
 
 function anderson_matrix(P::PolesSumBlock)
-    T = eltype(P) <: Real ? Float64 : ComplexF64
     N = length(P)
-    n = size(P, 1) # block size
+    n_b = size(P, 1) # block size
 
     return _with_blas_threads(Threads.nthreads()) do
-        H_LP = Diagonal(repeat(locations(P); inner = n))
-        V::Matrix{T} = vcat(amplitudes(P)...)
+        H_LP = Diagonal(repeat(locations(P); inner = n_b))
+        V = vcat(amplitudes(P)...)
         R_a, B_0 = RAS_DMFT._orthonormalize_SVD(V)
         RAS_DMFT._orthonormalize_GramSchmidt!(R_a) # numerical instability
         RAS_DMFT._orthonormalize_GramSchmidt!(R_a) # numerical instability
@@ -63,17 +52,17 @@ function anderson_matrix(P::PolesSumBlock)
         # (1 0   ) * ( h11 h12 ) * ( 1 0  ) = ( h11 h12*U2 )
         # (0 U2' ) * ( h21 h22 )   ( 0 U2 )   ( U2'*h21  d )
         # with d diagonal
-        F = eigen!(Hermitian(h[(n + 1):end, (n + 1):end]))
+        F = eigen!(Hermitian(h[(n_b + 1):end, (n_b + 1):end]))
         # Anderson matrix
         H_A = zero(h)
-        H_A[1:n, 1:n] .= @view h[1:n, 1:n]
-        for i in (n + 1):(N * n)
-            @inline H_A[i, i] = F.values[i - n]
+        H_A[1:n_b, 1:n_b] .= @view h[1:n_b, 1:n_b]
+        for i in (n_b + 1):(N * n_b)
+            @inline H_A[i, i] = F.values[i - n_b]
         end
-        h21 = @view h[(n + 1):end, 1:n]
-        H_A21 = @view H_A[(n + 1):end, 1:n]
+        h21 = @view h[(n_b + 1):end, 1:n_b]
+        H_A21 = @view H_A[(n_b + 1):end, 1:n_b]
         mul!(H_A21, F.vectors', h21)
-        H_A12 = @view H_A[1:n, (n + 1):end] # H_A12
+        H_A12 = @view H_A[1:n_b, (n_b + 1):end] # H_A12
         adjoint!(H_A12, H_A21)
 
         B_0, Hermitian(H_A)
