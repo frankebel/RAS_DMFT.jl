@@ -15,6 +15,7 @@ using Test
                 sqrt(0.4) 0.0 sqrt(0.2)
             ]
         ) < 10 * eps()
+
         # block
         P = PolesSumBlock(
             [-1.0, 0, 1],
@@ -32,6 +33,64 @@ using Test
         @test norm(locations(P_new) - locations(P)) < 20 * eps()
         @test all(<(50 * eps()), norm.(weights(P_new) .- weights(P))) # norm of each weight difference
     end # Anderson matrix
+
+    @testset "arrowhead matrix" begin
+        # scalar
+        loc = 1:5
+        amp = 6:10
+        P = PolesSum(loc, abs2.(amp))
+        ma = arrowhead_matrix(P)
+        @inferred arrowhead_matrix(P)
+        @test ma isa Matrix{Float64}
+        @test ma == [
+            0 6 7 8 9 10
+            6 1 0 0 0 0
+            7 0 2 0 0 0
+            8 0 0 3 0 0
+            9 0 0 0 4 0
+            10 0 0 0 0 5
+        ]
+        # pole with zero weight
+        loc = 1:5
+        amp = [6, 7, 0, 9, 0]
+        P = PolesSum(loc, abs2.(amp))
+        ma = arrowhead_matrix(P)
+        @test ma == [
+            0 6 7 0 9 0
+            6 1 0 0 0 0
+            7 0 2 0 0 0
+            0 0 0 3 0 0
+            9 0 0 0 4 0
+            0 0 0 0 0 5
+        ]
+
+        # block
+        locs = 1:2
+        amps = [
+            rand(ComplexF64, 4, 1),
+            rand(ComplexF64, 4, 2),
+        ]
+        wgts = map(amp -> amp * amp', amps)
+        P = PolesSumBlock(locs, wgts)
+        ma = arrowhead_matrix(P)
+        @inferred arrowhead_matrix(P)
+        @test ishermitian(ma)
+        @test iszero(@view ma[1:4, 1:4])
+        amp1 = @view ma[1:4, 5:8]
+        @test norm(wgts[1] - amp1 * amp1') < 100 * eps()
+        amp2 = @view ma[1:4, 9:12]
+        @test norm(wgts[2] - amp2 * amp2') < 100 * eps()
+        @test view(ma, 5:12, 5:12) == Diagonal([1, 1, 1, 1, 2, 2, 2, 2])
+        # thin rectangular amplitudes
+        ma = arrowhead_matrix(P, 10 * sqrt(eps()); thin = true)
+        @test ishermitian(ma)
+        @test iszero(@view ma[1:4, 1:4])
+        amp1 = @view ma[1:4, 5]
+        @test norm(wgts[1] - amp1 * amp1') < 100 * eps()
+        amp2 = @view ma[1:4, 6:7]
+        @test norm(wgts[2] - amp2 * amp2') < 100 * eps()
+        @test view(ma, 5:7, 5:7) == Diagonal([1, 2, 2])
+    end # arrowhead matrix
 
     @testset "scalar" begin
         P = PolesContinuedFraction(5:10, 0.1:0.1:0.5, 0.25)

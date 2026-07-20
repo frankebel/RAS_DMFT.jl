@@ -183,9 +183,6 @@ end
 
 PolesSumBlock{A, B}(P::PolesSumBlock) where {A, B} = convert(PolesSumBlock{A, B}, P)
 
-# General Julia code does not know about semipositive eigenvalues
-# and gives eltype as union of Float64 and ComplexF64.
-# Therefore, decompose by hand and apply square root in-place.
 function amplitude(P::PolesSumBlock, i::Integer, tol_amp::Real = 0; thin::Bool = false)
     tol_amp >= 0 || throw(DomainError(tol_amp, "negative amplitude"))
 
@@ -193,6 +190,9 @@ function amplitude(P::PolesSumBlock, i::Integer, tol_amp::Real = 0; thin::Bool =
     F = eigen(w)
     map!(i -> i > tol_amp^2 ? sqrt(i) : zero(i), F.values) # set small amplitudes to zero
     if !thin
+        # General Julia code does not know about semipositive eigenvalues
+        # and gives eltype as union of Float64 and ComplexF64.
+        # Therefore, decompose by hand and apply square root in-place.
         result = F.vectors * Diagonal(F.values) * F.vectors'
         hermitianpart!(result)
     else
@@ -206,6 +206,28 @@ function amplitude(P::PolesSumBlock, i::Integer, tol_amp::Real = 0; thin::Bool =
             j += 1
         end
     end
+    return result
+end
+
+function arrowhead_matrix(P::PolesSumBlock, args...; kwargs...)
+    amps = amplitudes(P, args...; kwargs...)
+    T = promote_type(eltype(P), eltype(eltype((amps))))
+    n_b = size(P, 1)
+    dim = n_b + sum(amp -> size(amp, 2), amps)
+    result = zeros(T, dim, dim)::Matrix{T}
+
+    idx = n_b
+    @inbounds for i in eachindex(P)
+        amp = amps[i]
+        r = size(amp, 2) # rank of amplitude matrix
+        result[1:n_b, (idx + 1):(idx + r)] = amp
+        result[(idx + 1):(idx + r), 1:n_b] = amp'
+        for j in (idx + 1):(idx + r)
+            result[j, j] = location(P, i)
+        end
+        idx += r
+    end
+
     return result
 end
 
@@ -344,24 +366,6 @@ end
 
 function moment(P::PolesSumBlock, n::Int = 0)
     return sum(i -> i[1]^n * i[2], zip(locations(P), weights(P)))
-end
-
-function Core.Array(P::PolesSumBlock)
-    T = eltype(P) <: Real ? Float64 : ComplexF64
-    N = length(P)
-    n = size(P, 1)
-    result = zeros(T, (N + 1) * n, (N + 1) * n)
-    A = locations(P)
-    result[1:n, 1:n] = zeros(T, n, n)
-    for i in 2:(N + 1)
-        i1 = (i - 1) * n + 1
-        i2 = i * n
-        B = amplitude(P, i - 1)
-        result[1:n, i1:i2] = B # first block row
-        result[i1:i2, 1:n] = B # first block column
-        map(j -> result[j, j] = A[i - 1], i1:i2) # main diagonal
-    end
-    return result
 end
 
 function Base.:+(A::PolesSumBlock{<:Any, TA}, B::PolesSumBlock{<:Any, TB}) where {TA, TB}

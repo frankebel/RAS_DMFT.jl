@@ -69,6 +69,21 @@ end
 
 amplitude(P::PolesSum{<:Any, <:Real}, i::Integer) = sqrt(weight(P, i))
 
+function arrowhead_matrix(P::PolesSum)
+    amps = amplitudes(P)
+    T = promote_type(eltype(P), eltype(amps))
+    n = length(P) + 1
+    result = zeros(T, n, n)::Matrix{T}
+
+    for i in eachindex(P)
+        result[i + 1, i + 1] = location(P, i)
+    end
+    result[1, 2:end] .= amps
+    result[2:end, 1] .= amps
+
+    return result
+end
+
 function evaluate_gaussian(P::PolesSum, ω::Real, σ::Real)
     real = zero(ω)
     imag = zero(ω)
@@ -307,14 +322,6 @@ function spectral_function_loggaussian(P::PolesSum, ω::AbstractVector{<:Real}, 
 end
 
 weight(P::PolesSum, i::Integer) = weights(P)[i]
-
-function Core.Array(P::PolesSum)
-    T = eltype(P)
-    result = Matrix{T}(Diagonal([0; locations(P)]))
-    result[1, 2:end] .= amplitudes(P)
-    result[2:end, 1] .= amplitudes(P)
-    return result
-end
 
 function Base.:+(A::PolesSum, B::PolesSum)
     result = PolesSum([locations(A); locations(B)], [weights(A); weights(B)])

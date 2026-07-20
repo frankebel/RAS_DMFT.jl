@@ -25,7 +25,7 @@ function update_hybridization_function(
     # Create tridiagonal matrix `T` using Householder transformations.
     # These do not touch the (1,1) element of the original matrix,
     # making it perfect for our use case.
-    h = hessenberg!(Array(Σ)) # don't give symmetric information on purpose
+    h = hessenberg!(arrowhead_matrix(Σ)) # don't give symmetric information on purpose
     T = SymTridiagonal(diag(h.H), diag(h.H, -1)) # diagonal and first lower diagonal
 
     # Update the (1,1) element for each pole in Δ0 and diagonalize `T`.

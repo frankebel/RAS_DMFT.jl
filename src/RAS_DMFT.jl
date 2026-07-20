@@ -27,6 +27,7 @@ export
     amplitude,
     amplitudes,
     anderson_matrix,
+    arrowhead_matrix,
     block_lanczos,
     block_lanczos_full_ortho,
     correlator,

@@ -56,7 +56,7 @@ using Test
         n_sites = 1 + n_bath
 
         Δ = hybridization_function_bethe_simple(n_bath)
-        H_nat, n_occ = to_natural_orbitals(Array(Δ))
+        H_nat, n_occ = to_natural_orbitals(arrowhead_matrix(Δ))
         n_bit, V_v, V_c = get_CI_parameters(n_sites, n_occ, L_c, L_v)
 
         # CIWavefunction

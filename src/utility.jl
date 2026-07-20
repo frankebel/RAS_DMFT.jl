@@ -35,7 +35,7 @@ Return Hamiltonian, ground state energy, and ground state.
 function init_system(
         Δ::PolesSum, H_int::Operator, ϵ_imp::Real, L_v::Int, L_c::Int, p::Int, var::Real
     )
-    arr = Array(Δ)
+    arr = arrowhead_matrix(Δ)
     n_sites = size(arr, 1)
     H_nat, n_occ = to_natural_orbitals(arr)
     n_bit, V_v, V_c = get_CI_parameters(n_sites, n_occ, L_c, L_v)

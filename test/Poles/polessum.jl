@@ -386,47 +386,6 @@ using Test
         end # weights
     end # custom functions
 
-    @testset "Core" begin
-        @testset "Array" begin
-            loc = 1:5
-            amp = 6:10
-            P = PolesSum(loc, abs2.(amp))
-            m = Array(P)
-            @test typeof(m) === Matrix{Int}
-            @test m == [
-                0 6 7 8 9 10
-                6 1 0 0 0 0
-                7 0 2 0 0 0
-                8 0 0 3 0 0
-                9 0 0 0 4 0
-                10 0 0 0 0 5
-            ]
-            # poles with zero weight
-            loc = 1:5
-            amp = [6, 7, 0, 9, 0]
-            P = PolesSum(loc, abs2.(amp))
-            m = Array(P)
-            @test m == [
-                0 6 7 0 9 0
-                6 1 0 0 0 0
-                7 0 2 0 0 0
-                0 0 0 3 0 0
-                9 0 0 0 4 0
-                0 0 0 0 0 5
-            ]
-            # correct promotion
-            loc = 1:2
-            amp = [1.1, 5.5]
-            P = PolesSum(loc, abs2.(amp))
-            m = Array(P)
-            @test m == [
-                0 1.1 5.5
-                1.1 1 0
-                5.5 0 2
-            ]
-        end # Array
-    end # Core
-
     @testset "Base" begin
         @testset "+" begin
             # addition must sort resulting poles

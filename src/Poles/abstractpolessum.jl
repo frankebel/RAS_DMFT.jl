@@ -8,6 +8,30 @@ abstract type AbstractPolesSum <: AbstractPoles end
 amplitudes(P::AbstractPolesSum, args...; kwargs...) = map(i -> amplitude(P, i, args...; kwargs...), eachindex(P))
 
 """
+    arrowhead_matrix(P::AbstractPolesSum, args...; kwargs...)
+
+Calculate the (block) arrowhead matrix representation of
+
+```math
+\\frac{1}{z - \\mathbb{0} - P(z)} .
+```
+
+See also [`amplitude`](@ref) for details of `args...` and `kwargs...`.
+
+```jldoctest
+julia> P = PolesSum(1:2, [4, 9])
+PolesSum{Int64, Int64} with 2 poles
+
+julia> arrowhead_matrix(P)
+3×3 Matrix{Float64}:
+ 0.0  2.0  3.0
+ 2.0  1.0  0.0
+ 3.0  0.0  2.0
+```
+"""
+function arrowhead_matrix end
+
+"""
     filling(P::AbstractPolesSum, μ::Real=0)
 
 Calculate

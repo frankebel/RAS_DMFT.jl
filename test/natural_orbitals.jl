@@ -8,7 +8,7 @@ using Test
 @testset "natural orbitals" begin
     @testset "matrix transformation" begin
         Δ = hybridization_function_bethe_simple(11)
-        m = Array(Δ)
+        m = arrowhead_matrix(Δ)
         H, n_occ = to_natural_orbitals(m)
 
         @test n_occ === 6
@@ -32,7 +32,7 @@ using Test
         ] atol = 2.0e-13
 
         Δ = hybridization_function_bethe_simple(301)
-        m = Array(Δ)
+        m = arrowhead_matrix(Δ)
         H, n_occ = to_natural_orbitals(m)
         @test n_occ === 151
         E = eigvals(H)
@@ -49,7 +49,7 @@ using Test
 
         # sites with zero hybridization, Löwdin must not return negative eigenvalues
         Δ = hybridization_function_bethe_grid(range(-2, 2; length = 31))
-        to_natural_orbitals(Array(Δ))
+        to_natural_orbitals(arrowhead_matrix(Δ))
     end # matrix transformation
 
     @testset "operator" begin
@@ -357,7 +357,7 @@ using Test
             n = occupations(fs)
             H_int = U1 * n[1, -1 // 2] * n[1, 1 // 2]
             Δ = hybridization_function_bethe_simple(11)
-            H_nat, n_occ1 = to_natural_orbitals(Array(Δ))
+            H_nat, n_occ1 = to_natural_orbitals(arrowhead_matrix(Δ))
             H = natural_orbital_ci_operator(H_nat, H_int, -μ1, fs, n_occ1, 2, 2, 2)
             @test length(H.opbit.terms) == 1 + 2 * 6 + 4 * 7
             @test length(H.opmix) == 96 # didn't calculate myself
@@ -442,7 +442,7 @@ using Test
 
         # Single particle part of the Hamiltonian as a Matrix H0.
         Δ = hybridization_function_bethe_simple(n_bath)
-        H_nat, n_occ = to_natural_orbitals(Array(Δ))
+        H_nat, n_occ = to_natural_orbitals(arrowhead_matrix(Δ))
         n_emp = n_sites - n_occ
         n_v_vector = n_occ - 1 - n_v_bit
         n_c_vector = n_emp - 1 - n_c_bit

@@ -16,7 +16,7 @@ Solve AIM in exact diagonalization.
 """
 function solve_impurity_ed(Δ::PolesSum, H_int::Operator, ϵ_imp::Real)
     # Get Hamiltonian
-    H_nat, n_occ = to_natural_orbitals(Array(Δ))
+    H_nat, n_occ = to_natural_orbitals(arrowhead_matrix(Δ))
     n_sites = size(H_nat, 1)
     fs = FockSpace(Orbitals(n_sites), FermionicSpin(1 // 2))
     H = natural_orbital_operator(

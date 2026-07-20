@@ -98,7 +98,7 @@ function self_energy_IFG(C::PolesSumBlock, block::Int = 1)
     end
 
     # diagonalize
-    H = Array(P)
+    H = arrowhead_matrix(P)
     H[1:(n ÷ 2), 1:(n ÷ 2)] = A1
     F = eigen!(H)
     loc = F.values
