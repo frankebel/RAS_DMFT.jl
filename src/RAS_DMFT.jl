@@ -91,6 +91,7 @@ export
     temperature_kondo,
     to_grid,
     to_natural_orbitals,
+    tridiagonal_matrix,
     update_hybridization_function,
     weight,
     weights,

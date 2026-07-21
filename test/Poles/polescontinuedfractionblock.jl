@@ -101,6 +101,30 @@ using Test
             @test scale(P) === scl
         end # scale
 
+        @testset "tridiagonal_matrix" begin
+            loc = [[1 2; 2 3], [4 5; 5 6], [7 8; 8 9]]
+            amp = [[10 11; 11 12], [13 14; 14 15]]
+            scl = [16 17; 17 18]
+            P = PolesContinuedFractionBlock(loc, amp, scl)
+            @test tridiagonal_matrix(P) == [
+                1  2  10 11 0  0
+                2  3  11 12 0  0
+                10 11 4  5  13 14
+                11 12 5  6  14 15
+                0  0  13 14 7  8
+                0  0  14 15 8  9
+            ]
+            P = PolesContinuedFractionBlock(loc, amp)
+            @test tridiagonal_matrix(P) == [
+                1  2  10 11 0  0
+                2  3  11 12 0  0
+                10 11 4  5  13 14
+                11 12 5  6  14 15
+                0  0  13 14 7  8
+                0  0  14 15 8  9
+            ]
+        end # tridiagonal_matrix
+
         @testset "weight" begin
             loc = [[1 2; 2 3], [4 5; 5 6]]
             amp = [[7 8; 8 9]]
@@ -117,32 +141,6 @@ using Test
             @test_throws MethodError weights(P)
         end # weights
     end # custom functions
-
-    @testset "Core" begin
-        @testset "Array" begin
-            loc = [[1 2; 2 3], [4 5; 5 6], [7 8; 8 9]]
-            amp = [[10 11; 11 12], [13 14; 14 15]]
-            scl = [16 17; 17 18]
-            P = PolesContinuedFractionBlock(loc, amp, scl)
-            @test Array(P) == [
-                1 2 10 11 0 0
-                2 3 11 12 0 0
-                10 11 4 5 13 14
-                11 12 5 6 14 15
-                0 0 13 14 7 8
-                0 0 14 15 8 9
-            ]
-            P = PolesContinuedFractionBlock(loc, amp)
-            @test Array(P) == [
-                1 2 10 11 0 0
-                2 3 11 12 0 0
-                10 11 4 5 13 14
-                11 12 5 6 14 15
-                0 0 13 14 7 8
-                0 0 14 15 8 9
-            ]
-        end # Array
-    end # Core
 
     @testset "Base" begin
         @testset "eltype" begin

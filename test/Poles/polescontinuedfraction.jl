@@ -85,6 +85,16 @@ using Test
             @test scale(P) === scl
         end # scale
 
+        @testset "tridiagonal_matrix" begin
+            loc = 1:3
+            amp = 4:5
+            scl = 2
+            P = PolesContinuedFraction(loc, amp, scl)
+            @test tridiagonal_matrix(P) == [1 4 0; 4 2 5; 0 5 3]
+            P = PolesContinuedFraction(loc, amp)
+            @test tridiagonal_matrix(P) == [1 4 0; 4 2 5; 0 5 3]
+        end # tridiagonal_matrix
+
         @testset "weight" begin
             P = PolesContinuedFraction([-1.0, 0.0, 0.5], [0.25, 1.5])
             @test_throws BoundsError weight(P, 0)
@@ -98,18 +108,6 @@ using Test
             @test weights(P) == [0.0625, 2.25]
         end # weights
     end # custom functions
-
-    @testset "Core" begin
-        @testset "Array" begin
-            loc = 1:3
-            amp = 4:5
-            scl = 2
-            P = PolesContinuedFraction(loc, amp, scl)
-            @test Array(P) == [1 4 0; 4 2 5; 0 5 3]
-            P = PolesContinuedFraction(loc, amp)
-            @test Array(P) == [1 4 0; 4 2 5; 0 5 3]
-        end # Array
-    end # Core
 
     @testset "Base" begin
         @testset "eltype" begin

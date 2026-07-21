@@ -129,8 +129,7 @@ end
 # block form
 
 function PolesSumBlock(P::PolesContinuedFractionBlock)
-    T = eltype(P) <: Real ? Float64 : ComplexF64 # use double precision
-    F = eigen!(hermitianpart!(Matrix{T}(Array(P))))
+    F = eigen!(Hermitian(tridiagonal_matrix(P)))
     amp = scale(P) * view(F.vectors, 1:size(P, 1), :)
     result = PolesSumBlock(F.values, amp)
     remove_zero_weight!(result)

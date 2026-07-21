@@ -56,14 +56,11 @@ function evaluate_lorentzian(P::PolesContinuedFraction, ω::Real, δ::Real)
     return result
 end
 
+tridiagonal_matrix(P::PolesContinuedFraction) = Matrix(SymTridiagonal(P))
+
 weight(P::PolesContinuedFraction, i::Integer) = abs2(amplitudes(P)[i])
 
 weights(P::PolesContinuedFraction) = abs2.(amplitudes(P))
-
-function Core.Array(P::PolesContinuedFraction)
-    # lose information about scale
-    return Array(SymTridiagonal(P))
-end
 
 Base.eltype(::Type{<:PolesContinuedFraction{A, B}}) where {A, B} = promote_type(A, B)
 

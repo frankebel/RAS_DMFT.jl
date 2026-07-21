@@ -86,11 +86,11 @@ function evaluate_lorentzian(P::PolesContinuedFractionBlock, ω::Real, δ::Real)
     return result
 end
 
-function Core.Array(P::PolesContinuedFractionBlock)
+function tridiagonal_matrix(P::PolesContinuedFractionBlock)
     n1 = length(P)
     n2 = size(P, 1)
     n = n1 * n2
-    result = zeros(eltype(P), n, n)
+    result = zeros(eltype(P), n, n)::Matrix{eltype(P)}
     for i in 1:(n1 - 1)
         i1 = 1 + (i - 1) * n2
         i2 = i * n2
