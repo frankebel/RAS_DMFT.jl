@@ -17,9 +17,3 @@ Modules = [RAS_DMFT.Combinatorics]
 ```@autodocs
 Modules = [RAS_DMFT.Debug]
 ```
-
-## RAS_DMFT.ED
-
-```@autodocs
-Modules = [RAS_DMFT.ED]
-```

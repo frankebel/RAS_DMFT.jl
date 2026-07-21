@@ -126,6 +126,5 @@ include("update_hybridization_function.jl")
 include("discretization.jl")
 include("Combinatorics.jl")
 include("Debug.jl")
-include("ED.jl")
 
 end

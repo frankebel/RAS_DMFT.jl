@@ -30,5 +30,4 @@ include("aqua.jl")
     include("discretization.jl")
     include("Combinatorics.jl")
     include("Debug.jl")
-    include("ED.jl")
 end

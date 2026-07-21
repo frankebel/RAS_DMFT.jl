@@ -60,6 +60,5 @@ There are also submodules
 
 - `RAS_DMFT.Combinatorics`
 - `RAS_DMFT.Debug`
-- `RAS_DMFT.ED`
 
 which are not necessary to be called in 99 % of all cases.
