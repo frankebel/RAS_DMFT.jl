@@ -54,45 +54,45 @@ using Test
     end # _orthonormalize_SVD
 
     @testset "_orthonormalize_GramSchmidt!" begin
-        V = [0 3 1; 0 0 1; 100 * eps() 8 0]
-        @test RAS_DMFT._orthonormalize_GramSchmidt!(V) === V
-        @test view(V, :, 1) == zeros(3)
-        @test view(V, :, 2) == 1 / sqrt(73) * [3, 0, 8]
+        V1 = [0 3 1; 0 0 1; 100 * eps() 8 0]
+        @test RAS_DMFT._orthonormalize_GramSchmidt!(V1) === V1
+        @test view(V1, :, 1) == zeros(3)
+        @test view(V1, :, 2) == 1 / sqrt(73) * [3, 0, 8]
         v3 = [64, 73, -24] / 73
         normalize!(v3)
-        @test norm(view(V, :, 3) - v3) < eps()
+        @test norm(view(V1, :, 3) - v3) < eps()
         # applying again has small changes
-        foo = copy(V)
-        @test RAS_DMFT._orthonormalize_GramSchmidt!(V) != foo
-        @test V' * V == Diagonal([0, 1, 1])
+        foo = copy(V1)
+        @test RAS_DMFT._orthonormalize_GramSchmidt!(V1) != foo
+        @test V1' * V1 == Diagonal([0, 1, 1])
         # applying again should keep it equal
-        foo = copy(V)
-        @test RAS_DMFT._orthonormalize_GramSchmidt!(V) == foo
+        foo = copy(V1)
+        @test RAS_DMFT._orthonormalize_GramSchmidt!(V1) == foo
 
         # no allocations
-        V = [0 3 1; 0 0 1; 100 * eps() 8 0]
-        @test iszero(@allocated(RAS_DMFT._orthonormalize_GramSchmidt!(V)))
+        V2 = [0 3 1; 0 0 1; 100 * eps() 8 0]
+        @test iszero(@allocated(RAS_DMFT._orthonormalize_GramSchmidt!(V2)))
     end # _orthonormalize_GramSchmidt!
 
     @testset "_orthogonalize_states!" begin
-        Q_new = rand(ComplexF64, 8, 4)
-        Q_old = rand(ComplexF64, 8, 4)
-        Q_old, _ = RAS_DMFT._orthonormalize_SVD(Q_old)
-        RAS_DMFT._orthonormalize_GramSchmidt!(Q_old)
-        RAS_DMFT._orthonormalize_GramSchmidt!(Q_old) # twice because unstable
+        Q_new1 = rand(ComplexF64, 8, 4)
+        Q_old1 = rand(ComplexF64, 8, 4)
+        Q_old1, _ = RAS_DMFT._orthonormalize_SVD(Q_old1)
+        RAS_DMFT._orthonormalize_GramSchmidt!(Q_old1)
+        RAS_DMFT._orthonormalize_GramSchmidt!(Q_old1) # twice because unstable
         M1 = Matrix{ComplexF64}(undef, 4, 4)
-        @test RAS_DMFT._orthogonalize_states!(M1, Q_new, Q_old) === Q_new
+        @test RAS_DMFT._orthogonalize_states!(M1, Q_new1, Q_old1) === Q_new1
         # overlap to previous state
-        foo = norm(Q_old' * Q_new)
+        foo = norm(Q_old1' * Q_new1)
         @test foo < 10 * eps()
         # orthogonalize again
-        RAS_DMFT._orthogonalize_states!(M1, Q_new, Q_old)
-        bar = norm(Q_old' * Q_new)
+        RAS_DMFT._orthogonalize_states!(M1, Q_new1, Q_old1)
+        bar = norm(Q_old1' * Q_new1)
         @test bar <= foo
         @test bar < eps()
 
         # no allocations
-        Q_new = rand(ComplexF64, 8, 4)
-        @test iszero(@allocated(RAS_DMFT._orthogonalize_states!(M1, Q_new, Q_old)))
+        Q_new2 = rand(ComplexF64, 8, 4)
+        @test iszero(@allocated(RAS_DMFT._orthogonalize_states!(M1, Q_new2, Q_old1)))
     end # _orthogonalize_states!
 end # orthogonalization

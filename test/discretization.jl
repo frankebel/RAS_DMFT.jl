@@ -32,7 +32,7 @@ using Test
     O = [q_dag, d_dag]
 
     # initialize system
-    H, E0, ψ0 = init_system(Δ0, H_int, ϵ_imp, n_v_bit, n_c_bit, e, var)
+    H, _, ψ0 = init_system(Δ0, H_int, ϵ_imp, n_v_bit, n_c_bit, e, var)
 
     @testset "Lanczos" begin
         # impurity Green's functions

@@ -27,7 +27,6 @@ using Test
         L_v = 1
         L_c = 1
         p = 2
-        n_kryl = 15
         var = eps()
 
         E0_target = -21.527949990417255 # target ground state energy
@@ -61,7 +60,6 @@ using Test
         Hk = [h]
         Z = (-10:0.01:10) .+ 0.05im
         Σ = [zero(h) for _ in eachindex(Z)]
-        G = greens_function_local(Z, 0, Hk)
         # test half-filling
         μ, filling = find_chemical_potential(Z, Hk, Σ, n_tot / 2)
         @test μ ≈ 0 atol = 2.0e-3
