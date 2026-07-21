@@ -29,6 +29,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - explicitly specify matrix representation for given pole representation ([#196](https://github.com/frankebel/RAS_DMFT.jl/pull/196)) (80d9ae7)
   New methods are `anderson_matrix`, `arrowhead_matrix`, or `tridiagonal_matrix`.
 
+### Removed
+
+- module `ED` ([#198](https://github.com/frankebel/RAS_DMFT.jl/pull/198)) (86ed14b)
+
 ### Fixed
 
 - lognormal broadening on a grid of type `AbstractVector` ([#163](https://github.com/frankebel/RAS_DMFT.jl/pull/163)) ([2cb92dd](https://github.com/frankebel/RAS_DMFT.jl/commit/2cb92dd3b16ae4f3fbd7e28cdb0f578d422ca229))
