@@ -26,6 +26,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Degenerate poles are automatically merged.
   ([#175](https://github.com/frankebel/RAS_DMFT.jl/pull/175)) ([4f876e1](https://github.com/frankebel/RAS_DMFT.jl/commit/4f876e11abd33458386e02fc410f7960bf4beb34))
 - `PolesSumBlock` operates on Hermitian matrices ([#180](https://github.com/frankebel/RAS_DMFT.jl/pull/180)) ([cbb7bfb](https://github.com/frankebel/RAS_DMFT.jl/commit/cbb7bfb89fa94d5bcaef3805b2a155e99b90c234))
+- explicitly specify matrix representation for given pole representation ([#196](https://github.com/frankebel/RAS_DMFT.jl/pull/196)) (80d9ae7)
+  New methods are `anderson_matrix`, `arrowhead_matrix`, or `tridiagonal_matrix`.
 
 ### Fixed
 
