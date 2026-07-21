@@ -10,17 +10,18 @@ using LinearAlgebra
 using SpecialFunctions
 using Statistics
 
+# Types
 export
-    # Types
     AbstractPoles,
     AbstractPolesContinuedFraction,
     AbstractPolesSum,
     PolesContinuedFraction,
     PolesContinuedFractionBlock,
     PolesSum,
-    PolesSumBlock,
+    PolesSumBlock
 
-    # Functions
+# Functions
+export
     CIWavefunction_singlet,
     Wavefunction_singlet,
     add_pole_at_zero!,
@@ -40,8 +41,8 @@ export
     evaluate_lorentzian,
     filling,
     find_chemical_potential,
-    flip_spectrum!,
     flip_spectrum,
+    flip_spectrum!,
     get_CI_parameters,
     greens_function_bethe_analytic,
     greens_function_bethe_equal_weight,
@@ -76,8 +77,8 @@ export
     quasiparticle_weight_gaussian,
     read_hdf5,
     realKK,
-    remove_zero_weight!,
     remove_zero_weight,
+    remove_zero_weight!,
     scale,
     self_energy_IFG,
     self_energy_IFG_gaussian,
