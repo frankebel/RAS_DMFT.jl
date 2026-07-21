@@ -1,20 +1,14 @@
 # sytrd: Reduce a real symmetric matrix to tridiagonal form.
 
-using LinearAlgebra.BLAS: @blasfunc, chkuplo
+using LinearAlgebra.BLAS: @blasfunc
 using LinearAlgebra.LAPACK: chklapackerror
 using LinearAlgebra:
-    libblastrampoline,
-    BlasFloat,
     BlasInt,
-    LAPACKException,
     DimensionMismatch,
-    SingularException,
-    PosDefException,
-    chkstride1,
     checksquare,
-    triu,
-    tril,
-    dot
+    chkstride1,
+    dot,
+    libblastrampoline
 
 for (sytrd, orgtr, elty) in ((:dsytrd_, :dorgtr_, :Float64), (:ssytrd_, :sorgtr_, :Float32))
     @eval begin

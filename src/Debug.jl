@@ -78,7 +78,7 @@ function colorprint(
     printstyled(io, bs[(i + 1):(i += nfilled)]; color = :cyan)
     printstyled(io, bs[(i + 1):(i += nempty_bit)]; color = :green)
     printstyled(io, bs[(i + 1):(i += nfilled_bit)]; color = :magenta)
-    printstyled(io, bs[(i + 1):(i += 2)]; color = :red)
+    printstyled(io, bs[(i + 1):(i + 2)]; color = :red)
     return nothing
 end
 
