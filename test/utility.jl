@@ -1,8 +1,9 @@
-using RAS_DMFT
 using Fermions
 using Fermions.Lanczos
 using Fermions.Wavefunctions
 using LinearAlgebra
+using RAS_DMFT
+using Random
 using Test
 
 @testset "util" begin
@@ -54,6 +55,19 @@ using Test
     end # Kondo temperature
 
     @testset "find chemical potential" begin
+        Random.seed!(0)
+        n_b = 4
+        n_fill = n_b * 0.7
+        H_k = [Hermitian(randn(n_b, n_b)) for _ in 1:10]
+        Σ_stat = Diagonal(randn(n_b))
+        amps = [randn(4, 2) for _ in 1:20]
+        wgts = [Hermitian(amp * amp') for amp in amps]
+        Σ_dyn = PolesSumBlock(randn(20) .* 2, wgts)
+        μ, n = find_chemical_potential(H_k, Σ_stat, Σ_dyn, n_fill; μ_min = -1, μ_max = 8)
+        @test μ ≈ 5.823782742023468 atol = 1.0e-6
+        @test n ≈ n_fill atol = 1.0e-7
+
+        # finite broadening
         # Create a symmetric uniform density on `n_tot` poles.
         n_tot = 100 # number of poles ≙ filling for μ = ∞
         h = Diagonal(range(-1, 1, n_tot)) # uniform density in [-1, 1]
