@@ -232,6 +232,70 @@ function greens_function_local(
     return G_loc
 end
 
+"""
+    greens_function_local(
+        H_k::Vector{<:AbstractMatrix},
+        Σ_stat::AbstractMatrix,
+        Σ_dyn::PolesSumBlock,
+        μ::Real;
+        tol_location::Real = 0,
+        tol_weight::Real = 0,
+    )
+
+Calculate the interacting local Green's function for a given dispersion relation ``H_k``
+and self-energy ``Σ(z)``.
+
+```math
+G_\\mathrm{loc}(z) = \\frac{1}{N_k} ∑_k \\frac{1}{z + μ - H_k - Σ(z)} .
+```
+
+# Arguments
+- `tol_location::Real = 0`: treat locations less or equal than this value in `G_loc` as degenerate
+- `tol_weight::Real = 0`: treat weights less or equal than this value in `Σ_dyn` as zero
+"""
+function greens_function_local(
+        H_k::Vector{<:AbstractMatrix},
+        Σ_stat::AbstractMatrix,
+        Σ_dyn::PolesSumBlock,
+        μ::Real;
+        tol_location::Real = 0,
+        tol_weight::Real = 0,
+    )
+    # check input
+    n_b = LinearAlgebra.checksquare(first(H_k)) # number of bands
+    allequal(size, H_k)::Bool || throw(DimensionMismatch("different matrix sizes in H_k"))
+    (size(Σ_dyn) == (n_b, n_b))::Bool || throw(DimensionMismatch("matrix size of Σ_dyn does not match H_k"))
+
+    # represent dynamic part of self-energy as block arrowhead matrix
+    Σ_A = arrowhead_matrix(Σ_dyn, sqrt(tol_weight); thin = true)
+
+    # Calculate Green's function in pole representation.
+    T = float(promote_type(eltype(eltype(H_k)), eltype(Σ_stat), eltype(Σ_dyn)))
+    n_k = length(H_k)
+    dim = size(Σ_A, 1)
+    n_p = n_k * dim # total number of poles
+    loc = Vector{real(T)}(undef, n_p)
+    amp = Matrix{T}(undef, n_b, n_p)
+    loc, amp = let loc = loc, amp = amp, Σ_A = Σ_A, n_b = n_b, dim = dim
+        Threads.@threads for i in eachindex(H_k)
+            foo = copy(Σ_A)
+            foo[1:n_b, 1:n_b] = H_k[i]
+            foo[1:n_b, 1:n_b] += Σ_stat
+            foo[1:n_b, 1:n_b] -= μ * I
+            F = eigen!(Hermitian(foo))
+            idx_low = 1 + dim * (i - 1)
+            idx_high = idx_low + dim - 1
+            @inbounds loc[idx_low:idx_high] = F.values
+            @inbounds amp[:, idx_low:idx_high] = F.vectors[1:n_b, :]
+        end
+        loc, amp
+    end
+    G = PolesSumBlock(loc, amp, tol_location)
+    rmul!(G, inv(n_k))
+
+    return G
+end
+
 # TODO: remove finite broadening methods
 """
     greens_function_local(
@@ -344,8 +408,8 @@ function spectral_function_gauss(
         throw(DimensionMismatch("different matrix sizes in Hk"))
     σ > 0 || throw(ArgumentError("negative broadening σ"))
 
-    m = Matrix{ComplexF64}(undef, nb, nb) # matrix container to reduce allocations
-    Ac::Vector{Matrix{T}} = [zero(m) for _ in eachindex(W)]
+    m = Matrix{float(T)}(undef, nb, nb) # matrix container to reduce allocations
+    Ac::Vector{Matrix{float(T)}} = [zero(m) for _ in eachindex(W)]
     for k in eachindex(Hk)
         copyto!(m, Hk[k])
         E, V = LAPACK.syev!('V', 'U', m)

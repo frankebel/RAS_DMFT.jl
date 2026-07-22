@@ -126,7 +126,9 @@ using Test
     end # Bethe lattice
 
     @testset "user supplied dispersion" begin
-        H_k = [[1 + 0.0im 2; 2 1], [3 4; 4 3]]
+        H_k = [[1 + 0im 2; 2 1], [3 4; 4 3]]
+        Σ_stat = Diagonal([1, 0])
+        Σ_dyn = PolesSumBlock([-2, 3], [[0 im; -im 5], [0 0; 0 6]]) # self-energy only on [2, 2] index
         Z = (-10:-9) .+ 0.1im
         Σ = [Diagonal([0, 5 + im]), Diagonal([0, 6 + im])] # self-energy only on [2, 2] index
 
@@ -158,6 +160,42 @@ using Test
         end # non-interacting
 
         @testset "interacting" begin
+            # μ = 0
+            @inferred greens_function_local(H_k, Σ_stat, Σ_dyn, 0)
+            G = greens_function_local(H_k, Σ_stat, Σ_dyn, 0)
+            locs_ref = [
+                -3.672298697206984,
+                -3.4963335910609388,
+                -0.13601938094586696,
+                -0.11866710984063822,
+                2.4215987184100305,
+                3.2883126139747096,
+                5.386719359742839,
+                8.326688086926891,
+            ]
+            @test all(<(10 * eps()), locations(G) - locs_ref)
+            @test norm(moment(G, 0) - I) < 10 * eps()
+            m1 = [3 3; 3 2]
+            @test norm(moment(G, 1) - m1) < 100 * eps()
+
+            # μ = 4 must not be a simple shift of poles
+            G = greens_function_local(H_k, Σ_stat, Σ_dyn, 4)
+            locs_ref = [
+                -5.966810528426411,
+                -5.796191057467859,
+                -2.0437833375992263,
+                -1.5551427327462921,
+                -0.06386413066063401,
+                2.0401530820076825,
+                4.074457996686286,
+                5.311180708206492,
+            ]
+            @test all(<(10 * eps()), locations(G) - locs_ref)
+            @test norm(moment(G, 0) - I) < 10 * eps()
+            m1 = [-1 3; 3 -2]
+            @test norm(moment(G, 1) - m1) < 100 * eps()
+
+            # finite broadening
             G = greens_function_local(Z, 0, H_k, Σ)
             @test length(G) == 2
             @test norm(
