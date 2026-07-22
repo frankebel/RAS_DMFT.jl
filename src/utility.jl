@@ -77,6 +77,122 @@ function temperature_kondo(U::Real, ϵ::Real, Δ0::Real)
     return sqrt(U * Δ0 / 2) * exp(π * ϵ * (ϵ + U) / (2 * U * Δ0))
 end
 
+
+# TODO: write docstring
+"""
+    find_chemical_potential(
+        H_k::Vector{<:AbstractMatrix},
+        Σ_stat::AbstractMatrix,
+        Σ_dyn::PolesSumBlock,
+        n_fill::Real;
+        μ_tol::Real = 1.0e-6,
+        b_max::Int = 30,
+        μ_min::Real = minimum(locations(Σ_dyn)),
+        μ_max::Real = maximum(locations(Σ_dyn)),
+        tol_weight::Real = 0,
+    )
+
+Find chemical potential ``μ``, such that desired filling ``n_\\mathrm{fill}`` is fulfilled
+
+```math
+\\begin{align}
+n_\\mathrm{fill}
+& ≡
+∫_{-∞}^0 \\mathrm{d}ω~\\mathrm{Tr}
+\\left[
+-\\frac{1}{π}\\mathrm{Im}~G_\\mathrm{loc}(ω+\\mathrm{i}0^+)
+\\right] \\\\
+& =
+∫_{-∞}^0 \\mathrm{d}ω~\\mathrm{Tr}
+\\left[
+-\\frac{1}{π}\\mathrm{Im}~
+\\frac{1}{N_k} ∑_k \\frac{1}{ω + \\mathrm{i}0^+ +μ - H_k - Σ(ω + \\mathrm{i}0^+)}
+\\right] .
+\\end{align}
+```
+
+A bisection algorithm is used which stops once `Δμ < μ_tol`
+or `b_max` iterations are surpassed.
+
+Returns the calculated chemical potential and effective filling.
+
+# Arguments
+- `μ_tol::Real = 1.0e-6`: tolerance `Δμ` to exit bisection early
+- `b_max::Int = 30`: maximum number of bisections
+- `μ_min::Real = minimum(locations(Σ_dyn))`: initial lower bound for `μ`
+- `μ_max::Real = maximum(locations(Σ_dyn))`: initial upper bound for `μ`
+- `tol_weight::Real = 0`: treat weights less or equal than this value in `Σ_dyn` as zero
+"""
+function find_chemical_potential(
+        H_k::Vector{<:AbstractMatrix},
+        Σ_stat::AbstractMatrix,
+        Σ_dyn::PolesSumBlock,
+        n_fill::Real;
+        μ_tol::Real = 1.0e-6,
+        b_max::Int = 30,
+        μ_min::Real = minimum(locations(Σ_dyn)),
+        μ_max::Real = maximum(locations(Σ_dyn)),
+        tol_weight::Real = 0,
+    )
+    # check input
+    n_b = size(first(H_k), 1)
+    allequal(size, H_k)::Bool || throw(DimensionMismatch("different matrix sizes in H_k"))
+    size(Σ_stat) == (n_b, n_b) || throw(DimensionMismatch("size of Σ_stat does not match H_k"))
+    (size(Σ_dyn) == (n_b, n_b))::Bool || throw(DimensionMismatch("size of Σ_dyn does not match H_k"))
+    μ_min < μ_max || throw(ArgumentError("violating μ_min < μ_max"))
+
+    # represent dynamic part of self-energy as block arrowhead matrix
+    Σ_A = arrowhead_matrix(Σ_dyn, sqrt(tol_weight); thin = true)
+
+    # filling for initial guesses
+    n_min = _filling_mu(H_k, Σ_stat, Σ_A, μ_min)
+    n_max = _filling_mu(H_k, Σ_stat, Σ_A, μ_max)
+    n_min <= n_fill <= n_max ||
+        throw(ArgumentError("violating n(μ_min) = $(n_min) <= n_fill <= n(μ_max) = $(n_max)"))
+
+    # bisect chemical potential μ
+    μ_new = 0.0
+    n_new = 0.0
+    for _ in 1:b_max
+        μ_new = 0.5 * (μ_min + μ_max)
+        n_new = _filling_mu(H_k, Σ_stat, Σ_A, μ_new)
+        n_new > n_fill ? μ_max = μ_new : μ_min = μ_new
+        (μ_max - μ_min) < μ_tol && break
+    end
+
+    return μ_new, n_new
+end
+
+# Calculate filling for given chemical potential μ.
+function _filling_mu(H_k, Σ_stat, Σ_A::AbstractMatrix{T}, μ) where {T}
+    n_b = LinearAlgebra.checksquare(first(H_k)) # number of bands
+    z = zero(float(real(T)))
+    result = Threads.Atomic{typeof(z)}(z)
+
+    Threads.@threads for i in eachindex(H_k)
+        foo = copy(Σ_A)
+        foo[1:n_b, 1:n_b] = H_k[i]
+        foo[1:n_b, 1:n_b] -= μ * I
+        foo[1:n_b, 1:n_b] += Σ_stat
+        # NOTE: `foo` is a sparse (block arrowhead matrix).
+        # One can use Krylov methods to approximate spectrum
+        # if full decomposition is too slow.
+        F = eigen!(Hermitian(foo))
+        n_loc = z # local filling
+        @inbounds for j in axes(Σ_A, 2)
+            ϵ = F.values[j]
+            v = @view F.vectors[1:n_b, j]
+            if ϵ < 0
+                # Trace of v*v' is sum of vaules squared.
+                n_loc += sum(abs2, v)
+            end
+        end
+        Threads.atomic_add!(result, n_loc)
+    end
+
+    return result[] /= length(H_k)
+end
+
 """
     find_chemical_potential(
         W::AbstractVector{<:Number},
