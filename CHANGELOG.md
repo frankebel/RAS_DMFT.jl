@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - shift spectrum of `AbstractPolesSum` ([#186](https://github.com/frankebel/RAS_DMFT.jl/pull/186)) (d191feb)
 - calculate trace of `AbstractPolesSum` ([#187](https://github.com/frankebel/RAS_DMFT.jl/pull/187)) (5cf51be)
 - calculate thin rectangular amplitude ([#195](https://github.com/frankebel/RAS_DMFT.jl/pull/195)) (bfc7348)
+- local lattice Greens function in resolvent formalism ([#201](https://github.com/frankebel/RAS_DMFT.jl/pull/201)) (5b8c250)
 
 ### Changed
 
