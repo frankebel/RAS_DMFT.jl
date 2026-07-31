@@ -6,14 +6,13 @@ using Test
     @testset "constructor" begin
         loc = 0:1
         wgt = [[1 2; 2 1], [3 4; 4 3]]
-        wgt_h = map(Hermitian, wgt)
 
         # inner constructor
-        P = PolesSumBlock{Int, Int}(loc, wgt_h)
+        P = PolesSumBlock{Int, Int}(loc, wgt)
         @test P.locations == loc
-        @test P.weights == wgt_h
+        @test P.weights == wgt
         @test_throws DimensionMismatch PolesSumBlock(rand(3), wgt) # length mismatch
-        PolesSumBlock([1], [[1 2im; 2im 1]]) # Hermiticity is not enforced
+        @test_throws ArgumentError PolesSumBlock([1], [[1 2im; 2im 1]]) # not hermitian
         @test_throws DimensionMismatch PolesSumBlock(0:1, [[1 2im; -2im 1], [1;;]]) # wrong size
 
         # outer constructors
@@ -29,6 +28,12 @@ using Test
         P = PolesSumBlock(loc_amp, amp, 0.25)
         @test P.locations == [-3.0, -2.5]
         @test P.weights == [[10 14; 14 20], [25 30; 30 36]]
+        loc_amp = [0.0]
+        amp = [1; 2;;]
+        P = PolesSumBlock(loc_amp, amp)
+        @test P.locations == [0.0]
+        @test P.weights == [[1 2; 2 4]]
+
 
         # conversion of type
         P = PolesSumBlock(loc, wgt)
@@ -60,9 +65,9 @@ using Test
             amp = zeros(10, 2)
             amp[3, 1] = 2
             amp[5, 2] = 3
-            P = PolesSumBlock(rand(1), [Hermitian(w)])
+            P = PolesSumBlock(rand(1), [w])
             amp2 = amplitude(P, 1, thin = true)
-            @test norm(amp - amp2) == 0
+            @test amp == amp2
         end # amplitude
 
         @testset "amplitudes" begin
@@ -76,7 +81,7 @@ using Test
 
             # thin with random values
             amps = [rand(ComplexF64, 10, i) for i in 1:10]
-            wghts = [Hermitian(amp * amp') for amp in amps]
+            wghts = [amp * amp' for amp in amps]
             loc = sort!(rand(10))
             P = PolesSumBlock(loc, wghts)
             amps2 = amplitudes(P, sqrt(100 * eps()); thin = true)
@@ -332,7 +337,7 @@ using Test
         end # eltype
 
         @testset "isempty" begin
-            @test isempty(PolesSumBlock(Int[], Hermitian{Float64, Matrix{Float64}}[]))
+            @test isempty(PolesSumBlock(Int[], Matrix{Float64}[]))
             @test !isempty(PolesSumBlock(rand(10), rand(2, 10)))
         end # isempty
 
@@ -344,7 +349,7 @@ using Test
         end # iterate
 
         @testset "length" begin
-            @test length(PolesSumBlock(Int[], Hermitian{Float64, Matrix{Float64}}[])) === 0
+            @test length(PolesSumBlock(Int[], Matrix{Float64}[])) === 0
             @test length(PolesSumBlock(rand(10), rand(4, 10))) === 10
         end
 
@@ -373,7 +378,7 @@ using Test
         end # size
 
         @testset "show" begin
-            P = PolesSumBlock(Int[], Hermitian{Float64, Matrix{Float64}}[])
+            P = PolesSumBlock(Int[], Matrix{Float64}[])
             @test sprint(show, P) == "PolesSumBlock{Int64, Float64} with 0 poles"
             P = PolesSumBlock(rand(Int, 1), [hermitianpart!(rand(Float64, 2, 2))])
             @test sprint(show, P) == "PolesSumBlock{Int64, Float64} with 1 poles of size 2×2"

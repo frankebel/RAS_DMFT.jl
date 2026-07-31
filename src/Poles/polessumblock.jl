@@ -1,24 +1,26 @@
 """
-    PolesSumBlock{A<:Real,B<:Number} <: AbstractPolesSum
+    PolesSumBlock{A <: Real, B <: Number} <: AbstractPolesSum
 
 Representation of block of poles on the real axis with locations ``a_i`` of type `A`
-and weights ``W_i`` of type `Hermitian{B, Matrix{B}}` (``W_i^† = W_i``).
+and weights ``W_i`` of type `Matrix{B}`.
 
 ```math
 P(ω) = ∑_i \\frac{W_i}{ω-a_i}.
 ```
 
 For ``W_i`` to be physical,
-it needs to be positive semidefinite ``W_i ⪰ 0``.
+it needs to be Hermitian (``W_i^† = W_i``)
+and positive semidefinite ``W_i ⪰ 0``.
 
 For a scalar variant see [`PolesSum`](@ref).
 """
 struct PolesSumBlock{A <: Real, B <: Number} <: AbstractPolesSum
     locations::Vector{A}
-    weights::Vector{Hermitian{B, Matrix{B}}}
+    weights::Vector{Matrix{B}}
 
     function PolesSumBlock{A, B}(locations, weights) where {A, B}
         length(locations) == length(weights) || throw(DimensionMismatch("length mismatch"))
+        all(ishermitian, weights)::Bool || throw(ArgumentError("weights are not hermitian"))
         allequal(size, weights)::Bool ||
             throw(DimensionMismatch("weights do not have matching size"))
         result = new{A, B}(locations, weights)
@@ -33,9 +35,6 @@ end
 
 Create a new instance of [`PolesSumBlock`](@ref) by supplying locations `loc`
 and weights `wgt`.
-
-!!! info
-    The constructor does not check if every matrix inside `wgt` is Hermitian.
 
 ```jldoctest
 julia> loc = 0:2;
@@ -52,10 +51,7 @@ julia> weights(P) == wgt
 true
 ```
 """
-function PolesSumBlock(loc::AbstractVector, wgt::Vector{<:AbstractMatrix})
-    return PolesSumBlock(loc, map(Hermitian, wgt))
-end
-PolesSumBlock(loc::AbstractVector{A}, wgt::Vector{Hermitian{B, Matrix{B}}}) where {A, B} =
+PolesSumBlock(loc::AbstractVector{A}, wgt::Vector{<:AbstractMatrix{B}}) where {A, B} =
     PolesSumBlock{A, B}(loc, wgt)
 
 """
@@ -105,7 +101,7 @@ function PolesSumBlock(
     # no merging necessary
     if n == 1
         b = @view amp[:, 1]
-        return PolesSumBlock(loc, [Hermitian(b * b')])
+        return PolesSumBlock(loc, [b * b'])
     end
 
     # sort by location
@@ -114,7 +110,7 @@ function PolesSumBlock(
     amp = @view amp[:, p]
 
     loc_new = A[]
-    wgt_new = Hermitian{B, Matrix{B}}[]
+    wgt_new = Matrix{B}[]
 
     i = 1
 
@@ -130,7 +126,7 @@ function PolesSumBlock(
                 w .+= b * b'
             else
                 push!(loc_new, l)
-                push!(wgt_new, Hermitian(w))
+                push!(wgt_new, w)
                 l = loc[i]
                 b = @view amp[:, i]
                 w = b * b'
@@ -138,7 +134,7 @@ function PolesSumBlock(
             i += 1
         end
         push!(loc_new, l)
-        push!(wgt_new, Hermitian(w))
+        push!(wgt_new, w)
     end
 
     # poles in [-tol, tol]
@@ -151,7 +147,7 @@ function PolesSumBlock(
             i += 1
         end
         push!(loc_new, zero(A))
-        push!(wgt_new, Hermitian(w))
+        push!(wgt_new, w)
     end
 
     # poles in (tol, ∞)
@@ -167,7 +163,7 @@ function PolesSumBlock(
                 w .+= b * b'
             else
                 push!(loc_new, l)
-                push!(wgt_new, Hermitian(w))
+                push!(wgt_new, w)
                 l = loc[i]
                 b = @view amp[:, i]
                 w = b * b'
@@ -175,7 +171,7 @@ function PolesSumBlock(
             i += 1
         end
         push!(loc_new, l)
-        push!(wgt_new, Hermitian(w))
+        push!(wgt_new, w)
     end
 
     return PolesSumBlock(loc_new, wgt_new)
@@ -187,7 +183,7 @@ function amplitude(P::PolesSumBlock, i::Integer, tol_amp::Real = 0; thin::Bool =
     tol_amp >= 0 || throw(DomainError(tol_amp, "negative amplitude"))
 
     w = weight(P, i)
-    F = eigen(w)
+    F = eigen(Hermitian(w))
     map!(i -> i > tol_amp^2 ? sqrt(i) : zero(i), F.values) # set small amplitudes to zero
     if !thin
         # General Julia code does not know about semipositive eigenvalues
@@ -278,8 +274,6 @@ function merge_degenerate_poles!(P::PolesSumBlock, tol::Real = 0)
     # get information from P
     loc = locations(P)
     wgt = weights(P)
-    # When adding matrices, Hermitian can't add in-place.
-    # Thus, access H.data directly with parent(H).
 
     # pole(s) at [-tol, tol]
     idx_zeros = findall(i -> abs(i) <= tol, loc)
@@ -287,7 +281,7 @@ function merge_degenerate_poles!(P::PolesSumBlock, tol::Real = 0)
         i0 = popfirst!(idx_zeros)
         loc[i0] = 0
         for i in reverse!(idx_zeros)
-            parent(wgt[i0]) .+= popat!(wgt, i)
+            wgt[i0] .+= popat!(wgt, i)
             deleteat!(loc, i)
         end
     end
@@ -298,7 +292,7 @@ function merge_degenerate_poles!(P::PolesSumBlock, tol::Real = 0)
     while i < lastindex(loc)
         if loc[i + 1] - loc[i] <= tol
             # merge
-            parent(wgt[i]) .+= popat!(wgt, i + 1)
+            wgt[i] .+= popat!(wgt, i + 1)
             deleteat!(loc, i + 1) # keep location closer to zero
         else
             # increment index
@@ -312,7 +306,7 @@ function merge_degenerate_poles!(P::PolesSumBlock, tol::Real = 0)
     while i > firstindex(loc)
         if loc[i] - loc[i - 1] <= tol
             # merge
-            parent(wgt[i - 1]) .+= popat!(wgt, i)
+            wgt[i - 1] .+= popat!(wgt, i)
             deleteat!(loc, i - 1) # keep location closer to zero
             i -= 1
         else
@@ -339,13 +333,13 @@ function merge_small_weight!(P::PolesSumBlock, tol::Real)
         if i == 1
             # add weight to next pole
             wgt_next = weight(P, i + 1)
-            parent(wgt_next) .+= wgt
+            wgt_next .+= wgt
             deleteat!(locations(P), 1)
             deleteat!(weights(P), 1)
         elseif i == length(P)
             # add weight to previous pole
             wgt_prev = weight(P, i - 1)
-            parent(wgt_prev) .+= wgt
+            wgt_prev .+= wgt
             pop!(locations(P))
             pop!(weights(P))
         else
@@ -355,8 +349,8 @@ function merge_small_weight!(P::PolesSumBlock, tol::Real)
             wgt_prev = weight(P, i - 1)
             wgt_next = weight(P, i + 1)
             α = (loc_next - loc) / (loc_next - loc_prev)
-            parent(wgt_prev) .+= α * wgt
-            parent(wgt_next) .+= (1 - α) * wgt
+            wgt_prev .+= α * wgt
+            wgt_next .+= (1 - α) * wgt
             deleteat!(locations(P), i)
             deleteat!(weights(P), i)
         end
@@ -372,7 +366,7 @@ function Base.:+(A::PolesSumBlock{<:Any, TA}, B::PolesSumBlock{<:Any, TB}) where
     loc = [locations(A); locations(B)]
     # copy weights of `A`, `B` to `wgt`
     T = promote_type(TA, TB)
-    wgt = Vector{Hermitian{T, Matrix{T}}}(undef, length(A) + length(B))
+    wgt = Vector{Matrix{T}}(undef, length(A) + length(B))
     for i in eachindex(wgt)
         if i <= length(A)
             wgt[i] = copy(weight(A, i))
@@ -385,7 +379,7 @@ end
 
 function Base.convert(::Type{PolesSumBlock{M, N}}, P::PolesSumBlock{A, B}) where {M, N, A, B}
     loc = convert(Vector{M}, locations(P))
-    wgt = convert.(Hermitian{N, Matrix{N}}, weights(P))
+    wgt = convert.(Matrix{N}, weights(P))
     return PolesSumBlock(loc, wgt)
 end
 Base.convert(::Type{PolesSumBlock{A, B}}, P::PolesSumBlock{A, B}) where {A, B} = P
@@ -408,7 +402,7 @@ Base.size(P::PolesSumBlock) = size(first(weights(P)))
 Base.size(P::PolesSumBlock, i) = size(first(weights(P)), i)
 
 function Base.transpose(P::PolesSumBlock)
-    return PolesSumBlock(copy(locations(P)), map(conj, weights(P)))
+    return PolesSumBlock(copy(locations(P)), map(transpose, weights(P)))
 end
 
 function LinearAlgebra.tr(P::PolesSumBlock{<:Any, B}) where {B}

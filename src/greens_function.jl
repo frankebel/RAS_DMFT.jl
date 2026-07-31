@@ -216,13 +216,13 @@ function greens_function_local(
 
     T = eltype(eltype(H_k)) <: Real ? Float64 : ComplexF64
     loc = real(T)[]
-    wgt = Hermitian{T, Matrix{T}}[]
+    wgt = Matrix{T}[]
     for H in H_k
         E, U = eigen(Hermitian(H))
         append!(loc, E)
         for i in axes(U, 2)
             u = view(U, :, i)
-            push!(wgt, Hermitian(u * u'))
+            push!(wgt, u * u')
         end
     end
 
