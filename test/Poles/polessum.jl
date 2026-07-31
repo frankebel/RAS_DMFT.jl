@@ -226,47 +226,52 @@ using Test
             # equidistant grid
             loc = [-0.5, 0.5, 1.5]
             wgt = [1.5, -0.5, 5.0]
-            P = merge_negative_weight!(PolesSum{Float64, Float64}(loc, wgt))
-            @test locations(P) === loc
-            @test weights(P) === wgt
-            @test loc == [-0.5, 0.5, 1.5]
-            @test wgt == [1.25, 0.0, 4.75]
+            P = PolesSum(loc, wgt)
+            @test merge_negative_weight!(P) === P
+            @test locations(P) == [-0.5, 1.5]
+            @test weights(P) == [1.25, 4.75]
+
             # not equidistant grid
             loc = [-0.5, 0.0, 1.5]
             wgt = [1.5, -0.5, 5.0]
-            merge_negative_weight!(PolesSum{Float64, Float64}(loc, wgt))
-            @test loc == [-0.5, 0.0, 1.5]
-            @test wgt == [1.125, 0.0, 4.875]
+            P = merge_negative_weight!(PolesSum(loc, wgt))
+            @test locations(P) == [-0.5, 1.5]
+            @test weights(P) == [1.125, 4.875]
+
             # first pole negative
             loc = [0.0, 1.0, 5.0]
             wgt = [-1.0, 0.5, 2.25]
-            merge_negative_weight!(PolesSum{Float64, Float64}(loc, wgt))
-            @test loc == [0.0, 1.0, 5.0]
-            @test wgt == [0.0, 0.0, 1.75]
+            P = merge_negative_weight!(PolesSum(loc, wgt))
+            @test locations(P) == [5.0]
+            @test weights(P) == [1.75]
+
             # last pole negative
             loc = [0.0, 1.0, 5.0]
             wgt = [2.25, 0.5, -1.0]
-            merge_negative_weight!(PolesSum{Float64, Float64}(loc, wgt))
-            @test loc == [0.0, 1.0, 5.0]
-            @test wgt == [1.75, 0.0, 0.0]
-            # weight exactly cancel
+            P = merge_negative_weight!(PolesSum(loc, wgt))
+            @test locations(P) == [0.0]
+            @test weights(P) == [1.75]
+
+            # total weight zero
             loc = [0.0, 1.0, 5.0]
             wgt = [-1.0, 0.5, 0.5]
-            merge_negative_weight!(PolesSum{Float64, Float64}(loc, wgt))
-            @test loc == [0.0, 1.0, 5.0]
-            @test wgt == [0.0, 0.0, 0.0]
+            P = merge_negative_weight!(PolesSum(loc, wgt))
+            @test locations(P) == Float64[]
+            @test weights(P) == Float64[]
+
             # symmetric case
             loc = [-2.0, -0.5, 0.0, 0.5, 2.0]
-            wgt = [5.0, -2.0, 1.0, -2.0, 5.0]
-            merge_negative_weight!(PolesSum{Float64, Float64}(loc, wgt))
-            @test loc == [-2.0, -0.5, 0.0, 0.5, 2.0]
-            @test norm(wgt - [3.5, 0.0, 0.0, 0.0, 3.5]) < 10 * eps()
+            wgt = [4.0, -2.0, 1.0, -2.0, 4.0]
+            P = merge_negative_weight!(PolesSum(loc, wgt))
+            @test locations(P) == [-2.0, 2.0]
+            @test weights(P) == [2.5, 2.5]
+
             # previous pole would get negative weight
             loc = [-1.0, -0.5, 0.0, 1.5]
             wgt = [2.0, 1.5, -2.5, 5.0]
-            merge_negative_weight!(PolesSum{Float64, Float64}(loc, wgt))
-            @test loc == [-1.0, -0.5, 0.0, 1.5]
-            @test wgt == [1.7, 0.0, 0.0, 4.3]
+            P = merge_negative_weight!(PolesSum(loc, wgt))
+            @test locations(P) == [-1.0, 1.5]
+            @test weights(P) == [1.7, 4.3]
         end # merge_negative_weight!
 
         @testset "merge_small_weight!" begin

@@ -194,67 +194,91 @@ end
 """
     merge_negative_weight!(P::PolesSum)
 
-Move negative weights of `P` such that the zeroth moment is conserved
-and the first moment changes minimally.
+Remove negative weights of `P` such that
+the zeroth (total weight) and first moment are conserved.
+
+For each pole with negative weight at index `i`,
+the weight is merged to neighbors using the law of levers.
+
+!!! warning
+    For negative outermost poles, the first moment is **not conserved**.
+
+Poles with zero weight after merging are automatically removed.
 """
 function merge_negative_weight!(P::PolesSum)
     # check input
-    moment(P, 0) >= 0 || throw(ArgumentError("total weight is negative"))
+    m0 = moment(P, 0)
+    m0 >= 0 || throw(
+        ArgumentError("total weight is negative: $(m0)."),
+    )
 
-    loc = locations(P)
-    wgt = weights(P)
-    for i in eachindex(P)
-        (weight(P, i) >= 0) && continue # no negative weight, go to next
+    locs = locations(P)
+    wgts = weights(P)
+    i = 1
+    while i <= length(P)
+        wgts[i] > 0 && (i += 1; continue)
+
+        if iszero(wgts[i])
+            deleteat!(locs, i)
+            deleteat!(wgts, i)
+            continue
+        end
+
+        # single pole with negative weight
+        i == 1 && length(P) == 1 && throw(
+            ArgumentError("Single pole has negative weight $(wgts[1])."),
+        )
+
+        # first pole
+        if i == 1
+            wgts[2] += wgts[1]
+            deleteat!(locs, 1)
+            deleteat!(wgts, 1)
+            continue
+        end
+
+        # last pole
         if i == length(P)
-            # find previous positive weight
-            for j in Iterators.reverse(1:(i - 1))
-                iszero(wgt[j]) && continue
-                if wgt[j] + wgt[end] >= 0
-                    # wgt[j] can fully compensate wgt[end]
-                    wgt[j] += wgt[end]
-                    wgt[end] = 0
-                    break
-                else
-                    # wgt[j] can't fully compensate wgt[end]
-                    wgt[end] += wgt[j]
-                    wgt[j] = 0
-                end
-            end
-        else
-            for j in Iterators.reverse(1:(i - 1))
-                # find a previous pole with positive weight
-                iszero(wgt[j]) && continue
-                # calculate fractions how weight should be split
-                f_left = (loc[i + 1] - loc[i]) / (loc[i + 1] - loc[j])
-                f_right = 1 - f_left
-                if wgt[j] + f_left * wgt[i] >= 0
-                    # wgt[j] can fully compensate wgt[i]
-                    wgt[j] += f_left * wgt[i]
-                    wgt[i + 1] += f_right * wgt[i]
-                    wgt[i] = 0
-                else
-                    # wgt[j] can't fully compensate wgt[i].
-                    # Find fraction f ∈ (0, 1) which can be merged such that wgt[j] gets 0 weight.
-                    # b_j + f f_l b_i === 0
-                    wgt[i] += wgt[j] / f_left
-                    wgt[i + 1] -= f_right / f_left * wgt[j]
-                    wgt[j] = 0
-                end
-                if j == 1
-                    # no pole with positive weight remaining
-                    wgt[i + 1] += wgt[i]
-                    wgt[i] = 0
-                end
-            end
-            if wgt[i] <= 0
-                # negative weight remaining and no previous weight to compensate
-                # move negative weight to next pole
-                wgt[i + 1] += wgt[i]
-                wgt[i] = 0
+            wgts[end - 1] += wgts[end]
+            deleteat!(locs, i)
+            deleteat!(wgts, i)
+            i -= 1
+            continue
+        end
+
+        # search leftward for compensation
+        j = i - 1
+        while true
+            # lever rule split between j and i+1
+            f_left = (locs[i + 1] - locs[i]) / (locs[i + 1] - locs[j])
+            f_right = 1 - f_left
+            need_left = -f_left * wgts[i]  # amount needed from left
+
+            if wgts[j] >= need_left
+                # w_j can fully compensate w_i.
+                wgts[j] -= need_left
+                wgts[i + 1] += f_right * wgts[i]
+                deleteat!(locs, i)
+                deleteat!(wgts, i)
+                i = j
+                break
+            else
+                # w_j can't fully compensate w_i.
+                # Find fraction f ∈ (0, 1) which can be merged such that w_j becomes 0.
+                # w_j + f f_l w_i == 0
+                wgts[i] += wgts[j] / f_left
+                wgts[i + 1] -= f_right / f_left * wgts[j]
+                deleteat!(locs, j)
+                deleteat!(wgts, j)
+                j -= 1
+                i -= 1
+
+                # no more left neighbors
+                j < 1 && break
             end
         end
     end
-    moment(P, 0) >= 0 || throw(ArgumentError("total weight got negative"))
+
     return P
 end
 
