@@ -341,9 +341,11 @@ using Test
         @testset "convert" begin
             P = PolesSumBlock([1, 3], [[1 0; 0 1], [2 1; 1 0]])
             P_new = convert(PolesSumBlock{Float64, ComplexF64}, P)
-            @test typeof(P_new) === PolesSumBlock{Float64, ComplexF64}
+            @test P_new isa PolesSumBlock{Float64, ComplexF64}
             @test locations(P_new) == locations(P)
             @test weights(P_new) == weights(P)
+            P_new = convert(PolesSumBlock{Int, Int}, P)
+            @test P_new === P
         end # convert
 
         @testset "copy" begin

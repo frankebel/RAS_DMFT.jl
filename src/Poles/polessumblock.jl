@@ -441,12 +441,12 @@ end
 function Base.convert(::Type{PolesSumBlock{M, N}}, P::PolesSumBlock{A, B}) where {M, N, A, B}
     loc = convert(Vector{M}, locations(P))
     wgt = convert.(Matrix{N}, weights(P))
-    return PolesSumBlock(loc, wgt)
+    return PolesSumBlock{M, N}(loc, wgt)
 end
 Base.convert(::Type{PolesSumBlock{A, B}}, P::PolesSumBlock{A, B}) where {A, B} = P
 
-function Base.copy(P::PolesSumBlock)
-    return PolesSumBlock(copy(locations(P)), map(copy, weights(P)))
+function Base.copy(P::PolesSumBlock{A, B}) where {A, B}
+    return PolesSumBlock{A, B}(copy(locations(P)), map(copy, weights(P)))
 end
 
 Base.eltype(::Type{<:PolesSumBlock{A, B}}) where {A, B} = promote_type(A, B)
@@ -462,8 +462,9 @@ end
 Base.size(P::PolesSumBlock) = size(first(weights(P)))
 Base.size(P::PolesSumBlock, i) = size(first(weights(P)), i)
 
-function Base.transpose(P::PolesSumBlock)
-    return PolesSumBlock(copy(locations(P)), map(transpose, weights(P)))
+function Base.transpose(P::PolesSumBlock{A, B}) where {A, B}
+    wgt = [Matrix(transpose(w)) for w in weights(P)]
+    return PolesSumBlock{A, B}(copy(locations(P)), wgt)
 end
 
 function LinearAlgebra.tr(P::PolesSumBlock{<:Any, B}) where {B}
