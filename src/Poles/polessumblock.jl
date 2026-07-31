@@ -5,12 +5,13 @@ Representation of block of poles on the real axis with locations ``a_i`` of type
 and weights ``W_i`` of type `Matrix{B}`.
 
 ```math
-P(ω) = ∑_i \\frac{W_i}{ω-a_i}.
+P(z) = ∑_i \\frac{W_i}{z-a_i}.
 ```
 
 For ``W_i`` to be physical,
 it needs to be Hermitian (``W_i^† = W_i``)
 and positive semidefinite ``W_i ⪰ 0``.
+The latter is not enforced at construction to reduce computational cost.
 
 For a scalar variant see [`PolesSum`](@ref).
 """
@@ -23,15 +24,13 @@ struct PolesSumBlock{A <: Real, B <: Number} <: AbstractPolesSum
         all(ishermitian, weights)::Bool || throw(ArgumentError("weights are not hermitian"))
         allequal(size, weights)::Bool ||
             throw(DimensionMismatch("weights do not have matching size"))
-        result = new{A, B}(locations, weights)
-        sort!(result)
-        merge_degenerate_poles!(result)
-        return result
+        _issorted_and_unique(locations)
+        return new{A, B}(locations, weights)
     end
 end
 
 """
-    PolesSumBlock(loc::AbstractVector, wgt::Vector{<:AbstractMatrix}) where {A,B}
+    PolesSumBlock(loc::AbstractVector{A}, wgt::Vector{<:AbstractMatrix{B}}) where {A, B}
 
 Create a new instance of [`PolesSumBlock`](@ref) by supplying locations `loc`
 and weights `wgt`.
@@ -51,8 +50,40 @@ julia> weights(P) == wgt
 true
 ```
 """
-PolesSumBlock(loc::AbstractVector{A}, wgt::Vector{<:AbstractMatrix{B}}) where {A, B} =
-    PolesSumBlock{A, B}(loc, wgt)
+function PolesSumBlock(loc::AbstractVector{A}, wgt::Vector{<:AbstractMatrix{B}}) where {A, B}
+    # Check length for permutation below.
+    length(loc) == length(wgt) || throw(DimensionMismatch("length mismatch"))
+
+    # Do no mutate user input.
+    loc = collect(A, loc)
+    wgt = [copy(w) for w in wgt]
+    for w in wgt
+        isapprox(w, w') || throw(ArgumentError("weight is not hermitian"))
+        ishermitian(w) || hermitianpart!(w)
+    end
+
+    # sort
+    p = sortperm(loc)
+    loc = loc[p]
+    wgt = wgt[p]
+
+    # Merge degenerate locations.
+    loc_out = similar(loc, 0)
+    wgt_out = similar(wgt, 0)
+    i = 1
+    while i <= length(loc)
+        l = loc[i]
+        w = copy(wgt[i])
+        i += 1
+        while i <= length(loc) && loc[i] == l
+            w .+= wgt[i]
+            i += 1
+        end
+        push!(loc_out, l)
+        push!(wgt_out, w)
+    end
+    return PolesSumBlock{A, B}(loc_out, wgt_out)
+end
 
 """
     PolesSumBlock(
@@ -101,7 +132,7 @@ function PolesSumBlock(
     # no merging necessary
     if n == 1
         b = @view amp[:, 1]
-        return PolesSumBlock(loc, [b * b'])
+        return PolesSumBlock{A, B}(loc, [b * b'])
     end
 
     # sort by location
@@ -174,7 +205,7 @@ function PolesSumBlock(
         push!(wgt_new, w)
     end
 
-    return PolesSumBlock(loc_new, wgt_new)
+    return PolesSumBlock{A, B}(loc_new, wgt_new)
 end
 
 PolesSumBlock{A, B}(P::PolesSumBlock) where {A, B} = convert(PolesSumBlock{A, B}, P)

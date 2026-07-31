@@ -2,6 +2,9 @@
     AbstractPolesSum
 
 Supertype which represents a (block) function on the real axis as a sum of poles.
+
+The canonical representation requires the locations to be strictly increasing
+(sorted with no duplicates).
 """
 abstract type AbstractPolesSum <: AbstractPoles end
 

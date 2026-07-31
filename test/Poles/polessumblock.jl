@@ -3,45 +3,68 @@ using LinearAlgebra
 using Test
 
 @testset "PolesSumBlock" begin
-    @testset "constructor" begin
-        loc = 0:1
-        wgt = [[1 2; 2 1], [3 4; 4 3]]
+    @testset "constructors" begin
+        @testset "inner constructor" begin
+            loc = [0, 1]
+            wgt = [[1 2; 2 1], [3 4; 4 3]]
+            P = PolesSumBlock{Int, Int}(loc, wgt)
+            @test P.locations === loc
+            @test P.weights === wgt
+            @test @allocated(PolesSumBlock{Int, Int}(loc, wgt)) == 0 # no allocations
+            @test_throws DimensionMismatch PolesSumBlock{Int, Int}(rand(Int, 3), wgt) # length mismatch
+            @test_throws ArgumentError PolesSumBlock{Int, Complex{Int}}([1], [[1 2im; 2im 1]]) # not Hermitian
+            @test_throws DimensionMismatch PolesSumBlock{Int, Int}([0, 1], [[1 2im; -2im 1], [1;;]]) # weights wrong size
+            PolesSumBlock{Int, Float64}(Int[], Matrix{Float64}[]) # empty lists
+        end # inner constructor
 
-        # inner constructor
-        P = PolesSumBlock{Int, Int}(loc, wgt)
-        @test P.locations == loc
-        @test P.weights == wgt
-        @test_throws DimensionMismatch PolesSumBlock(rand(3), wgt) # length mismatch
-        @test_throws ArgumentError PolesSumBlock([1], [[1 2im; 2im 1]]) # not hermitian
-        @test_throws DimensionMismatch PolesSumBlock(0:1, [[1 2im; -2im 1], [1;;]]) # wrong size
+        @testset "outer constructors" begin
+            # canonical form
+            loc = [0, 1]
+            wgt = [[1 2; 2 1], [3 4; 4 3]]
+            P = PolesSumBlock(loc, wgt)
+            @test P.locations == loc
+            @test P.locations !== loc
+            @test P.weights == wgt
+            @test P.weights !== wgt
 
-        # outer constructors
-        P = PolesSumBlock(loc, wgt)
-        @test P.locations == loc
-        @test P.weights == wgt
-        P = PolesSumBlock(loc, [1 + 2im 3im; 4 5 + 6im])
-        @test P.locations == loc
-        @test P.weights == [[5 4 + 8im; 4 - 8im 16], [9 18 + 15im; 18 - 15im 61]]
-        # correct merging of degenerate poles
-        loc_amp = [-3.0, -2.5, -2.75]
-        amp = [1 5 3; 2 6 4]
-        P = PolesSumBlock(loc_amp, amp, 0.25)
-        @test P.locations == [-3.0, -2.5]
-        @test P.weights == [[10 14; 14 20], [25 30; 30 36]]
-        loc_amp = [0.0]
-        amp = [1; 2;;]
-        P = PolesSumBlock(loc_amp, amp)
-        @test P.locations == [0.0]
-        @test P.weights == [[1 2; 2 4]]
+            # sort and merge degenerate poles
+            loc = [0, 1, 0]
+            wgt = [[1 2; 2 1], [3 4; 4 3], [5 6; 6 5]]
+            P = PolesSumBlock(loc, wgt)
+            @test P.locations == [0, 1]
+            @test P.weights == [[6 8; 8 6], [3 4; 4 3]]
 
+            # supply amplitudes
+            loc = [0, 1]
+            amp = [1 + 2im 3im; 4 5 + 6im]
+            P = PolesSumBlock(loc, amp)
+            @test P.locations == [0, 1]
+            @test P.weights == [[5 4 + 8im; 4 - 8im 16], [9 18 + 15im; 18 - 15im 61]]
 
-        # conversion of type
-        P = PolesSumBlock(loc, wgt)
-        P_new = PolesSumBlock{UInt, Float64}(P)
-        @test typeof(P_new) === PolesSumBlock{UInt, Float64}
-        @test P_new.locations == loc
-        @test P_new.weights == wgt
-    end # constructor
+            # correct merging of degenerate poles
+            loc = [-3.0, -2.5, -2.75]
+            amp = [1 5 3; 2 6 4]
+            P = PolesSumBlock(loc, amp, 0.25)
+            @test P.locations == [-3.0, -2.5]
+            @test P.weights == [[10 14; 14 20], [25 30; 30 36]]
+
+            # single pole
+            loc = [0.0]
+            amp = [1; 2;;]
+            P = PolesSumBlock(loc, amp)
+            @test P.locations == [0.0]
+            @test P.weights == [[1 2; 2 4]]
+
+            # conversion of type
+            loc = [0, 1]
+            wgt = [[1 2; 2 1], [3 4; 4 3]]
+            P = PolesSumBlock(loc, wgt)
+            P_new = PolesSumBlock{UInt, Float64}(P)
+            @test P_new isa PolesSumBlock{UInt, Float64}
+            @test P_new.locations == loc
+            @test P_new.weights == wgt
+        end # outer constructors
+    end # constructors
 
     @testset "custom functions" begin
         @testset "amplitude" begin
