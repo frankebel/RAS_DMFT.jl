@@ -86,6 +86,14 @@ function add_pole_at_zero!(P::PolesSum)
 end
 
 amplitude(P::PolesSum{<:Any, <:Real}, i::Integer) = sqrt(weight(P, i))
+function amplitude(P::PolesSum{<:Any, <:Complex}, i::Integer)
+    throw(
+        DomainError(
+            weight(P, i),
+            "amplitude for complex weight not defined"
+        )
+    )
+end
 
 function arrowhead_matrix(P::PolesSum)
     amps = amplitudes(P)

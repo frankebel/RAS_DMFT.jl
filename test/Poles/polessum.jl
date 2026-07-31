@@ -72,6 +72,12 @@ using Test
             @test amplitude(P, 5) == sqrt(9)
             @test amplitude(P, 6) == sqrt(10)
             @test_throws BoundsError amplitude(P, 7)
+
+            # complex weight
+            loc = [1]
+            wgt = [5 + 3im]
+            P = PolesSum(loc, wgt)
+            @test_throws DomainError amplitude(P, 1)
         end # amplitude
 
         @testset "amplitudes" begin
@@ -80,9 +86,9 @@ using Test
             P = PolesSum(loc, wgt)
             @test amplitudes(P) == sqrt.(5:10)
             # errors
-            P = PolesSum(loc, rand(ComplexF64, 6))
-            @test_throws MethodError amplitudes(P)
             P = PolesSum(loc, -wgt)
+            @test_throws DomainError amplitudes(P)
+            P = PolesSum(loc, rand(ComplexF64, 6))
             @test_throws DomainError amplitudes(P)
         end # amplitudes
 
