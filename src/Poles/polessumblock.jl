@@ -129,12 +129,6 @@ function PolesSumBlock(
 
     n = length(loc)
 
-    # no merging necessary
-    if n == 1
-        b = @view amp[:, 1]
-        return PolesSumBlock{A, B}(loc, [b * b'])
-    end
-
     # sort by location
     p = sortperm(loc)
     loc = loc[p]
@@ -144,62 +138,20 @@ function PolesSumBlock(
     wgt_new = Matrix{B}[]
 
     i = 1
-
-    # poles in (-∞, -tol)
-    if i <= n && loc[i] < -tol
+    while i <= n
         l = loc[i]
         b = @view amp[:, i]
         w = b * b'
         i += 1
-        while i <= n && loc[i] < -tol
-            if loc[i] - l <= tol
-                b = @view amp[:, i]
-                w .+= b * b'
-            else
-                push!(loc_new, l)
-                push!(wgt_new, w)
-                l = loc[i]
-                b = @view amp[:, i]
-                w = b * b'
-            end
-            i += 1
-        end
-        push!(loc_new, l)
-        push!(wgt_new, w)
-    end
-
-    # poles in [-tol, tol]
-    if i <= n && abs(loc[i]) <= tol
-        m = size(amp, 1)
-        w = zeros(B, m, m)
-        while i <= n && abs(loc[i]) <= tol
+        while i <= n && loc[i] - l <= tol
+            # merge degenerate location
             b = @view amp[:, i]
             w .+= b * b'
             i += 1
         end
-        push!(loc_new, zero(A))
-        push!(wgt_new, w)
-    end
-
-    # poles in (tol, ∞)
-    if i <= n
-        l = loc[i]
-        l = l
-        b = @view amp[:, i]
-        w = b * b'
-        i += 1
-        while i <= n
-            if loc[i] - l <= tol
-                b = @view amp[:, i]
-                w .+= b * b'
-            else
-                push!(loc_new, l)
-                push!(wgt_new, w)
-                l = loc[i]
-                b = @view amp[:, i]
-                w = b * b'
-            end
-            i += 1
+        if abs(l) <= tol
+            # enforce pole at zero
+            l = zero(A)
         end
         push!(loc_new, l)
         push!(wgt_new, w)
