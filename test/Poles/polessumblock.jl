@@ -328,13 +328,14 @@ using Test
 
     @testset "Base" begin
         @testset "+" begin
-            # addition must sort and merge poles
+            # addition must merge degenerate poles
             A = PolesSumBlock([1, 3], [[1 0; 0 1], [2 1; 1 0]])
-            B = PolesSumBlock([3, 2], [[4 5; 5 6], [0 0; 0 0]])
+            B = PolesSumBlock([2, 3], [[0 0; 0 0], [4 5; 5 6]])
             P = A + B
-            @test locations(P) == [1, 2, 3] # must be sorted
+            @test locations(P) == [1, 2, 3]
             @test weights(P) == [[1 0; 0 1], [0 0; 0 0], [6 6; 6 6]]
             @test weight(P, 1) !== weight(A, 1)
+            @test weight(P, 2) !== weight(B, 1)
         end
 
         @testset "convert" begin

@@ -393,19 +393,49 @@ function moment(P::PolesSumBlock, n::Int = 0)
     return sum(i -> i[1]^n * i[2], zip(locations(P), weights(P)))
 end
 
-function Base.:+(A::PolesSumBlock{<:Any, TA}, B::PolesSumBlock{<:Any, TB}) where {TA, TB}
-    loc = [locations(A); locations(B)]
-    # copy weights of `A`, `B` to `wgt`
-    T = promote_type(TA, TB)
-    wgt = Vector{Matrix{T}}(undef, length(A) + length(B))
-    for i in eachindex(wgt)
-        if i <= length(A)
-            wgt[i] = copy(weight(A, i))
+function Base.:+(A::PolesSumBlock{LA, WA}, B::PolesSumBlock{LB, WB}) where {LA, WA, LB, WB}
+    L = promote_type(LA, LB)
+    W = promote_type(WA, WB)
+    na, nb = length(A), length(B)
+    loc = Vector{L}(undef, na + nb)
+    wgt = Vector{Matrix{W}}(undef, na + nb)
+    ia = ib = 1
+    k = 1
+    @inbounds while ia <= na || ib <= nb
+        if ia > na
+            loc[k] = location(B, ib)
+            wgt[k] = Matrix{W}(weight(B, ib))
+            ib += 1
+            k += 1
+        elseif ib > nb
+            loc[k] = location(A, ia)
+            wgt[k] = Matrix{W}(weight(A, ia))
+            ia += 1
+            k += 1
+        elseif location(A, ia) < location(B, ib)
+            loc[k] = location(A, ia)
+            wgt[k] = Matrix{W}(weight(A, ia))
+            ia += 1
+            k += 1
+        elseif location(B, ib) < location(A, ia)
+            loc[k] = location(B, ib)
+            wgt[k] = Matrix{W}(weight(B, ib))
+            ib += 1
+            k += 1
         else
-            wgt[i] = copy(weight(B, i - length(A)))
+            # merge degenerate locations
+            loc[k] = location(A, ia)
+            w = Matrix{W}(weight(A, ia))
+            w .+= convert(Matrix{W}, weight(B, ib))
+            wgt[k] = w
+            ia += 1
+            ib += 1
+            k += 1
         end
     end
-    return PolesSumBlock(loc, wgt)
+    resize!(loc, k - 1)
+    resize!(wgt, k - 1)
+    return PolesSumBlock{L, W}(loc, wgt)
 end
 
 function Base.convert(::Type{PolesSumBlock{M, N}}, P::PolesSumBlock{A, B}) where {M, N, A, B}
