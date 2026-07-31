@@ -5,7 +5,7 @@ Representation of poles on the real axis with locations ``a_i`` of type `A`
 and weights ``w_i`` of type `B`
 
 ```math
-P(ω) = ∑_i \\frac{w_i}{ω-a_i}.
+P(z) = ∑_i \\frac{w_i}{z-a_i}.
 ```
 
 For a block variant see [`PolesSumBlock`](@ref).
@@ -16,10 +16,8 @@ struct PolesSum{A <: Real, B <: Number} <: AbstractPolesSum
 
     function PolesSum{A, B}(locations, weights) where {A, B}
         length(locations) == length(weights) || throw(DimensionMismatch("length mismatch"))
-        result = new{A, B}(locations, weights)
-        sort!(result)
-        merge_degenerate_poles!(result)
-        return result
+        _issorted_and_unique(locations)
+        return new{A, B}(locations, weights)
     end
 end
 
@@ -45,13 +43,33 @@ true
 ```
 """
 function PolesSum(loc::AbstractVector{A}, wgt::AbstractVector{B}) where {A, B}
-    return PolesSum{A, B}(loc, wgt)
+    # Check length for permutation below.
+    length(loc) == length(wgt) || throw(DimensionMismatch("length mismatch"))
+
+    # sort
+    p = sortperm(loc)
+    loc = loc[p]
+    wgt = wgt[p]
+
+    # Merge degenerate locations.
+    loc_out = similar(loc, 0)
+    wgt_out = similar(wgt, 0)
+    i = 1
+    while i <= length(loc)
+        l = loc[i]
+        w = wgt[i]
+        i += 1
+        while i <= length(loc) && loc[i] == l
+            w += wgt[i]
+            i += 1
+        end
+        push!(loc_out, l)
+        push!(wgt_out, w)
+    end
+    return PolesSum{A, B}(loc_out, wgt_out)
 end
 
-# convert type
-function PolesSum{A, B}(P::PolesSum) where {A, B}
-    return PolesSum{A, B}(Vector{A}(locations(P)), Vector{B}(weights(P)))
-end
+PolesSum{A, B}(P::PolesSum) where {A, B} = convert(PolesSum{A, B}, P)
 
 """
     add_pole_at_zero!(P::PolesSum)
@@ -323,22 +341,60 @@ end
 
 weight(P::PolesSum, i::Integer) = weights(P)[i]
 
-function Base.:+(A::PolesSum, B::PolesSum)
-    result = PolesSum([locations(A); locations(B)], [weights(A); weights(B)])
-    sort!(result)
-    merge_degenerate_poles!(result, 0)
-    return result
+function Base.:+(A::PolesSum{LA, WA}, B::PolesSum{LB, WB}) where {LA, WA, LB, WB}
+    L = promote_type(LA, LB)
+    W = promote_type(WA, WB)
+    na, nb = length(A), length(B)
+    loc = Vector{L}(undef, na + nb)
+    wgt = Vector{W}(undef, na + nb)
+    ia = ib = 1
+    k = 1
+    @inbounds while ia <= na || ib <= nb
+        if ia > na
+            loc[k] = location(B, ib)
+            wgt[k] = weight(B, ib)
+            ib += 1
+            k += 1
+        elseif ib > nb
+            loc[k] = location(A, ia)
+            wgt[k] = weight(A, ia)
+            ia += 1
+            k += 1
+        elseif location(A, ia) < location(B, ib)
+            loc[k] = location(A, ia)
+            wgt[k] = weight(A, ia)
+            ia += 1
+            k += 1
+        elseif location(B, ib) < location(A, ia)
+            loc[k] = location(B, ib)
+            wgt[k] = weight(B, ib)
+            ib += 1
+            k += 1
+        else
+            loc[k] = location(A, ia)
+            wgt[k] = weight(A, ia) + weight(B, ib)
+            ia += 1
+            ib += 1
+            k += 1
+        end
+    end
+    resize!(loc, k - 1)
+    resize!(wgt, k - 1)
+    return PolesSum{L, W}(loc, wgt)
 end
 
-function Base.:-(A::PolesSum, B::PolesSum)
-    result = PolesSum([locations(A); locations(B)], [weights(A); -weights(B)])
-    sort!(result)
-    merge_degenerate_poles!(result, 0)
-    return result
+Base.:-(P::PolesSum{A, B}) where {A, B} = PolesSum{A, B}(copy(locations(P)), -weights(P))
+
+Base.:-(A::PolesSum, B::PolesSum) = +(A, -B)
+
+function Base.convert(::Type{PolesSum{M, N}}, P::PolesSum{A, B}) where {M, N, A, B}
+    loc = convert(Vector{M}, locations(P))
+    wgt = convert(Vector{N}, weights(P))
+    return PolesSum{M, N}(loc, wgt)
 end
 
-function Base.copy(P::PolesSum)
-    return PolesSum(copy(locations(P)), copy(weights(P)))
+function Base.copy(P::PolesSum{A, B}) where {A, B}
+    return PolesSum{A, B}(copy(locations(P)), copy(weights(P)))
 end
 
 Base.eltype(::Type{<:PolesSum{A, B}}) where {A, B} = promote_type(A, B)

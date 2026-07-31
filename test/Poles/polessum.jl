@@ -5,29 +5,45 @@ using Test
 
 @testset "PolesSum" begin
     @testset "constructor" begin
-        loc = 0:5
-        wgt = 5:10
+        @testset "inner constructor" begin
+            loc = [0, 1]
+            wgt = [2, 3]
+            P = PolesSum{Int, Int}(loc, wgt)
+            @test P isa PolesSum{Int, Int}
+            @test P.locations === loc
+            @test P.weights === wgt
+            # length mismatch
+            @test_throws DimensionMismatch PolesSum{Int, Int}(rand(3), rand(4))
+            @test_throws DimensionMismatch PolesSum{Int, Int}(rand(4), rand(3))
+            PolesSumBlock{Int, Float64}(Int[], Float64[]) # empty lists
+        end # inner constructor
 
-        # inner constructor
-        P = PolesSum{Int, Int}(loc, wgt)
-        @test typeof(P) === PolesSum{Int, Int}
-        @test P.locations == loc
-        @test P.weights == wgt
-        # length mismatch
-        @test_throws DimensionMismatch PolesSum{Int, Int}(rand(3), rand(4))
-        @test_throws DimensionMismatch PolesSum{Int, Int}(rand(4), rand(3))
+        @testset "outer constructors" begin
+            # canonical form
+            loc = [0, 1]
+            wgt = [2, 3]
+            P = PolesSum(loc, wgt)
+            @test P.locations == loc
+            @test P.locations !== loc
+            @test P.weights == wgt
+            @test P.weights !== wgt
 
-        # outer constructor
-        P = PolesSum(loc, wgt)
-        @test P.locations == loc
-        @test P.weights == wgt
+            # sort and merge degenerate poles
+            loc = [0, 1, 0]
+            wgt = [2, 3, 4]
+            P = PolesSum(loc, wgt)
+            @test P.locations == [0, 1]
+            @test P.weights == [6, 3]
 
-        # conversion of type
-        P = PolesSum(loc, wgt)
-        P_new = PolesSum{UInt, Float64}(P)
-        @test typeof(P_new) === PolesSum{UInt, Float64}
-        @test P_new.locations == loc
-        @test P_new.weights == wgt
+            # conversion of type
+            loc = [0, 1]
+            wgt = [2, 3]
+            P = PolesSum(loc, wgt)
+            P_new = PolesSum{UInt, Float64}(P)
+            @test P_new isa PolesSum{UInt, Float64}
+            @test P_new.locations == loc
+            @test P_new.weights == wgt
+        end # outer constructors
     end # constructor
 
     @testset "custom functions" begin
@@ -204,7 +220,7 @@ using Test
             # equidistant grid
             loc = [-0.5, 0.5, 1.5]
             wgt = [1.5, -0.5, 5.0]
-            P = merge_negative_weight!(PolesSum(loc, wgt))
+            P = merge_negative_weight!(PolesSum{Float64, Float64}(loc, wgt))
             @test locations(P) === loc
             @test weights(P) === wgt
             @test loc == [-0.5, 0.5, 1.5]
@@ -212,37 +228,37 @@ using Test
             # not equidistant grid
             loc = [-0.5, 0.0, 1.5]
             wgt = [1.5, -0.5, 5.0]
-            merge_negative_weight!(PolesSum(loc, wgt))
+            merge_negative_weight!(PolesSum{Float64, Float64}(loc, wgt))
             @test loc == [-0.5, 0.0, 1.5]
             @test wgt == [1.125, 0.0, 4.875]
             # first pole negative
             loc = [0.0, 1.0, 5.0]
             wgt = [-1.0, 0.5, 2.25]
-            merge_negative_weight!(PolesSum(loc, wgt))
+            merge_negative_weight!(PolesSum{Float64, Float64}(loc, wgt))
             @test loc == [0.0, 1.0, 5.0]
             @test wgt == [0.0, 0.0, 1.75]
             # last pole negative
             loc = [0.0, 1.0, 5.0]
             wgt = [2.25, 0.5, -1.0]
-            merge_negative_weight!(PolesSum(loc, wgt))
+            merge_negative_weight!(PolesSum{Float64, Float64}(loc, wgt))
             @test loc == [0.0, 1.0, 5.0]
             @test wgt == [1.75, 0.0, 0.0]
             # weight exactly cancel
             loc = [0.0, 1.0, 5.0]
             wgt = [-1.0, 0.5, 0.5]
-            merge_negative_weight!(PolesSum(loc, wgt))
+            merge_negative_weight!(PolesSum{Float64, Float64}(loc, wgt))
             @test loc == [0.0, 1.0, 5.0]
             @test wgt == [0.0, 0.0, 0.0]
             # symmetric case
             loc = [-2.0, -0.5, 0.0, 0.5, 2.0]
             wgt = [5.0, -2.0, 1.0, -2.0, 5.0]
-            merge_negative_weight!(PolesSum(loc, wgt))
+            merge_negative_weight!(PolesSum{Float64, Float64}(loc, wgt))
             @test loc == [-2.0, -0.5, 0.0, 0.5, 2.0]
             @test norm(wgt - [3.5, 0.0, 0.0, 0.0, 3.5]) < 10 * eps()
             # previous pole would get negative weight
             loc = [-1.0, -0.5, 0.0, 1.5]
             wgt = [2.0, 1.5, -2.5, 5.0]
-            merge_negative_weight!(PolesSum(loc, wgt))
+            merge_negative_weight!(PolesSum{Float64, Float64}(loc, wgt))
             @test loc == [-1.0, -0.5, 0.0, 1.5]
             @test wgt == [1.7, 0.0, 0.0, 4.3]
         end # merge_negative_weight!
@@ -388,34 +404,39 @@ using Test
 
     @testset "Base" begin
         @testset "+" begin
-            # addition must sort resulting poles
-            A = PolesSum([0.1, 0.3, 0.2], [0.1, 0.3, 0.2])
-            B = PolesSum([0.6, 0.5, 0.4], [6, 5, 4])
-            P = A + B
-            @test locations(P) == [0.1, 0.2, 0.3, 0.4, 0.5, 0.6]
-            @test weights(P) == [0.1, 0.2, 0.3, 4.0, 5.0, 6.0]
             # addition must merge degenerate poles
-            A = PolesSum([0.1, 0.2], [0.1, 0.25])
-            B = PolesSum([0.2], [1])
+            A = PolesSum([1, 3], [4, 5])
+            B = PolesSum([2, 3], [6, 7])
             P = A + B
-            @test locations(P) == [0.1, 0.2]
-            @test weights(P) == [0.1, 1.25]
+            @test locations(P) == [1, 2, 3]
+            @test weights(P) == [4, 6, 12]
         end
 
         @testset "-" begin
-            # subtraction must sort resulting poles
-            A = PolesSum([0.1, 0.3, 0.2], [0.1, 0.3, 0.2])
-            B = PolesSum([0.6, 0.5, 0.4], [6, 5, 4])
-            P = A - B
-            @test locations(P) == [0.1, 0.2, 0.3, 0.4, 0.5, 0.6]
-            @test weights(P) == [0.1, 0.2, 0.3, -4.0, -5.0, -6.0]
-            # addition must merge degenerate poles
+            # unary
+            P = PolesSum([1, 2], [3, 4])
+            P_new = -P
+            @test locations(P_new) == [1, 2]
+            @test locations(P_new) !== locations(P)
+            @test weights(P_new) == -[3, 4]
+
+            # subtraction must merge degenerate poles
             A = PolesSum([0.1, 0.2], [0.1, 0.25])
             B = PolesSum([0.2], [1])
             P = A - B
             @test locations(P) == [0.1, 0.2]
             @test weights(P) == [0.1, -0.75]
         end # -
+
+        @testset "convert" begin
+            P = PolesSum([1, 3], [0, 2])
+            P_new = convert(PolesSum{Float64, ComplexF64}, P)
+            @test P_new isa PolesSum{Float64, ComplexF64}
+            @test locations(P_new) == locations(P)
+            @test weights(P_new) == weights(P)
+            P_new = convert(PolesSum{Int, Int}, P)
+            @test P_new === P
+        end # convert
 
         @testset "copy" begin
             loc = 1:5
