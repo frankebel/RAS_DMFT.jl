@@ -215,7 +215,7 @@ function evaluate_gaussian(P::PolesSumBlock, ω::Real, σ::Real)
     # dot multiplication loses Hermiticity
     real = zeros(ComplexF64, d, d) # weights can be complex
     imag = zero(real)
-    for i in eachindex(P)
+    @inbounds for i in eachindex(P)
         w = weight(P, i)
         real .+= w .* sqrt(2) ./ (π * σ) .* dawson((ω - location(P, i)) / (sqrt(2) * σ))
         imag .+= w .* pdf(Normal(location(P, i), σ), ω)
@@ -228,7 +228,7 @@ end
 function evaluate_lorentzian(P::PolesSumBlock, ω::Real, δ::Real)
     d = size(P, 1)
     result = zeros(ComplexF64, d, d)
-    for i in eachindex(P)
+    @inbounds for i in eachindex(P)
         w = weight(P, i)
         result .+= w ./ (ω + im * δ - location(P, i))
     end
@@ -423,7 +423,7 @@ function LinearAlgebra.tr(P::PolesSumBlock{<:Any, B}) where {B}
     loc = copy(locations(P))
     wgt = similar(loc, real(B))
 
-    for i in eachindex(P)
+    @inbounds for i in eachindex(P)
         wgt[i] = tr(weight(P, i))
     end
     return PolesSum(loc, wgt)

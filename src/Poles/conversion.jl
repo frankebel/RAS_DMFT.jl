@@ -145,7 +145,7 @@ function PolesContinuedFractionBlock(P::PolesSumBlock)
     # Q1 = vcat(amp...) is type-unstable
     T = eltype(eltype(amp))
     Q1 = Matrix{T}(undef, n1 * n2, n2)
-    for i in eachindex(P)
+    @inbounds for i in eachindex(P)
         i1 = 1 + (i - 1) * n2
         i2 = i * n2
         Q1[i1:i2, :] = amp[i]
@@ -155,7 +155,7 @@ function PolesContinuedFractionBlock(P::PolesSumBlock)
     _orthonormalize_GramSchmidt!(Q1) # numerical instability
     # set small values to zero
     tol = sqrt(eps()) * norm(scl)
-    for i in eachindex(scl)
+    @inbounds for i in eachindex(scl)
         scl[i] < tol && (scl[i] = 0)
     end
     # block Lanczos with full orthogonalization

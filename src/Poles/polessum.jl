@@ -101,7 +101,7 @@ function arrowhead_matrix(P::PolesSum)
     n = length(P) + 1
     result = zeros(T, n, n)::Matrix{T}
 
-    for i in eachindex(P)
+    @inbounds for i in eachindex(P)
         result[i + 1, i + 1] = location(P, i)
     end
     result[1, 2:end] .= amps
@@ -113,7 +113,7 @@ end
 function evaluate_gaussian(P::PolesSum, ω::Real, σ::Real)
     real = zero(ω)
     imag = zero(ω)
-    for i in eachindex(P)
+    @inbounds for i in eachindex(P)
         w = weight(P, i)
         real += w * sqrt(2) / (π * σ) * dawson((ω - location(P, i)) / (sqrt(2) * σ))
         imag += w * pdf(Normal(location(P, i), σ), ω)
@@ -124,7 +124,7 @@ end
 
 function evaluate_lorentzian(P::PolesSum, ω::Real, δ::Real)
     result = zero(complex(ω))
-    for i in eachindex(P)
+    @inbounds for i in eachindex(P)
         result += weight(P, i) / (ω + im * δ - location(P, i))
     end
     return result
@@ -351,7 +351,7 @@ b_i δ(ω) →
 function spectral_function_loggaussian(P::PolesSum, ω::Real, b::Real)
     result = zero(ω)
     iszero(ω) && return result # no weight at ω == 0
-    for i in eachindex(P)
+    @inbounds for i in eachindex(P)
         if sign(ω) == sign(location(P, i))
             # only contribute weight if on same side of real axis
             w = weight(P, i)
@@ -457,7 +457,7 @@ function LinearAlgebra.axpby!(α::Number, x::P, β::Number, y::P) where {P <: Po
     ly = locations(y)
     sizehint!(ly, length(y) + length(x))
     sizehint!(wy, length(y) + length(x))
-    @inline for i in eachindex(x)
+    @inbounds @inline for i in eachindex(x)
         push!(ly, lx[i])
         push!(wy, α * wx[i])
     end
