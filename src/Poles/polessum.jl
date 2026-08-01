@@ -432,7 +432,7 @@ end
 Base.eltype(::Type{<:PolesSum{A, B}}) where {A, B} = promote_type(A, B)
 
 function Base.inv(P::PolesSum)
-    isapprox(moment(P, 0), 1; atol = 1000 * eps()) ||
+    isapprox(moment(P, 0), 1; atol = 1000 * eps(float(eltype(P)))) ||
         throw(ArgumentError("P does not have total weight 1"))
 
     b0, HA = anderson_matrix(P)
