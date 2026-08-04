@@ -80,7 +80,7 @@ function read_hdf5(filename::AbstractString, ::Type{<:PolesSum{A, B}}) where {A,
     return h5open(filename, "r") do fid
         locations::Vector{A} = read(fid, "locations")
         weights::Vector{B} = read(fid, "weights")
-        return PolesSum(locations, weights)
+        return PolesSum{A, B}(locations, weights)
     end
 end
 
@@ -100,7 +100,7 @@ function read_hdf5(filename::AbstractString, ::Type{<:PolesSumBlock{A, B}}) wher
         for i in eachindex(locations)
             weights[i] = read(fid, "weights/$i")
         end
-        return PolesSumBlock(locations, weights)
+        return PolesSumBlock{A, B}(locations, weights)
     end
 end
 
