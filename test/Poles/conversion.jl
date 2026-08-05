@@ -36,9 +36,9 @@ using Test
 
     @testset "arrowhead matrix" begin
         # scalar
-        loc = 1:5
-        amp = 6:10
-        P = PolesSum(loc, abs2.(amp))
+        locs = 1:5
+        amps = 6:10
+        P = PolesSum(locs, abs2.(amps))
         ma = arrowhead_matrix(P)
         @inferred arrowhead_matrix(P)
         @test ma isa Matrix{Float64}
@@ -51,9 +51,9 @@ using Test
             10 0 0 0 0 5
         ]
         # pole with zero weight
-        loc = 1:5
-        amp = [6, 7, 0, 9, 0]
-        P = PolesSum(loc, abs2.(amp))
+        locs = 1:5
+        amps = [6, 7, 0, 9, 0]
+        P = PolesSum(locs, abs2.(amps))
         ma = arrowhead_matrix(P)
         @test ma == [
             0 6 7 0 9 0

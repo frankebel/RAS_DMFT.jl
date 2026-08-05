@@ -22,17 +22,17 @@ struct PolesSum{A <: Real, B <: Number} <: AbstractPolesSum
 end
 
 """
-    PolesSum(loc::AbstractVector{A}, wgt::AbstractVector{B}) where {A,B}
+    PolesSum(locs::AbstractVector{A}, wgts::AbstractVector{B}) where {A,B}
 
-Create a new instance of [`PolesSum`](@ref) by supplying the locations `loc`
-and weights `wgt`.
+Create a new instance of [`PolesSum`](@ref) by supplying the locations `locs`
+and weights `wgts`.
 
 ```jldoctest
-julia> loc = 0:5;
+julia> locs = 0:5;
 
-julia> wgt = 5:10;
+julia> wgts = 5:10;
 
-julia> P = PolesSum(loc, wgt)
+julia> P = PolesSum(locs, wgts)
 PolesSum{Int64, Int64} with 6 poles
 
 julia> locations(P) == loc
@@ -42,25 +42,25 @@ julia> weights(P) == wgt
 true
 ```
 """
-function PolesSum(loc::AbstractVector{A}, wgt::AbstractVector{B}) where {A, B}
+function PolesSum(locs::AbstractVector{A}, wgts::AbstractVector{B}) where {A, B}
     # Check length for permutation below.
-    length(loc) == length(wgt) || throw(DimensionMismatch("length mismatch"))
+    length(locs) == length(wgts) || throw(DimensionMismatch("length mismatch"))
 
     # sort
-    p = sortperm(loc)
-    loc = loc[p]
-    wgt = wgt[p]
+    p = sortperm(locs)
+    locs = locs[p]
+    wgts = wgts[p]
 
     # Merge degenerate locations.
-    loc_out = similar(loc, 0)
-    wgt_out = similar(wgt, 0)
+    loc_out = similar(locs, 0)
+    wgt_out = similar(wgts, 0)
     i = 1
-    while i <= length(loc)
-        l = loc[i]
-        w = wgt[i]
+    while i <= length(locs)
+        l = locs[i]
+        w = wgts[i]
         i += 1
-        while i <= length(loc) && loc[i] == l
-            w += wgt[i]
+        while i <= length(locs) && locs[i] == l
+            w += wgts[i]
             i += 1
         end
         push!(loc_out, l)
@@ -149,39 +149,39 @@ function merge_degenerate_poles!(P::PolesSum, tol::Real = 0)
     # check input
     tol >= 0 || throw(ArgumentError("tol must not be negative"))
     # get information from P
-    loc = locations(P)
-    wgt = weights(P)
+    locs = locations(P)
+    wgts = weights(P)
     # pole(s) at [-tol, tol]
-    idx_zeros = findall(i -> abs(i) <= tol, loc)
+    idx_zeros = findall(i -> abs(i) <= tol, locs)
     if !isempty(idx_zeros)
         i0 = popfirst!(idx_zeros)
-        loc[i0] = 0
+        locs[i0] = 0
         for i in reverse!(idx_zeros)
-            wgt[i0] += popat!(wgt, i)
-            deleteat!(loc, i)
+            wgts[i0] += popat!(wgts, i)
+            deleteat!(locs, i)
         end
     end
     # pole(s) at tol → ∞
-    i = findfirst(>(0), loc)
-    isnothing(i) && (i = lastindex(loc)) # enforce `i` to be a number
-    while i < lastindex(loc)
-        if loc[i + 1] - loc[i] <= tol
+    i = findfirst(>(0), locs)
+    isnothing(i) && (i = lastindex(locs)) # enforce `i` to be a number
+    while i < lastindex(locs)
+        if locs[i + 1] - locs[i] <= tol
             # merge
-            wgt[i] += popat!(wgt, i + 1)
-            deleteat!(loc, i + 1) # keep location closer to zero
+            wgts[i] += popat!(wgts, i + 1)
+            deleteat!(locs, i + 1) # keep location closer to zero
         else
             # increment index
             i += 1
         end
     end
     # pole(s) at -tol → -∞
-    i = findlast(<(0), loc)
-    isnothing(i) && (i = firstindex(loc)) # enforce `i` to be a number
-    while i > firstindex(loc)
-        if loc[i] - loc[i - 1] <= tol
+    i = findlast(<(0), locs)
+    isnothing(i) && (i = firstindex(locs)) # enforce `i` to be a number
+    while i > firstindex(locs)
+        if locs[i] - locs[i - 1] <= tol
             # merge
-            wgt[i - 1] += popat!(wgt, i)
-            deleteat!(loc, i - 1) # keep location closer to zero
+            wgts[i - 1] += popat!(wgts, i)
+            deleteat!(locs, i - 1) # keep location closer to zero
             i -= 1
         else
             # decrement index
@@ -377,42 +377,42 @@ function Base.:+(A::PolesSum{LA, WA}, B::PolesSum{LB, WB}) where {LA, WA, LB, WB
     L = promote_type(LA, LB)
     W = promote_type(WA, WB)
     na, nb = length(A), length(B)
-    loc = Vector{L}(undef, na + nb)
-    wgt = Vector{W}(undef, na + nb)
+    locs = Vector{L}(undef, na + nb)
+    wgts = Vector{W}(undef, na + nb)
     ia = ib = 1
     k = 1
     @inbounds while ia <= na || ib <= nb
         if ia > na
-            loc[k] = location(B, ib)
-            wgt[k] = weight(B, ib)
+            locs[k] = location(B, ib)
+            wgts[k] = weight(B, ib)
             ib += 1
             k += 1
         elseif ib > nb
-            loc[k] = location(A, ia)
-            wgt[k] = weight(A, ia)
+            locs[k] = location(A, ia)
+            wgts[k] = weight(A, ia)
             ia += 1
             k += 1
         elseif location(A, ia) < location(B, ib)
-            loc[k] = location(A, ia)
-            wgt[k] = weight(A, ia)
+            locs[k] = location(A, ia)
+            wgts[k] = weight(A, ia)
             ia += 1
             k += 1
         elseif location(B, ib) < location(A, ia)
-            loc[k] = location(B, ib)
-            wgt[k] = weight(B, ib)
+            locs[k] = location(B, ib)
+            wgts[k] = weight(B, ib)
             ib += 1
             k += 1
         else
-            loc[k] = location(A, ia)
-            wgt[k] = weight(A, ia) + weight(B, ib)
+            locs[k] = location(A, ia)
+            wgts[k] = weight(A, ia) + weight(B, ib)
             ia += 1
             ib += 1
             k += 1
         end
     end
-    resize!(loc, k - 1)
-    resize!(wgt, k - 1)
-    return PolesSum{L, W}(loc, wgt)
+    resize!(locs, k - 1)
+    resize!(wgts, k - 1)
+    return PolesSum{L, W}(locs, wgts)
 end
 
 Base.:-(P::PolesSum{A, B}) where {A, B} = PolesSum{A, B}(copy(locations(P)), -weights(P))
@@ -420,9 +420,9 @@ Base.:-(P::PolesSum{A, B}) where {A, B} = PolesSum{A, B}(copy(locations(P)), -we
 Base.:-(A::PolesSum, B::PolesSum) = +(A, -B)
 
 function Base.convert(::Type{PolesSum{M, N}}, P::PolesSum{A, B}) where {M, N, A, B}
-    loc = convert(Vector{M}, locations(P))
-    wgt = convert(Vector{N}, weights(P))
-    return PolesSum{M, N}(loc, wgt)
+    locs = convert(Vector{M}, locations(P))
+    wgts = convert(Vector{N}, weights(P))
+    return PolesSum{M, N}(locs, wgts)
 end
 
 function Base.copy(P::PolesSum{A, B}) where {A, B}
@@ -436,12 +436,12 @@ function Base.inv(P::PolesSum)
         throw(ArgumentError("P does not have total weight 1"))
 
     b0, HA = anderson_matrix(P)
-    loc = diag(HA)
-    a0 = popfirst!(loc)
-    wgt = b0 * HA[1, 2:end]
-    map!(abs2, wgt)
+    locs = diag(HA)
+    a0 = popfirst!(locs)
+    wgts = b0 * HA[1, 2:end]
+    map!(abs2, wgts)
 
-    return a0, PolesSum(loc, wgt)
+    return a0, PolesSum(locs, wgts)
 end
 
 # create a better show?

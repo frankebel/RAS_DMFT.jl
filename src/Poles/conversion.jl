@@ -73,10 +73,10 @@ end
 
 function PolesSum(P::PolesContinuedFraction)
     # `SymTridiagonal` often raises `LAPACKException(22)`, therefore call directly
-    loc, V = LAPACK.stev!('V', Float64.(locations(P)), Float64.(amplitudes(P)))
+    locs, V = LAPACK.stev!('V', Float64.(locations(P)), Float64.(amplitudes(P)))
     amp = scale(P) * view(V, 1, :)
-    wgt = map(abs2, amp)
-    return PolesSum(loc, wgt)
+    wgts = map(abs2, amp)
+    return PolesSum(locs, wgts)
 end
 
 function PolesContinuedFraction(P::PolesSum)
@@ -159,8 +159,8 @@ function PolesContinuedFractionBlock(P::PolesSumBlock)
         scl[i] < tol && (scl[i] = 0)
     end
     # block Lanczos with full orthogonalization
-    loc, amp, _ = block_lanczos_full_ortho(A, Q1, n1 * n2)
-    return PolesContinuedFractionBlock(loc, amp, scl)
+    locs, amps, _ = block_lanczos_full_ortho(A, Q1, n1 * n2)
+    return PolesContinuedFractionBlock(locs, amps, scl)
 end
 
 # block form -> scalar form
@@ -170,7 +170,7 @@ end
 Take the ``P_{i,j}`` element.
 """
 function PolesSum(P::PolesSumBlock, i::Integer, j::Integer)
-    loc = copy(locations(P))
-    wgt = map(m -> m[i, j], weights(P))
-    return PolesSum(loc, wgt)
+    locs = copy(locations(P))
+    wgts = map(wgt -> wgt[i, j], weights(P))
+    return PolesSum(locs, wgts)
 end

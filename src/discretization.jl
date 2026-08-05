@@ -191,9 +191,9 @@ function equal_weight_discretization(
             pm = 0.0
         end
     end
-    loc = [reverse!(P_minus); 0; P_plus]
-    wgt = [reverse!(V_minus); v0 / π; V_plus]
-    return PolesSum(loc, wgt)
+    locs = [reverse!(P_minus); 0; P_plus]
+    wgts = [reverse!(V_minus); v0 / π; V_plus]
+    return PolesSum(locs, wgts)
 end
 
 """

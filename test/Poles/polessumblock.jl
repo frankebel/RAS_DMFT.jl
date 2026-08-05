@@ -5,13 +5,13 @@ using Test
 @testset "PolesSumBlock" begin
     @testset "constructors" begin
         @testset "inner constructor" begin
-            loc = [0, 1]
-            wgt = [[1 2; 2 1], [3 4; 4 3]]
-            P = PolesSumBlock{Int, Int}(loc, wgt)
-            @test P.locations === loc
-            @test P.weights === wgt
-            @test @allocated(PolesSumBlock{Int, Int}(loc, wgt)) == 0 # no allocations
-            @test_throws DimensionMismatch PolesSumBlock{Int, Int}(rand(Int, 3), wgt) # length mismatch
+            locs = [0, 1]
+            wgts = [[1 2; 2 1], [3 4; 4 3]]
+            P = PolesSumBlock{Int, Int}(locs, wgts)
+            @test P.locations === locs
+            @test P.weights === wgts
+            @test @allocated(PolesSumBlock{Int, Int}(locs, wgts)) == 0 # no allocations
+            @test_throws DimensionMismatch PolesSumBlock{Int, Int}(rand(Int, 3), wgts) # length mismatch
             @test_throws ArgumentError PolesSumBlock{Int, Complex{Int}}([1], [[1 2im; 2im 1]]) # not Hermitian
             @test_throws DimensionMismatch PolesSumBlock{Int, Int}([0, 1], [[1 2im; -2im 1], [1;;]]) # weights wrong size
             PolesSumBlock{Int, Float64}(Int[], Matrix{Float64}[]) # empty lists
@@ -19,50 +19,50 @@ using Test
 
         @testset "outer constructors" begin
             # canonical form
-            loc = [0, 1]
-            wgt = [[1 2; 2 1], [3 4; 4 3]]
-            P = PolesSumBlock(loc, wgt)
-            @test P.locations == loc
-            @test P.locations !== loc
-            @test P.weights == wgt
-            @test P.weights !== wgt
+            locs = [0, 1]
+            wgts = [[1 2; 2 1], [3 4; 4 3]]
+            P = PolesSumBlock(locs, wgts)
+            @test P.locations == locs
+            @test P.locations !== locs
+            @test P.weights == wgts
+            @test P.weights !== wgts
 
             # sort and merge degenerate poles
-            loc = [0, 1, 0]
-            wgt = [[1 2; 2 1], [3 4; 4 3], [5 6; 6 5]]
-            P = PolesSumBlock(loc, wgt)
+            locs = [0, 1, 0]
+            wgts = [[1 2; 2 1], [3 4; 4 3], [5 6; 6 5]]
+            P = PolesSumBlock(locs, wgts)
             @test P.locations == [0, 1]
             @test P.weights == [[6 8; 8 6], [3 4; 4 3]]
 
             # supply amplitudes
-            loc = [0, 1]
-            amp = [1 + 2im 3im; 4 5 + 6im]
-            P = PolesSumBlock(loc, amp)
+            locs = [0, 1]
+            amps = [1 + 2im 3im; 4 5 + 6im]
+            P = PolesSumBlock(locs, amps)
             @test P.locations == [0, 1]
             @test P.weights == [[5 4 + 8im; 4 - 8im 16], [9 18 + 15im; 18 - 15im 61]]
 
             # correct merging of degenerate poles
-            loc = [-3.0, -2.5, -2.75]
-            amp = [1 5 3; 2 6 4]
-            P = PolesSumBlock(loc, amp, 0.25)
+            locs = [-3.0, -2.5, -2.75]
+            amps = [1 5 3; 2 6 4]
+            P = PolesSumBlock(locs, amps, 0.25)
             @test P.locations == [-3.0, -2.5]
             @test P.weights == [[10 14; 14 20], [25 30; 30 36]]
 
             # single pole
-            loc = [0.0]
-            amp = [1; 2;;]
-            P = PolesSumBlock(loc, amp)
+            locs = [0.0]
+            amps = [1; 2;;]
+            P = PolesSumBlock(locs, amps)
             @test P.locations == [0.0]
             @test P.weights == [[1 2; 2 4]]
 
             # conversion of type
-            loc = [0, 1]
-            wgt = [[1 2; 2 1], [3 4; 4 3]]
-            P = PolesSumBlock(loc, wgt)
+            locs = [0, 1]
+            wgts = [[1 2; 2 1], [3 4; 4 3]]
+            P = PolesSumBlock(locs, wgts)
             P_new = PolesSumBlock{UInt, Float64}(P)
             @test P_new isa PolesSumBlock{UInt, Float64}
-            @test P_new.locations == loc
-            @test P_new.weights == wgt
+            @test P_new.locations == locs
+            @test P_new.weights == wgts
         end # outer constructors
     end # constructors
 
@@ -85,12 +85,12 @@ using Test
             w = zeros(10, 10)
             w[3, 3] = 4
             w[5, 5] = 9
-            amp = zeros(10, 2)
-            amp[3, 1] = 2
-            amp[5, 2] = 3
+            amps = zeros(10, 2)
+            amps[3, 1] = 2
+            amps[5, 2] = 3
             P = PolesSumBlock(rand(1), [w])
             amp2 = amplitude(P, 1, thin = true)
-            @test amp == amp2
+            @test amps == amp2
         end # amplitude
 
         @testset "amplitudes" begin
@@ -98,30 +98,30 @@ using Test
             v2 = [3im, 5 + 6im] # vector from which second weights are constructed
             P = PolesSumBlock(0:1, [1.0 + 2im 3im; 4 5 + 6im])
             @inferred amplitudes(P)
-            amp = amplitudes(P)
-            @test norm(amp[1] - 1 / sqrt(21) * v1 * v1') < 20 * eps()
-            @test norm(amp[2] - 1 / sqrt(70) * v2 * v2') < 20 * eps()
+            amps = amplitudes(P)
+            @test norm(amps[1] - 1 / sqrt(21) * v1 * v1') < 20 * eps()
+            @test norm(amps[2] - 1 / sqrt(70) * v2 * v2') < 20 * eps()
 
             # thin with random values
             amps = [rand(ComplexF64, 10, i) for i in 1:10]
-            wghts = [amp * amp' for amp in amps]
-            loc = sort!(rand(10))
-            P = PolesSumBlock(loc, wghts)
+            wghts = [amps * amps' for amps in amps]
+            locs = sort!(rand(10))
+            P = PolesSumBlock(locs, wghts)
             amps2 = amplitudes(P, sqrt(100 * eps()); thin = true)
             for i in eachindex(amps)
                 w = wghts[i]
-                amp = amps2[i]
-                @test size(amp) == (10, i)
-                @test norm(w - amp * amp') < 1.0e6 * eps()
+                amps = amps2[i]
+                @test size(amps) == (10, i)
+                @test norm(w - amps * amps') < 1.0e6 * eps()
             end
         end # amplitudes
 
         @testset "evaluate_gaussian" begin
             ω = 0.15
             σ = 0.04
-            loc = [0.1, 0.2]
-            amp = reshape(0.1:0.1:0.4, (2, 2))
-            P = PolesSumBlock(loc, amp)
+            locs = [0.1, 0.2]
+            amps = reshape(0.1:0.1:0.4, (2, 2))
+            P = PolesSumBlock(locs, amps)
             @test norm(
                 evaluate_gaussian(P, ω, σ) - [
                     -1.5277637226549838 - 1.4345225621076145im -1.90970465331873 - 2.00833158695066im
@@ -133,10 +133,10 @@ using Test
         @testset "evaluate_lorentzian" begin
             ω = 10.0
             δ = 1.0
-            loc = 1.0:10
-            amp = reshape(0.1:0.1:2, (2, 10))
+            locs = 1.0:10
+            amps = reshape(0.1:0.1:2, (2, 10))
             # single point
-            P = PolesSumBlock(loc, amp)
+            P = PolesSumBlock(locs, amps)
             @test norm(
                 evaluate_lorentzian(P, ω, δ) - [
                     3.419109056634164 - 5.796080126589452im 3.669440321902302 - 6.127487634859227im
@@ -196,14 +196,14 @@ using Test
         end # locations
 
         @testset "merge_degenerate_poles!" begin
-            loc = [0.2, 0.3, 0.6]
-            wgt = [[1 0; 0 1], [1 0; 0 0], [2 1; 1 2]]
-            P = PolesSumBlock(loc, wgt)
+            locs = [0.2, 0.3, 0.6]
+            wgts = [[1 0; 0 1], [1 0; 0 0], [2 1; 1 2]]
+            P = PolesSumBlock(locs, wgts)
             # default tolerance too small
             foo = copy(P)
             @test merge_degenerate_poles!(foo) === foo
-            @test locations(foo) == loc
-            @test weights(foo) == wgt
+            @test locations(foo) == locs
+            @test weights(foo) == wgts
             # merge 2 poles
             @test merge_degenerate_poles!(foo, 0.11) === foo
             @test locations(foo) == [0.2, 0.6]
@@ -221,7 +221,7 @@ using Test
         end # merge_negative_locations_to_zero!
 
         @testset "merge_small_weight!" begin
-            loc = [0.0, 1, 4]
+            locs = [0.0, 1, 4]
             W1 = [2.0 1; 1 3]
             W2 = [4.0 5; 5 6]
             W3 = [7.0 8; 8 9]
@@ -232,17 +232,17 @@ using Test
             @test locations(P) == [-1.0, 0.0, 1.5]
             @test weights(P) == [W1, W2, W3]
             # first index
-            P = PolesSumBlock(copy(loc), [copy(W1), copy(W2), copy(W3)])
+            P = PolesSumBlock(copy(locs), [copy(W1), copy(W2), copy(W3)])
             merge_small_weight!(P, tol)
             @test locations(P) == [1.0, 4.0]
             @test weights(P) == [[6 6; 6 9], [7 8; 8 9]]
             # last index
-            P = PolesSumBlock(copy(loc), [copy(W2), copy(W3), copy(W1)])
+            P = PolesSumBlock(copy(locs), [copy(W2), copy(W3), copy(W1)])
             merge_small_weight!(P, tol)
             @test locations(P) == [0, 1]
             @test weights(P) == [[4 5; 5 6], [9 9; 9 12]]
             # middle index
-            P = PolesSumBlock(copy(loc), [copy(W2), copy(W1), copy(W3)])
+            P = PolesSumBlock(copy(locs), [copy(W2), copy(W1), copy(W3)])
             merge_small_weight!(P, tol)
             @test locations(P) == [0, 4]
             @test weights(P) == [[5.5 5.75; 5.75 8.25], [7.5 8.25; 8.25 9.75]]
@@ -311,18 +311,18 @@ using Test
         end  # to_grid
 
         @testset "weight" begin
-            loc = 0:1
-            wgt = [[1 2; 2 1], [3 4; 4 3]]
-            P = PolesSumBlock(loc, wgt)
-            @test weight(P, 1) == wgt[1]
-            @test weight(P, 2) == wgt[2]
+            locs = 0:1
+            wgts = [[1 2; 2 1], [3 4; 4 3]]
+            P = PolesSumBlock(locs, wgts)
+            @test weight(P, 1) == wgts[1]
+            @test weight(P, 2) == wgts[2]
         end # weight
 
         @testset "weights" begin
-            loc = 0:1
-            wgt = [[1 2; 2 1], [3 4; 4 3]]
-            P = PolesSumBlock(loc, wgt)
-            @test weights(P) == wgt
+            locs = 0:1
+            wgts = [[1 2; 2 1], [3 4; 4 3]]
+            P = PolesSumBlock(locs, wgts)
+            @test weights(P) == wgts
         end # weights
     end # custom functions
 
@@ -413,9 +413,9 @@ using Test
         end # show
 
         @testset "sort!" begin
-            loc = [2, 1]
-            wgt = [[1 0; 0 1], [2 1; 1 0]]
-            P = PolesSumBlock(loc, wgt)
+            locs = [2, 1]
+            wgts = [[1 0; 0 1], [2 1; 1 0]]
+            P = PolesSumBlock(locs, wgts)
             @test locations(P) == [1, 2]
             @test weights(P) == [[2 1; 1 0], [1 0; 0 1]]
         end # sort!

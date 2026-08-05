@@ -101,10 +101,10 @@ function self_energy_IFG(C::PolesSumBlock, block::Int = 1)
     H = arrowhead_matrix(P)
     H[1:(n ÷ 2), 1:(n ÷ 2)] = A1
     F = eigen!(H)
-    loc = F.values
+    locs = F.values
     B = view(F.vectors, 1:(n ÷ 2), 1:size(H, 2)) # column vectors b_i
     amp = B0 * B
-    P = PolesSumBlock(loc, amp)
+    P = PolesSumBlock(locs, amp)
     merge_degenerate_poles!(P, zero(real(T)))
 
     return P

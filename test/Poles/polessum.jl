@@ -6,12 +6,12 @@ using Test
 @testset "PolesSum" begin
     @testset "constructor" begin
         @testset "inner constructor" begin
-            loc = [0, 1]
-            wgt = [2, 3]
-            P = PolesSum{Int, Int}(loc, wgt)
+            locs = [0, 1]
+            wgts = [2, 3]
+            P = PolesSum{Int, Int}(locs, wgts)
             @test P isa PolesSum{Int, Int}
-            @test P.locations === loc
-            @test P.weights === wgt
+            @test P.locations === locs
+            @test P.weights === wgts
             # length mismatch
             @test_throws DimensionMismatch PolesSum{Int, Int}(rand(3), rand(4))
             @test_throws DimensionMismatch PolesSum{Int, Int}(rand(4), rand(3))
@@ -20,29 +20,29 @@ using Test
 
         @testset "outer constructors" begin
             # canonical form
-            loc = [0, 1]
-            wgt = [2, 3]
-            P = PolesSum(loc, wgt)
-            @test P.locations == loc
-            @test P.locations !== loc
-            @test P.weights == wgt
-            @test P.weights !== wgt
+            locs = [0, 1]
+            wgts = [2, 3]
+            P = PolesSum(locs, wgts)
+            @test P.locations == locs
+            @test P.locations !== locs
+            @test P.weights == wgts
+            @test P.weights !== wgts
 
             # sort and merge degenerate poles
-            loc = [0, 1, 0]
-            wgt = [2, 3, 4]
-            P = PolesSum(loc, wgt)
+            locs = [0, 1, 0]
+            wgts = [2, 3, 4]
+            P = PolesSum(locs, wgts)
             @test P.locations == [0, 1]
             @test P.weights == [6, 3]
 
             # conversion of type
-            loc = [0, 1]
-            wgt = [2, 3]
-            P = PolesSum(loc, wgt)
+            locs = [0, 1]
+            wgts = [2, 3]
+            P = PolesSum(locs, wgts)
             P_new = PolesSum{UInt, Float64}(P)
             @test P_new isa PolesSum{UInt, Float64}
-            @test P_new.locations == loc
-            @test P_new.weights == wgt
+            @test P_new.locations == locs
+            @test P_new.weights == wgts
         end # outer constructors
     end # constructor
 
@@ -61,9 +61,9 @@ using Test
         end # add_pole_at_zero!
 
         @testset "amplitude" begin
-            loc = 0:5
-            wgt = 5:10
-            P = PolesSum(loc, wgt)
+            locs = 0:5
+            wgts = 5:10
+            P = PolesSum(locs, wgts)
             @test_throws BoundsError amplitude(P, 0)
             @test amplitude(P, 1) == sqrt(5)
             @test amplitude(P, 2) == sqrt(6)
@@ -74,28 +74,28 @@ using Test
             @test_throws BoundsError amplitude(P, 7)
 
             # complex weight
-            loc = [1]
-            wgt = [5 + 3im]
-            P = PolesSum(loc, wgt)
+            locs = [1]
+            wgts = [5 + 3im]
+            P = PolesSum(locs, wgts)
             @test_throws DomainError amplitude(P, 1)
         end # amplitude
 
         @testset "amplitudes" begin
-            loc = 0:5
-            wgt = 5:10
-            P = PolesSum(loc, wgt)
+            locs = 0:5
+            wgts = 5:10
+            P = PolesSum(locs, wgts)
             @test amplitudes(P) == sqrt.(5:10)
             # errors
-            P = PolesSum(loc, -wgt)
+            P = PolesSum(locs, -wgts)
             @test_throws DomainError amplitudes(P)
-            P = PolesSum(loc, rand(ComplexF64, 6))
+            P = PolesSum(locs, rand(ComplexF64, 6))
             @test_throws DomainError amplitudes(P)
         end # amplitudes
 
         @testset "evaluate_gaussian" begin
-            loc = [0.1, 0.2]
-            wgt = [0.01, 0.09]
-            P = PolesSum(loc, wgt)
+            locs = [0.1, 0.2]
+            wgts = [0.01, 0.09]
+            P = PolesSum(locs, wgts)
             # single point
             ω = 0.15
             σ = 0.04
@@ -114,9 +114,9 @@ using Test
         end # evaluate_gaussian
 
         @testset "evaluate_lorentzian" begin
-            loc = 1.0:10
-            wgt = abs2.(0.1:0.1:1)
-            P = PolesSum(loc, wgt)
+            locs = 1.0:10
+            wgts = abs2.(0.1:0.1:1)
+            P = PolesSum(locs, wgts)
             # single point
             @test evaluate_lorentzian(P, 10, 1) ≈ 0.9853493892744969 - 1.619653515362841im atol =
                 10 * eps()
@@ -126,9 +126,9 @@ using Test
         end # evaluate_lorentzian
 
         @testset "filling" begin
-            loc = -1:1
-            wgt = 4:6
-            P = PolesSum(loc, wgt)
+            locs = -1:1
+            wgts = 4:6
+            P = PolesSum(locs, wgts)
             @test filling(P) === 6.5
             @test filling(P, -Inf) === 0.0
             @test filling(P, -1.1) === 0.0
@@ -224,52 +224,52 @@ using Test
 
         @testset "merge_negative_weight!" begin
             # equidistant grid
-            loc = [-0.5, 0.5, 1.5]
-            wgt = [1.5, -0.5, 5.0]
-            P = PolesSum(loc, wgt)
+            locs = [-0.5, 0.5, 1.5]
+            wgts = [1.5, -0.5, 5.0]
+            P = PolesSum(locs, wgts)
             @test merge_negative_weight!(P) === P
             @test locations(P) == [-0.5, 1.5]
             @test weights(P) == [1.25, 4.75]
 
             # not equidistant grid
-            loc = [-0.5, 0.0, 1.5]
-            wgt = [1.5, -0.5, 5.0]
-            P = merge_negative_weight!(PolesSum(loc, wgt))
+            locs = [-0.5, 0.0, 1.5]
+            wgts = [1.5, -0.5, 5.0]
+            P = merge_negative_weight!(PolesSum(locs, wgts))
             @test locations(P) == [-0.5, 1.5]
             @test weights(P) == [1.125, 4.875]
 
             # first pole negative
-            loc = [0.0, 1.0, 5.0]
-            wgt = [-1.0, 0.5, 2.25]
-            P = merge_negative_weight!(PolesSum(loc, wgt))
+            locs = [0.0, 1.0, 5.0]
+            wgts = [-1.0, 0.5, 2.25]
+            P = merge_negative_weight!(PolesSum(locs, wgts))
             @test locations(P) == [5.0]
             @test weights(P) == [1.75]
 
             # last pole negative
-            loc = [0.0, 1.0, 5.0]
-            wgt = [2.25, 0.5, -1.0]
-            P = merge_negative_weight!(PolesSum(loc, wgt))
+            locs = [0.0, 1.0, 5.0]
+            wgts = [2.25, 0.5, -1.0]
+            P = merge_negative_weight!(PolesSum(locs, wgts))
             @test locations(P) == [0.0]
             @test weights(P) == [1.75]
 
             # total weight zero
-            loc = [0.0, 1.0, 5.0]
-            wgt = [-1.0, 0.5, 0.5]
-            P = merge_negative_weight!(PolesSum(loc, wgt))
+            locs = [0.0, 1.0, 5.0]
+            wgts = [-1.0, 0.5, 0.5]
+            P = merge_negative_weight!(PolesSum(locs, wgts))
             @test locations(P) == Float64[]
             @test weights(P) == Float64[]
 
             # symmetric case
-            loc = [-2.0, -0.5, 0.0, 0.5, 2.0]
-            wgt = [4.0, -2.0, 1.0, -2.0, 4.0]
-            P = merge_negative_weight!(PolesSum(loc, wgt))
+            locs = [-2.0, -0.5, 0.0, 0.5, 2.0]
+            wgts = [4.0, -2.0, 1.0, -2.0, 4.0]
+            P = merge_negative_weight!(PolesSum(locs, wgts))
             @test locations(P) == [-2.0, 2.0]
             @test weights(P) == [2.5, 2.5]
 
             # previous pole would get negative weight
-            loc = [-1.0, -0.5, 0.0, 1.5]
-            wgt = [2.0, 1.5, -2.5, 5.0]
-            P = merge_negative_weight!(PolesSum(loc, wgt))
+            locs = [-1.0, -0.5, 0.0, 1.5]
+            wgts = [2.0, 1.5, -2.5, 5.0]
+            P = merge_negative_weight!(PolesSum(locs, wgts))
             @test locations(P) == [-1.0, 1.5]
             @test weights(P) == [1.7, 4.3]
         end # merge_negative_weight!
@@ -325,13 +325,13 @@ using Test
             @test locations(P) == [2, 4]
             @test weights(P) == [7, 9]
             # pole at origin
-            loc = [-1, 0, 1]
-            wgt = [2, 0, 0]
-            P = PolesSum(copy(loc), copy(wgt))
+            locs = [-1, 0, 1]
+            wgts = [2, 0, 0]
+            P = PolesSum(copy(locs), copy(wgts))
             remove_zero_weight!(P)
             @test locations(P) == [-1]
             @test weights(P) == [2]
-            P = PolesSum(copy(loc), copy(wgt))
+            P = PolesSum(copy(locs), copy(wgts))
             remove_zero_weight!(P, false)
             @test locations(P) == [-1, 0]
             @test weights(P) == [2, 0]
@@ -357,8 +357,8 @@ using Test
         @testset "spectral_function_loggauss" begin
             Λ = 1.2
             N = 150
-            loc = grid_log(1, Λ, N)
-            grid = [-reverse(loc); 0; loc]
+            locs = grid_log(1, Λ, N)
+            grid = [-reverse(locs); 0; locs]
             G = greens_function_bethe_grid(grid)
             W = range(-2; stop = 2, length = 4000) # exclude ω == 0
             P = spectral_function_loggaussian(G, W, 0.2)
@@ -450,9 +450,9 @@ using Test
         end # convert
 
         @testset "copy" begin
-            loc = 1:5
-            wgt = 6:10
-            P = PolesSum(loc, wgt)
+            locs = 1:5
+            wgts = 6:10
+            P = PolesSum(locs, wgts)
             foo = copy(P)
             @test typeof(foo) === typeof(P)
             @test locations(foo) !== locations(P)
@@ -539,9 +539,9 @@ using Test
         end # show
 
         @testset "sort!" begin
-            loc = [2, 1]
-            wgt = [9, 16]
-            P = PolesSum(loc, wgt)
+            locs = [2, 1]
+            wgts = [9, 16]
+            P = PolesSum(locs, wgts)
             @test locations(P) == [1, 2]
             @test weights(P) == [16, 9]
         end # sort!

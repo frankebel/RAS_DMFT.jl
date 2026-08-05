@@ -24,18 +24,18 @@ end
 
 """
     PolesContinuedFraction(
-        loc::AbstractVector{A}, amp::AbstractVector{B}, scl=one(B)
+        locs::AbstractVector{A}, amps::AbstractVector{B}, scl=one(B)
     ) where {A,B}
 
-Create a new instance of [`PolesContinuedFraction`](@ref) by supplying locations `loc`,
-amplitudes `amp`, and scale `scl`.
+Create a new instance of [`PolesContinuedFraction`](@ref) by supplying locations `locs`,
+amplitudes `amps`, and scale `scl`.
 
 By default the scale is set to ``1``.
 """
 function PolesContinuedFraction(
-        loc::AbstractVector{A}, amp::AbstractVector{B}, scl = one(B)
+        locs::AbstractVector{A}, amps::AbstractVector{B}, scl = one(B)
     ) where {A, B}
-    return PolesContinuedFraction{A, B}(loc, amp, scl)
+    return PolesContinuedFraction{A, B}(locs, amps, scl)
 end
 
 # convert type
@@ -47,9 +47,9 @@ end
 
 function evaluate_lorentzian(P::PolesContinuedFraction, ω::Real, δ::Real)
     result = zero(ComplexF64)
-    loc = Iterators.reverse(locations(P))
-    amp = Iterators.reverse(amplitudes(P))
-    for (a, b) in zip(loc, amp)
+    locs = Iterators.reverse(locations(P))
+    amps = Iterators.reverse(amplitudes(P))
+    for (a, b) in zip(locs, amps)
         result = abs2(b) / (ω + im * δ - a - result)
     end
     result = abs2(scale(P)) / (ω + im * δ - location(P, 1) - result)

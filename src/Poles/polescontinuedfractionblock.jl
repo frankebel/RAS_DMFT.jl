@@ -38,24 +38,24 @@ end
 
 """
     PolesContinuedFractionBlock(
-        loc::AbstractVector{<:AbstractMatrix{<:A}},
-        amp::AbstractVector{<:AbstractMatrix{<:B}},
+        locs::AbstractVector{<:AbstractMatrix{<:A}},
+        amps::AbstractVector{<:AbstractMatrix{<:B}},
         [scl::AbstractMatrix{<:B},]
     ) where {A,B}
 
 Create a new instance of [`PolesContinuedFractionBlock`](@ref) by supplying
-locations `loc`,
-amplitudes `amp`,
+locations `locs`,
+amplitudes `amps`,
 and scale `scl`.
 
 By default the scale is set to the identity matrix ``1``.
 """
 function PolesContinuedFractionBlock(
-        loc::AbstractVector{<:AbstractMatrix{<:A}},
-        amp::AbstractVector{<:AbstractMatrix{<:B}},
+        locs::AbstractVector{<:AbstractMatrix{<:A}},
+        amps::AbstractVector{<:AbstractMatrix{<:B}},
         scl::AbstractMatrix{<:B},
     ) where {A, B}
-    return PolesContinuedFractionBlock{A, B}(loc, amp, scl)
+    return PolesContinuedFractionBlock{A, B}(locs, amps, scl)
 end
 
 # convert type
@@ -69,17 +69,17 @@ end
 
 # scale is identity matrix
 function PolesContinuedFractionBlock(
-        loc::AbstractVector{<:AbstractMatrix{<:A}}, amp::AbstractVector{<:AbstractMatrix{<:B}}
+        locs::AbstractVector{<:AbstractMatrix{<:A}}, amps::AbstractVector{<:AbstractMatrix{<:B}}
     ) where {A, B}
-    scl = LinearAlgebra.I(size(first(loc), 1))
-    return PolesContinuedFractionBlock{A, B}(loc, amp, scl)
+    scl = LinearAlgebra.I(size(first(locs), 1))
+    return PolesContinuedFractionBlock{A, B}(locs, amps, scl)
 end
 
 function evaluate_lorentzian(P::PolesContinuedFractionBlock, ω::Real, δ::Real)
     result = zeros(ComplexF64, size(P))
-    loc = Iterators.reverse(locations(P))
-    amp = Iterators.reverse(amplitudes(P))
-    for (A, B) in zip(loc, amp)
+    locs = Iterators.reverse(locations(P))
+    amps = Iterators.reverse(amplitudes(P))
+    for (A, B) in zip(locs, amps)
         result = B * inv((ω + im * δ) * I - A - result) * B
     end
     result = scale(P) * inv((ω + im * δ) * I - location(P, 1) - result) * scale(P)

@@ -94,19 +94,19 @@ Find all `locations(P) <= 0` and merge them.
 """
 function merge_negative_locations_to_zero!(P::AbstractPolesSum)
     # get information from P
-    loc = locations(P)
-    wgt = weights(P)
-    idx_zeros = findall(<=(0), loc)
+    locs = locations(P)
+    wgts = weights(P)
+    idx_zeros = findall(<=(0), locs)
     isempty(idx_zeros) && return P
     # add up all weights
-    w0 = sum(wgt[idx_zeros])
+    w0 = sum(wgts[idx_zeros])
     i0 = popfirst!(idx_zeros)
-    loc[i0] = 0
-    wgt[i0] = w0
+    locs[i0] = 0
+    wgts[i0] = w0
     # delete degenerate locations
     for i in reverse!(idx_zeros)
-        deleteat!(loc, i)
-        deleteat!(wgt, i)
+        deleteat!(locs, i)
+        deleteat!(wgts, i)
     end
     return P
 end

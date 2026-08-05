@@ -215,18 +215,18 @@ function greens_function_local(
     all(ishermitian, H_k) || throw(ArgumentError("H_k is not Hermitian"))
 
     T = eltype(eltype(H_k)) <: Real ? Float64 : ComplexF64
-    loc = real(T)[]
-    wgt = Matrix{T}[]
+    locs = real(T)[]
+    wgts = Matrix{T}[]
     for H in H_k
         E, U = eigen(Hermitian(H))
-        append!(loc, E)
+        append!(locs, E)
         for i in axes(U, 2)
             u = view(U, :, i)
-            push!(wgt, u * u')
+            push!(wgts, u * u')
         end
     end
 
-    G_loc = PolesSumBlock(loc, wgt)
+    G_loc = PolesSumBlock(locs, wgts)
     rmul!(G_loc, inv(length(H_k))) # prefactor 1/N_k
     shift_spectrum!(G_loc, μ)
     return G_loc
@@ -274,9 +274,9 @@ function greens_function_local(
     n_k = length(H_k)
     dim = size(Σ_A, 1)
     n_p = n_k * dim # total number of poles
-    loc = Vector{real(T)}(undef, n_p)
-    amp = Matrix{T}(undef, n_b, n_p)
-    loc, amp = let loc = loc, amp = amp, Σ_A = Σ_A, n_b = n_b, dim = dim
+    locs = Vector{real(T)}(undef, n_p)
+    amps = Matrix{T}(undef, n_b, n_p)
+    locs, amps = let locs = locs, amps = amps, Σ_A = Σ_A, n_b = n_b, dim = dim
         Threads.@threads for i in eachindex(H_k)
             foo = copy(Σ_A)
             foo[1:n_b, 1:n_b] = H_k[i]
@@ -285,12 +285,12 @@ function greens_function_local(
             F = eigen!(Hermitian(foo))
             idx_low = 1 + dim * (i - 1)
             idx_high = idx_low + dim - 1
-            @inbounds loc[idx_low:idx_high] = F.values
-            @inbounds amp[:, idx_low:idx_high] = F.vectors[1:n_b, :]
+            @inbounds locs[idx_low:idx_high] = F.values
+            @inbounds amps[:, idx_low:idx_high] = F.vectors[1:n_b, :]
         end
-        loc, amp
+        locs, amps
     end
-    G = PolesSumBlock(loc, amp, tol_location)
+    G = PolesSumBlock(locs, amps, tol_location)
     rmul!(G, inv(n_k))
 
     return G
