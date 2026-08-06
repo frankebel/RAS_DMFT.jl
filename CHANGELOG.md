@@ -33,6 +33,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 
 - module `ED` ([#198](https://github.com/frankebel/RAS_DMFT.jl/pull/198)) (86ed14b)
+- finite broadening methods ([#207](https://github.com/frankebel/RAS_DMFT.jl/pull/207)) (f4b5a8d)
+  - `imagKK`
+  - `realKK`
+  - `greens_function_partial`
+  - `quasiparticle_weight_gaussian`
+  - `self_energy_IFG_gaussian`
+  - `self_energy_IFG_lorentzian`
+  - `spectral_function_loggaussian`
+  - `δ_gaussian`
 
 ### Fixed
 
