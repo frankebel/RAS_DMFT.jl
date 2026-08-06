@@ -50,7 +50,6 @@ export
     greens_function_bethe_grid_hubbard3,
     greens_function_bethe_simple,
     greens_function_local,
-    greens_function_partial,
     grid_interpolate,
     grid_log,
     ground_state!,
@@ -74,19 +73,15 @@ export
     natural_orbital_operator,
     orgtr!,
     quasiparticle_weight,
-    quasiparticle_weight_gaussian,
     read_hdf5,
     realKK,
     remove_zero_weight,
     remove_zero_weight!,
     scale,
     self_energy_IFG,
-    self_energy_IFG_gaussian,
-    self_energy_IFG_lorentzian,
     self_energy_dyson,
     shift_spectrum!,
     slater_start,
-    spectral_function_gauss,
     spectral_function_loggaussian,
     sytrd!,
     temperature_kondo,
@@ -96,8 +91,7 @@ export
     update_hybridization_function,
     weight,
     weights,
-    write_hdf5,
-    δ_gaussian
+    write_hdf5
 
 include("bits.jl")
 include("Poles/abstractpoles.jl")

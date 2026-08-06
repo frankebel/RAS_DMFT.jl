@@ -73,41 +73,6 @@ using Test
         C_plus = correlator_plus(H, ψ0, O, n_kryl)
         C_minus = correlator_minus(H, ψ0, map(adjoint, O), n_kryl)
         C = transpose(C_minus) + C_plus
-
-        # Lorentzian
-        # self-energy
-        Σ = self_energy_IFG_lorentzian(Σ_H, C, W, δ)
-        # new hybridization function
-        Δ_grid = Δ0_analytic(Z .+ μ - Σ)
-        Δ_new_L = equal_weight_discretization(-imag(Δ_grid), W, δ, n_bath)
-        @test typeof(Δ_new_L) === PolesSum{Float64, Float64}
-        @test typeof(Δ_grid) === Vector{ComplexF64}
-        @test length(Δ_new_L) === n_bath
-        @test all(b -> isapprox(b, 1 / sqrt(n_bath) / 2; rtol = 3.0e-3), amplitudes(Δ_new_L))
-        # small weight loss due to truncated interval
-        @test 0.2486 <= moment(Δ_new_L, 0) <= 0.25
-        @test moment(Δ_new_L, 1) < 200 * eps() # PHS
-
-        # Gaussian
-        # self-energy
-        Σ = self_energy_IFG_gaussian(Σ_H, C, W, δ)
-        # new hybridization function
-        Δ_grid = Δ0_analytic(Z .+ μ - Σ)
-        Δ_new_G = equal_weight_discretization(-imag(Δ_grid), real(Z), δ, n_bath)
-        @test typeof(Δ_new_G) === PolesSum{Float64, Float64}
-        @test typeof(Δ_grid) === Vector{ComplexF64}
-        @test length(Δ_new_G) === n_bath
-        weights_without_zero = copy(weights(Δ_new_G))
-        popat!(weights_without_zero, cld(n_bath, 2))
-        @test all(b -> isapprox(b, inv(4 * n_bath); atol = 2.0e-5), weights_without_zero)
-        @test weight(Δ_new_G, cld(n_bath, 2)) ≈ inv(4 * n_bath) atol = 2.0e-4
-        # small weight loss due to truncated interval
-        @test 0.2486 <= moment(Δ_new_G, 0) <= 0.25
-        @test moment(Δ_new_G, 1) < 200 * eps() # PHS
-
-        # must not be equal
-        @test locations(Δ_new_L) != locations(Δ_new_G)
-        @test amplitudes(Δ_new_L) != amplitudes(Δ_new_G)
     end # block Lanczos
 
     # Discretization for Gaussian returned wrong number of poles.

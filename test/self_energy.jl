@@ -60,16 +60,9 @@ using Test
     end # self_energy_dyson
 
     @testset "IFG" begin
-        # on the real axis
         Σ = PolesSum(self_energy_IFG(C), 1, 1)
         merge_small_weight!(Σ, tol)
         @test moment(Σ, 0) ≈ U^2 / 4 rtol = 1.0e3 * eps()
         @test moment(Σ, 1) ≈ 0 atol = 1.0e-9
-        # broadened
-        Σ_IFG_lorentz = self_energy_IFG_lorentzian(Σ_H, C, W, δ)
-        Σ_IFG_gauss = self_energy_IFG_gaussian(Σ_H, C, W, δ)
-        @test Σ_IFG_lorentz != Σ_IFG_gauss
-        @test iszero(imag(first(Σ_IFG_gauss))) # exponential decay results in zero
-        @test minimum(imag(Σ_IFG_gauss)) < minimum(imag(Σ_IFG_lorentz)) # Gauss is steeper
     end # correlator
 end # self-energy

@@ -41,8 +41,9 @@ end
 """
     self_energy_IFG(C::PolesSumBlock, block::Int = 1)
 
-Given a block sum of poles ``C``, calculate the self-energy using the Schur complement
-``Σ(ω) = I(ω) - F^\\mathrm{L}(ω) (G(ω))^{-1} F^\\mathrm{R}(ω)``.
+Given a block sum of poles ``C``, calculate the dynamic part of the self-energy
+using the Schur complement
+``Σ(z) = I(z) - F^\\mathrm{L}(z) (G(z))^{-1} F^\\mathrm{R}(z)``.
 
 The `block` argument chooses either the top left component (default `1`)
 or bottom right (`2`) component.
@@ -108,54 +109,4 @@ function self_energy_IFG(C::PolesSumBlock, block::Int = 1)
     merge_degenerate_poles!(P, zero(real(T)))
 
     return P
-end
-
-"""
-    self_energy_IFG(Σ_H::Real, C::PolesSumBlock, W, δ)
-
-Calculate self-energy as
-``Σ_z = Σ^\\mathrm{H} + I_z - F^\\mathrm{L}_z (G_z)^{-1} F^\\mathrm{R}_z``
-with Lorentzian broadening.
-
-Assumes that `C` is given as
-
-```math
-\\begin{pmatrix}
-I             & F^\\mathrm{L} \\\\
-F^\\mathrm{R} & G
-\\end{pmatrix}.
-```
-"""
-function self_energy_IFG_lorentzian(Σ_H::Real, C::PolesSumBlock, W, δ)
-    c = evaluate_lorentzian(C, W, δ)
-    I = map(c -> c[1, 1], c)
-    F_L = map(c -> c[1, 2], c)
-    F_R = map(c -> c[2, 1], c)
-    G = map(c -> c[2, 2], c)
-    return Σ_H .+ I - F_L ./ G .* F_R
-end
-
-"""
-    self_energy_IFG_gaussian(Σ_H::Real, C::PolesSumBlock, W, σ)
-
-Calculate self-energy as
-``Σ_z = Σ^\\mathrm{H} + I_z - F^\\mathrm{L}_z (G_z)^{-1} F^\\mathrm{R}_z``
-with Gaussian broadening.
-
-Assumes that `C` is given as
-
-```math
-\\begin{pmatrix}
-I             & F^\\mathrm{L} \\\\
-F^\\mathrm{R} & G
-\\end{pmatrix}.
-```
-"""
-function self_energy_IFG_gaussian(Σ_H::Real, C::PolesSumBlock, W, σ)
-    c = evaluate_gaussian(C, W, σ)
-    I = map(c -> c[1, 1], c)
-    F_L = map(c -> c[1, 2], c)
-    F_R = map(c -> c[2, 1], c)
-    G = map(c -> c[2, 2], c)
-    return Σ_H .+ I - F_L ./ G .* F_R
 end

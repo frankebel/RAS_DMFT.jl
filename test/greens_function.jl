@@ -141,22 +141,6 @@ using Test
             @test norm(weight(G0, 1) - [0.5 -0.5; -0.5 0.5]) < 2 * eps()
             @test norm(weight(G0, 2) - [0.25 0.25; 0.25 0.25]) < 2 * eps()
             @test norm(weight(G0, 3) - [0.25 0.25; 0.25 0.25]) < 2 * eps()
-
-            # finite broadening
-            G0 = greens_function_local(Z, 0, H_k)
-            @test length(G0) == 2
-            @test norm(
-                G0[1] - [
-                    -0.08948370259088873 - 0.0008516301906910084im 0.021613692792397263 + 0.0003827853135677249im
-                    0.021613692792397263 + 0.0003827853135677249im -0.08948370259088873 - 0.0008516301906910084im
-                ],
-            ) < eps()
-            @test norm(
-                G0[2] - [
-                    -0.09894651224745543 - 0.001052379439830884im 0.0260339595538256 + 0.0005098764576851289im
-                    0.0260339595538256 + 0.0005098764576851289im -0.09894651224745543 - 0.001052379439830884im
-                ],
-            ) < eps()
         end # non-interacting
 
         @testset "interacting" begin
@@ -194,43 +178,6 @@ using Test
             @test norm(moment(G, 0) - I) < 10 * eps()
             m1 = [-1 3; 3 -2]
             @test norm(moment(G, 1) - m1) < 100 * eps()
-
-            # finite broadening
-            G = greens_function_local(Z, 0, H_k, Σ)
-            @test length(G) == 2
-            @test norm(
-                G[1] - [
-                    -0.08778121899483271 - 0.0005616185151491649im 0.014949094763816347 - 0.0006950450017352803im
-                    0.014949094763816347 - 0.0006950450017352803im -0.061604402244826835 + 0.0034066891091674998im
-                ],
-            ) < eps()
-            @test norm(
-                G[2] - [
-                    -0.09626381282560724 - 0.0006774835502274772im 0.01636751358241116 - 0.0007517320959592241im
-                    0.01636751358241116 - 0.0007517320959592241im -0.06186055815770346 + 0.003430278158287015im
-                ],
-            ) < eps()
         end # interacting
-
-        @testset "partial Green's function" begin
-            G = [rand(5, 5) for _ in 1:2]
-            @test greens_function_partial(G, 1:5) == [tr(foo) for foo in G]
-            Gp = greens_function_partial(G, (1, 4))
-            @test Gp[1] == G[1][1, 1] + G[1][4, 4]
-            @test Gp[2] == G[2][1, 1] + G[2][4, 4]
-        end # partial Green's function
-
-        @testset "spectrum Gauss" begin
-            W = [-1, 1]
-            A = spectral_function_gauss(W, 0, H_k, 0.05)
-            @test typeof(A) === Vector{Matrix{Float64}}
-            @test norm(
-                A[1] - [
-                    3.989422804014326 -3.989422804014326
-                    -3.989422804014326 3.989422804014326
-                ],
-            ) < eps()
-            @test iszero(A[2])
-        end # spectrum Gauss
     end # user supplied dispersion
 end # Green's function
