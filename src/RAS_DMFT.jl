@@ -58,7 +58,6 @@ export
     hybridization_function_bethe_grid,
     hybridization_function_bethe_grid_hubbard3,
     hybridization_function_bethe_simple,
-    imagKK,
     init_system,
     location,
     locations,
@@ -74,7 +73,6 @@ export
     orgtr!,
     quasiparticle_weight,
     read_hdf5,
-    realKK,
     remove_zero_weight,
     remove_zero_weight!,
     scale,
@@ -106,7 +104,6 @@ include("io.jl")
 include("sytrd.jl")
 include("natural_orbitals.jl")
 include("wavefunctions.jl")
-include("kramers_kronig.jl")
 include("grid.jl")
 include("orthogonalization.jl")
 include("utility.jl")
