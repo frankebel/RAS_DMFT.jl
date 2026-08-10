@@ -13,11 +13,11 @@ function _with_blas_threads(f, t::Int = 1)
 end
 
 """
-    get_CI_parameters(n_sites::Int, n_occ::Int, n_v_bit::Int, n_c_bit::Int)
+    get_RAS_parameters(n_sites::Int, n_occ::Int, n_v_bit::Int, n_c_bit::Int)
 
 Return `n_bit`, `n_v_vector`, `n_c_vector`.
 """
-function get_CI_parameters(n_sites::Int, n_occ::Int, n_v_bit::Int, n_c_bit::Int)
+function get_RAS_parameters(n_sites::Int, n_occ::Int, n_v_bit::Int, n_c_bit::Int)
     n_bit = 2 + n_v_bit + n_c_bit
     n_emp = n_sites - n_occ
     n_v_vector = n_occ - 1 - n_v_bit
@@ -38,10 +38,10 @@ function init_system(
     arr = arrowhead_matrix(Δ)
     n_sites = size(arr, 1)
     H_nat, n_occ = to_natural_orbitals(arr)
-    n_bit, V_v, V_c = get_CI_parameters(n_sites, n_occ, L_c, L_v)
+    n_bit, V_v, V_c = get_RAS_parameters(n_sites, n_occ, L_c, L_v)
     fs = FockSpace(Orbitals(n_bit), FermionicSpin(1 // 2))
     H = natural_orbital_ci_operator(H_nat, H_int, ϵ_imp, fs, n_occ, L_v, L_c, p)
-    ψ_start = CIWavefunction_singlet(Dict{UInt64, Float64}, L_v, L_c, V_v, V_c, p)
+    ψ_start = RASWavefunction_singlet(Dict{UInt64, Float64}, L_v, L_c, V_v, V_c, p)
     E0, ψ0 = ground_state!(H, ψ_start, 5, typemax(Int), var)
     return H, E0, ψ0
 end

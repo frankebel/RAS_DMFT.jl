@@ -7,18 +7,18 @@ using Random
 using Test
 
 @testset "util" begin
-    @testset "get_CI_parameters" begin
-        @test get_CI_parameters(10, 5, 1, 1) == (4, 3, 3)
-        @test get_CI_parameters(10, 6, 1, 1) == (4, 4, 2)
-        @test get_CI_parameters(10, 4, 1, 1) == (4, 2, 4)
-        @test get_CI_parameters(10, 5, 2, 1) == (5, 2, 3)
-        @test get_CI_parameters(10, 5, 1, 2) == (5, 3, 2)
-        @test get_CI_parameters(10, 6, 2, 1) == (5, 3, 2)
-        @test get_CI_parameters(10, 4, 1, 2) == (5, 2, 3)
+    @testset "get_RAS_parameters" begin
+        @test get_RAS_parameters(10, 5, 1, 1) == (4, 3, 3)
+        @test get_RAS_parameters(10, 6, 1, 1) == (4, 4, 2)
+        @test get_RAS_parameters(10, 4, 1, 1) == (4, 2, 4)
+        @test get_RAS_parameters(10, 5, 2, 1) == (5, 2, 3)
+        @test get_RAS_parameters(10, 5, 1, 2) == (5, 3, 2)
+        @test get_RAS_parameters(10, 6, 2, 1) == (5, 3, 2)
+        @test get_RAS_parameters(10, 4, 1, 2) == (5, 2, 3)
         # non-sensical input values still work
-        @test get_CI_parameters(10, 10, 1, 1) == (4, 8, -2)
-        @test get_CI_parameters(10, 0, 1, 1) == (4, -2, 8)
-    end # get_CI_parameters
+        @test get_RAS_parameters(10, 10, 1, 1) == (4, 8, -2)
+        @test get_RAS_parameters(10, 0, 1, 1) == (4, -2, 8)
+    end # get_RAS_parameters
 
     @testset "init_system" begin
         # parameters

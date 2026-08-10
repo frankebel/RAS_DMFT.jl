@@ -1,7 +1,7 @@
 """
     block_lanczos(
-        H::CIOperator, W::AbstractMatrix{<:CWF}, n_kryl::Int
-    ) where {CWF<:CIWavefunction}
+        H::RASOperator, W::AbstractMatrix{<:WF}, n_kryl::Int
+    ) where {WF<:RASWavefunction}
 
 
 Block Lanczos algorithm for given operator `H`, states in `W` and `n_kryl` Krylov cycles.
@@ -9,14 +9,14 @@ Block Lanczos algorithm for given operator `H`, states in `W` and `n_kryl` Krylo
 Returns main diagonal `A` and subdiagonal `B`.
 """
 function block_lanczos(
-        H::CIOperator, Q1::AbstractMatrix{<:CWF}, N::Integer
-    ) where {CWF <: CIWavefunction}
+        H::RASOperator, Q1::AbstractMatrix{<:WF}, N::Integer
+    ) where {WF <: RASWavefunction}
     foo, q = size(Q1)
     isone(foo) || throw(ArgumentError("input matrix must have 1 row"))
     A = Vector{Matrix{Float64}}(undef, N)
     B = Vector{Matrix{Float64}}(undef, N - 1)
     N >= 1 || throw(ArgumentError("N must be >= 1"))
-    T = scalartype(CWF)
+    T = scalartype(WF)
     Q_curr = deepcopy(Q1)
     Q_new = similar(Q1)
     Q_old = similar(Q1)

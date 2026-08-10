@@ -3,13 +3,13 @@
 """
     mask_fe(slaterdet::Type{<:Unsigned}, nbit::Int, nfilled::Int, nempty::Int)
 
-Return masks of filled/empty sites in vector of `CIWavefunction`.
+Return masks of filled/empty sites in vector of `RASWavefunction`.
 
 # Arguments
 - `slaterdet`: Type of the mask.
-- `nbit`: Number of sites in bit component of `CIWavefunction`.
-- `nfilled`: Number of filled sites in vector of `CIWavefunction`.
-- `nempty`: Number of empty sites in vector of `CIWavefunction`.
+- `nbit`: Number of sites in bit component of `RASWavefunction`.
+- `nfilled`: Number of filled sites in vector of `RASWavefunction`.
+- `nempty`: Number of empty sites in vector of `RASWavefunction`.
 """
 function mask_fe(slaterdet::Type{<:Unsigned}, nbit::Int, nfilled::Int, nempty::Int)
     # test input

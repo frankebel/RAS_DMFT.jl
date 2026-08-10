@@ -1,7 +1,7 @@
 """
     correlator(
-        H::CIOperator, E0::Real, ψ0::CI, O::Operator, n_kryl::Int
-    ) where {CI<:CIWavefunction}
+        H::RASOperator, ψ0::RASWavefunction, O::Operator, n_kryl::Int
+    )
 
 Calculate the correlator
 
@@ -10,8 +10,8 @@ C(ω) = \\left⟨ ψ_0 O^† \\frac{1}{ω - H} O ψ_0 \\right⟩.
 ```
 """
 function correlator(
-        H::CIOperator, ψ0::CI, O::Operator, n_kryl::Int
-    ) where {CI <: CIWavefunction}
+        H::RASOperator, ψ0::RASWavefunction, O::Operator, n_kryl::Int
+    )
     v = O * ψ0
     scale = norm(v)
     rmul!(v, inv(scale))
@@ -28,8 +28,8 @@ end
 
 """
     correlator(
-        H::CIOperator, ψ0::CI, O::AbstractVector{<:Operator}, n_kryl::Int
-    ) where {CI<:CIWavefunction}
+        H::RASOperator, ψ0::RASWavefunction, O::AbstractVector{<:Operator}, n_kryl::Int
+    )
 
 Calculate the block correlator
 
@@ -38,9 +38,9 @@ C(ω) = \\left⟨ ψ_0 O^† \\frac{1}{ω - H} O ψ_0 \\right⟩.
 ```
 """
 function correlator(
-        H::CIOperator, ψ0::CI, O::AbstractVector{<:Operator}, n_kryl::Int
-    ) where {CI <: CIWavefunction}
-    V = Matrix{CI}(undef, 1, length(O)) # 1×n matrix
+        H::RASOperator, ψ0::RASWavefunction, O::AbstractVector{<:Operator}, n_kryl::Int
+    )
+    V = Matrix{typeof(ψ0)}(undef, 1, length(O)) # 1×n matrix
     for i in eachindex(V)
         V[i] = O[i] * ψ0
     end
@@ -54,8 +54,8 @@ end
 
 """
     correlator_plus(
-        H::CIOperator, ψ0::CI, O::Operator, n_kryl::Int
-    ) where {CI<:CIWavefunction}
+        H::RASOperator, ψ0::RASWavefunction, O::Operator, n_kryl::Int
+    )
 
 Calculate the positive spectrum of the correlator.
 
@@ -66,8 +66,8 @@ C^+(ω) = \\left⟨ ψ_0 O^† \\frac{1}{ω - H} O ψ_0 \\right⟩
 See also [`correlator_minus`](@ref).
 """
 function correlator_plus(
-        H::CIOperator, ψ0::CI, O::Operator, n_kryl::Int
-    ) where {CI <: CIWavefunction}
+        H::RASOperator, ψ0::RASWavefunction, O::Operator, n_kryl::Int
+    )
     C = correlator(H, ψ0, O, n_kryl)
 
     # poles at negative locatiions (never happens on exact arithmetic)
@@ -83,8 +83,8 @@ end
 
 """
     correlator_plus(
-        H::CIOperator, ψ0::CI, O::AbstractVector{<:Operator}, n_kryl::Int
-    ) where {CI<:CIWavefunction}
+        H::RASOperator, ψ0::RASWavefunction, O::AbstractVector{<:Operator}, n_kryl::Int
+    )
 
 Calculate the positive spectrum of the block correlator.
 
@@ -95,8 +95,8 @@ C^+(ω) = \\left⟨ ψ_0 O^† \\frac{1}{ω - H} O ψ_0 \\right⟩
 See also [`correlator_minus`](@ref).
 """
 function correlator_plus(
-        H::CIOperator, ψ0::CI, O::AbstractVector{<:Operator}, n_kryl::Int
-    ) where {CI <: CIWavefunction}
+        H::RASOperator, ψ0::RASWavefunction, O::AbstractVector{<:Operator}, n_kryl::Int
+    )
     C = correlator(H, ψ0, O, n_kryl)
 
     # poles at negative energies (never happens on exact arithmetic)
@@ -111,8 +111,8 @@ end
 
 """
     correlator_minus(
-        H::CIOperator, ψ0::CI, O::Operator, n_kryl::Int
-    ) where {CI<:CIWavefunction}
+        H::RASOperator, ψ0::RASWavefunction, O::Operator, n_kryl::Int
+    )
 
 Calculate the negative spectrum of the correlator.
 
@@ -123,8 +123,8 @@ C^-(ω) = \\left⟨ ψ_0 O^† \\frac{1}{ω + H} O ψ_0 \\right⟩
 See also [`correlator_plus`](@ref).
 """
 function correlator_minus(
-        H::CIOperator, ψ0::CI, O::Operator, n_kryl::Int
-    ) where {CI <: CIWavefunction}
+        H::RASOperator, ψ0::RASWavefunction, O::Operator, n_kryl::Int
+    )
     C = correlator(H, ψ0, O, n_kryl)
 
     map!(-, locations(C)) # flip sign of eigenvalues
@@ -143,8 +143,8 @@ end
 
 """
     correlator_minus(
-        H::CIOperator, ψ0::CI, O::AbstractVector{<:Operator}, n_kryl::Int
-    ) where {CI<:CIWavefunction}
+        H::RASOperator, ψ0::RASWavefunction, O::AbstractVector{<:Operator}, n_kryl::Int
+    )
 
 Calculate the negative spectrum of the block correlator.
 
@@ -155,8 +155,8 @@ C^+(ω) = \\left⟨ ψ_0 O^† \\frac{1}{ω + H} O ψ_0 \\right⟩
 See also [`correlator_minus`](@ref).
 """
 function correlator_minus(
-        H::CIOperator, ψ0::CI, O::AbstractVector{<:Operator}, n_kryl::Int
-    ) where {CI <: CIWavefunction}
+        H::RASOperator, ψ0::RASWavefunction, O::AbstractVector{<:Operator}, n_kryl::Int
+    )
     C = correlator(H, ψ0, O, n_kryl)
 
     map!(-, locations(C)) # flip sign of eigenvalues

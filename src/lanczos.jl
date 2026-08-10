@@ -1,12 +1,12 @@
 """
     lanczos!(
-        states::Vector{CWF},
+        states::Vector{WF},
         a::Vector{Float64},
         b::Vector{Float64},
-        H::CIOperator,
-        q::CWF,
+        H::RASOperator,
+        q::WF,
         M::Integer,
-    ) where {CWF<:CIWavefunction}
+    ) where {WF<:RASWavefunction}
 
 Calculate `M` Lanczos steps
 storing coefficients in `a`, `b` and intermediate states in `states`.
@@ -14,11 +14,11 @@ storing coefficients in `a`, `b` and intermediate states in `states`.
 function lanczos!(
         a::Vector{Float64},
         b::Vector{Float64},
-        states::Vector{CWF},
-        H::CIOperator,
-        q::CWF,
+        states::Vector{WF},
+        H::RASOperator,
+        q::WF,
         M::Integer,
-    ) where {CWF <: CIWavefunction}
+    ) where {WF <: RASWavefunction}
     # check input
     length(states) == M + 1 || throw(ArgumentError("length of states must be M+1")) # need space for one more
     length(a) == M || throw(ArgumentError("length of a must be M-1"))

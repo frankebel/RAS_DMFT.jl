@@ -6,8 +6,8 @@ using Test
 @testset "orthogonalization" begin
     @testset "_orthonormalize_SVD" begin
         # in-place
-        q1 = CIWavefunction(Dict(zero(UInt8) => rand(5), one(UInt8) => rand(5)), 4, 1, 1, 1)
-        q2 = CIWavefunction(Dict(zero(UInt8) => rand(5)), 4, 1, 1, 1)
+        q1 = RASWavefunction(Dict(zero(UInt8) => rand(5), one(UInt8) => rand(5)), 4, 1, 1, 1)
+        q2 = RASWavefunction(Dict(zero(UInt8) => rand(5)), 4, 1, 1, 1)
         Q = [q1 q2]
         Q_new = similar(Q)
         S_sqrt = Matrix{Float64}(undef, 2, 2)
@@ -34,9 +34,9 @@ using Test
         @test norm(Q - Q_new * S_sqrt) < 100 * eps() # Q = Q_new * S^{1/2}
         @test ishermitian(S_sqrt)
 
-        # CIWavefunction
-        q1 = CIWavefunction(Dict(zero(UInt8) => rand(5), one(UInt8) => rand(5)), 4, 1, 1, 1)
-        v2 = CIWavefunction(Dict(zero(UInt8) => rand(5)), 4, 1, 1, 1)
+        # RASWavefunction
+        q1 = RASWavefunction(Dict(zero(UInt8) => rand(5), one(UInt8) => rand(5)), 4, 1, 1, 1)
+        v2 = RASWavefunction(Dict(zero(UInt8) => rand(5)), 4, 1, 1, 1)
         Q = [q1 v2]
         @inferred RAS_DMFT._orthonormalize_SVD(Q)
         Q_new, S_sqrt = RAS_DMFT._orthonormalize_SVD(Q)

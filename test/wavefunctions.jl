@@ -15,34 +15,34 @@ using Test
         @test ψ == ϕ
     end # Wavefunction_singlet
 
-    @testset "CIWavefunction_singlet" begin
+    @testset "RASWavefunction_singlet" begin
         # excitation = 0
-        ψ = CIWavefunction_singlet(Dict{UInt64, Float64}, 1, 2, 3, 4, 0)
+        ψ = RASWavefunction_singlet(Dict{UInt64, Float64}, 1, 2, 3, 4, 0)
         # vectors must be the equal but no egal
         foo = collect(values(ψ))
         @test foo[1] == foo[2]
         @test foo[1] !== foo[2]
         v = [1 / sqrt(2)]
         d = Dict(UInt64(0b00_1_01_00_1_10) => copy(v), UInt64(0b00_1_10_00_1_01) => copy(v))
-        ϕ = CIWavefunction(d, 5, 3, 4, 0)
+        ϕ = RASWavefunction(d, 5, 3, 4, 0)
         @test ψ == ϕ
 
         # excitation = 1
-        ψ = CIWavefunction_singlet(Dict{UInt64, Float64}, 1, 2, 3, 4, 1)
+        ψ = RASWavefunction_singlet(Dict{UInt64, Float64}, 1, 2, 3, 4, 1)
         v = zeros(1 + 2 * (3 + 4))
         v[1] = 1 / sqrt(2)
         d = Dict(UInt64(0b00_1_01_00_1_10) => copy(v), UInt64(0b00_1_10_00_1_01) => copy(v))
-        ϕ = CIWavefunction(d, 5, 3, 4, 1)
+        ϕ = RASWavefunction(d, 5, 3, 4, 1)
         @test ψ == ϕ
 
         # excitation = 2
-        ψ = CIWavefunction_singlet(Dict{UInt64, Float64}, 1, 2, 3, 4, 2)
+        ψ = RASWavefunction_singlet(Dict{UInt64, Float64}, 1, 2, 3, 4, 2)
         v = zeros(1 + 14 + 14 * 13 ÷ 2)
         v[1] = 1 / sqrt(2)
         d = Dict(UInt64(0b00_1_01_00_1_10) => copy(v), UInt64(0b00_1_10_00_1_01) => copy(v))
-        ϕ = CIWavefunction(d, 5, 3, 4, 2)
+        ϕ = RASWavefunction(d, 5, 3, 4, 2)
         @test ψ == ϕ
-    end # CIWavefunction_singlet
+    end # RASWavefunction_singlet
 
     @testset "ground state" begin
         # parameters
@@ -57,14 +57,14 @@ using Test
 
         Δ = hybridization_function_bethe_simple(n_bath)
         H_nat, n_occ = to_natural_orbitals(arrowhead_matrix(Δ))
-        n_bit, V_v, V_c = get_CI_parameters(n_sites, n_occ, L_c, L_v)
+        n_bit, V_v, V_c = get_RAS_parameters(n_sites, n_occ, L_c, L_v)
 
-        # CIWavefunction
+        # RASWavefunction
         fs = FockSpace(Orbitals(n_bit), FermionicSpin(1 // 2))
         n = occupations(fs)
         H_int = U * n[1, -1 // 2] * n[1, 1 // 2]
         H = natural_orbital_ci_operator(H_nat, H_int, -μ, fs, n_occ, L_v, L_c, p)
-        ψ_start = CIWavefunction_singlet(Dict{UInt64, Float64}, L_v, L_c, V_v, V_c, p)
+        ψ_start = RASWavefunction_singlet(Dict{UInt64, Float64}, L_v, L_c, V_v, V_c, p)
 
         # 10 steps total
         E0, ψ0 = ground_state!(H, ψ_start, n_kryl, 10, 0)

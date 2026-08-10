@@ -213,7 +213,7 @@ end
     ) where {T<:Real}
 
 
-Convert natural orbital Hamiltonian `H_nat` to `CIOperator`.
+Convert natural orbital Hamiltonian `H_nat` to `RASOperator`.
 
 # Arguments
 - `H_nat::Matrix{T}`: natural orbital Hamiltonian
@@ -225,7 +225,7 @@ Convert natural orbital Hamiltonian `H_nat` to `CIOperator`.
 - `n_c_bit::Int=1`: number of conduction bath sites in bit component
 - `excitation::Int=1`: maximum excitation in bit component
 
-See also `CIOperator`.
+See also `RASOperator`.
 """
 function natural_orbital_ci_operator(
         H_nat::Matrix{T},
@@ -325,7 +325,7 @@ function natural_orbital_ci_operator(
         (2 + n_v_bit + n_c_bit, n_v_vector + 1, foo[n_occ + n_c_bit + 1]),
     )
 
-    return CIOperator(H_bit, mixed, esite, ehop, n_bit, n_v_vector, n_c_vector, excitation)
+    return RASOperator(H_bit, mixed, esite, ehop, n_bit, n_v_vector, n_c_vector, excitation)
 end
 
 # Same as `natural_orbital_operator` but with `n_v_bit === n_c_bit === 0`.
@@ -377,5 +377,5 @@ function _natural_orbital_ci_operator_zero(
         (2, n_v_vector + 1, H_nat[n_occ + 1, n_occ + 2]), # b <-> c1
     )
 
-    return CIOperator(H_bit, mixed, esite, ehop, n_bit, n_v_vector, n_c_vector, excitation)
+    return RASOperator(H_bit, mixed, esite, ehop, n_bit, n_v_vector, n_c_vector, excitation)
 end

@@ -200,7 +200,7 @@ using Test
             )
         end # Operator
 
-        @testset "CIOperator" begin
+        @testset "RASOperator" begin
             # some sites of each chain in bit component
             fs = FockSpace(Orbitals(4), FermionicSpin(1 // 2))
             n = occupations(fs)
@@ -248,7 +248,7 @@ using Test
                 23 * c[4, -1 // 2]' * c[2, -1 // 2] +
                 23 * c[2, 1 // 2]' * c[4, 1 // 2] +
                 23 * c[4, 1 // 2]' * c[2, 1 // 2]
-            H_mix = CIOperatorMixed{UInt64, Int}[]
+            H_mix = RASOperatorMixed{UInt64, Int}[]
             @test H1.opbit == H_bit
             @test H1.opmix == H_mix
             @test H1.zero == 2 * 15
@@ -266,14 +266,14 @@ using Test
             H1 = natural_orbital_ci_operator(H_nat1, H_int, -μ, fs, n_occ, 1, 1, 1)
             H2 = natural_orbital_ci_operator(H_nat2, H_int, -μ, fs, n_occ, 1, 1, 1)
             H_mix = [
-                CIOperatorMixed(only((9 * c[3, -1 // 2]').terms), 0x0000000000000008, 1, 2),
-                CIOperatorMixed(only((9 * c[3, -1 // 2]).terms), 0x0000000000000008, 2, 1),
-                CIOperatorMixed(only((9 * c[3, 1 // 2]').terms), 0x0000000000000080, 1, 4),
-                CIOperatorMixed(only((9 * c[3, 1 // 2]).terms), 0x0000000000000080, 4, 1),
-                CIOperatorMixed(only((-30 * c[4, -1 // 2]').terms), 0x0000000000000000, 3, 1),
-                CIOperatorMixed(only((-30 * c[4, -1 // 2]).terms), 0x0000000000000000, 1, 3),
-                CIOperatorMixed(only((-30 * c[4, 1 // 2]').terms), 0x0000000000000000, 5, 1),
-                CIOperatorMixed(only((-30 * c[4, 1 // 2]).terms), 0x0000000000000000, 1, 5),
+                RASOperatorMixed(only((9 * c[3, -1 // 2]').terms), 0x0000000000000008, 1, 2),
+                RASOperatorMixed(only((9 * c[3, -1 // 2]).terms), 0x0000000000000008, 2, 1),
+                RASOperatorMixed(only((9 * c[3, 1 // 2]').terms), 0x0000000000000080, 1, 4),
+                RASOperatorMixed(only((9 * c[3, 1 // 2]).terms), 0x0000000000000080, 4, 1),
+                RASOperatorMixed(only((-30 * c[4, -1 // 2]').terms), 0x0000000000000000, 3, 1),
+                RASOperatorMixed(only((-30 * c[4, -1 // 2]).terms), 0x0000000000000000, 1, 3),
+                RASOperatorMixed(only((-30 * c[4, 1 // 2]').terms), 0x0000000000000000, 5, 1),
+                RASOperatorMixed(only((-30 * c[4, 1 // 2]).terms), 0x0000000000000000, 1, 5),
             ]
             @test typeof(H1) == typeof(H2)
             @test H1 == H2
@@ -303,40 +303,40 @@ using Test
             H1 = natural_orbital_ci_operator(H_nat1, H_int, -μ, fs, n_occ, 1, 1, 2)
             H2 = natural_orbital_ci_operator(H_nat2, H_int, -μ, fs, n_occ, 1, 1, 2)
             H_mix = [
-                CIOperatorMixed(only((9 * c[3, -1 // 2]').terms), 0x0000000000000008, 1, 2),
-                CIOperatorMixed(only((9 * c[3, -1 // 2]).terms), 0x0000000000000008, 2, 1),
-                CIOperatorMixed(only((9 * c[3, 1 // 2]').terms), 0x0000000000000080, 1, 4),
-                CIOperatorMixed(only((9 * c[3, 1 // 2]).terms), 0x0000000000000080, 4, 1),
-                CIOperatorMixed(only((9 * c[3, 1 // 2]').terms), 0x0000000000000080, 2, 7),
-                CIOperatorMixed(only((9 * c[3, 1 // 2]).terms), 0x0000000000000080, 7, 2),
-                CIOperatorMixed(only((9 * c[3, -1 // 2]').terms), 0x0000000000000008, 3, 6),
-                CIOperatorMixed(only((9 * c[3, -1 // 2]).terms), 0x0000000000000008, 6, 3),
-                CIOperatorMixed(only((9 * c[3, 1 // 2]').terms), 0x0000000000000080, 3, 8),
-                CIOperatorMixed(only((9 * c[3, 1 // 2]).terms), 0x0000000000000080, 8, 3),
-                CIOperatorMixed(only((9 * c[3, -1 // 2]').terms), 0x0000000000000008, 4, 7),
-                CIOperatorMixed(only((9 * c[3, -1 // 2]).terms), 0x0000000000000008, 7, 4),
-                CIOperatorMixed(only((9 * c[3, -1 // 2]').terms), 0x0000000000000008, 5, 9),
-                CIOperatorMixed(only((9 * c[3, -1 // 2]).terms), 0x0000000000000008, 9, 5),
-                CIOperatorMixed(only((9 * c[3, 1 // 2]').terms), 0x0000000000000080, 5, 11),
-                CIOperatorMixed(only((9 * c[3, 1 // 2]).terms), 0x0000000000000080, 11, 5),
-                CIOperatorMixed(only((-30 * c[4, -1 // 2]').terms), 0x0000000000000000, 3, 1),
-                CIOperatorMixed(only((-30 * c[4, -1 // 2]).terms), 0x0000000000000000, 1, 3),
-                CIOperatorMixed(only((-30 * c[4, 1 // 2]').terms), 0x0000000000000000, 5, 1),
-                CIOperatorMixed(only((-30 * c[4, 1 // 2]).terms), 0x0000000000000000, 1, 5),
-                CIOperatorMixed(only((30 * c[4, -1 // 2]').terms), 0x0000000000000000, 6, 2),
-                CIOperatorMixed(only((30 * c[4, -1 // 2]).terms), 0x0000000000000000, 2, 6),
-                CIOperatorMixed(only((-30 * c[4, 1 // 2]').terms), 0x0000000000000000, 9, 2),
-                CIOperatorMixed(only((-30 * c[4, 1 // 2]).terms), 0x0000000000000000, 2, 9),
-                CIOperatorMixed(only((-30 * c[4, 1 // 2]').terms), 0x0000000000000000, 10, 3),
-                CIOperatorMixed(only((-30 * c[4, 1 // 2]).terms), 0x0000000000000000, 3, 10),
-                CIOperatorMixed(only((-30 * c[4, -1 // 2]').terms), 0x0000000000000000, 8, 4),
-                CIOperatorMixed(only((-30 * c[4, -1 // 2]).terms), 0x0000000000000000, 4, 8),
-                CIOperatorMixed(only((30 * c[4, 1 // 2]').terms), 0x0000000000000000, 11, 4),
-                CIOperatorMixed(only((30 * c[4, 1 // 2]).terms), 0x0000000000000000, 4, 11),
-                CIOperatorMixed(
+                RASOperatorMixed(only((9 * c[3, -1 // 2]').terms), 0x0000000000000008, 1, 2),
+                RASOperatorMixed(only((9 * c[3, -1 // 2]).terms), 0x0000000000000008, 2, 1),
+                RASOperatorMixed(only((9 * c[3, 1 // 2]').terms), 0x0000000000000080, 1, 4),
+                RASOperatorMixed(only((9 * c[3, 1 // 2]).terms), 0x0000000000000080, 4, 1),
+                RASOperatorMixed(only((9 * c[3, 1 // 2]').terms), 0x0000000000000080, 2, 7),
+                RASOperatorMixed(only((9 * c[3, 1 // 2]).terms), 0x0000000000000080, 7, 2),
+                RASOperatorMixed(only((9 * c[3, -1 // 2]').terms), 0x0000000000000008, 3, 6),
+                RASOperatorMixed(only((9 * c[3, -1 // 2]).terms), 0x0000000000000008, 6, 3),
+                RASOperatorMixed(only((9 * c[3, 1 // 2]').terms), 0x0000000000000080, 3, 8),
+                RASOperatorMixed(only((9 * c[3, 1 // 2]).terms), 0x0000000000000080, 8, 3),
+                RASOperatorMixed(only((9 * c[3, -1 // 2]').terms), 0x0000000000000008, 4, 7),
+                RASOperatorMixed(only((9 * c[3, -1 // 2]).terms), 0x0000000000000008, 7, 4),
+                RASOperatorMixed(only((9 * c[3, -1 // 2]').terms), 0x0000000000000008, 5, 9),
+                RASOperatorMixed(only((9 * c[3, -1 // 2]).terms), 0x0000000000000008, 9, 5),
+                RASOperatorMixed(only((9 * c[3, 1 // 2]').terms), 0x0000000000000080, 5, 11),
+                RASOperatorMixed(only((9 * c[3, 1 // 2]).terms), 0x0000000000000080, 11, 5),
+                RASOperatorMixed(only((-30 * c[4, -1 // 2]').terms), 0x0000000000000000, 3, 1),
+                RASOperatorMixed(only((-30 * c[4, -1 // 2]).terms), 0x0000000000000000, 1, 3),
+                RASOperatorMixed(only((-30 * c[4, 1 // 2]').terms), 0x0000000000000000, 5, 1),
+                RASOperatorMixed(only((-30 * c[4, 1 // 2]).terms), 0x0000000000000000, 1, 5),
+                RASOperatorMixed(only((30 * c[4, -1 // 2]').terms), 0x0000000000000000, 6, 2),
+                RASOperatorMixed(only((30 * c[4, -1 // 2]).terms), 0x0000000000000000, 2, 6),
+                RASOperatorMixed(only((-30 * c[4, 1 // 2]').terms), 0x0000000000000000, 9, 2),
+                RASOperatorMixed(only((-30 * c[4, 1 // 2]).terms), 0x0000000000000000, 2, 9),
+                RASOperatorMixed(only((-30 * c[4, 1 // 2]').terms), 0x0000000000000000, 10, 3),
+                RASOperatorMixed(only((-30 * c[4, 1 // 2]).terms), 0x0000000000000000, 3, 10),
+                RASOperatorMixed(only((-30 * c[4, -1 // 2]').terms), 0x0000000000000000, 8, 4),
+                RASOperatorMixed(only((-30 * c[4, -1 // 2]).terms), 0x0000000000000000, 4, 8),
+                RASOperatorMixed(only((30 * c[4, 1 // 2]').terms), 0x0000000000000000, 11, 4),
+                RASOperatorMixed(only((30 * c[4, 1 // 2]).terms), 0x0000000000000000, 4, 11),
+                RASOperatorMixed(
                     only((-30 * c[4, -1 // 2]').terms), 0x0000000000000000, 10, 5
                 ),
-                CIOperatorMixed(only((-30 * c[4, -1 // 2]).terms), 0x0000000000000000, 5, 10),
+                RASOperatorMixed(only((-30 * c[4, -1 // 2]).terms), 0x0000000000000000, 5, 10),
             ]
             @test typeof(H1) == typeof(H2)
             @test H1 == H2
@@ -404,14 +404,14 @@ using Test
             @test H1.nfilled === 2
             @test H1.nempty === 2
             @test H1.excitation === 2
-        end # CIOperator
+        end # RASOperator
     end # operator
 
     @testset "operator comparison" begin
-        # Compare results between "Wavefunction", "CIWavefunction".
+        # Compare results between "Wavefunction", "RASWavefunction".
         # Create single determinant state and run H*ψ for both methods.
         # Convert to Wavefunction and show that both have numerically the same result.
-        # Use symbol "ϕ" for Wavefunction, "ψ" for CIWavefunction.
+        # Use symbol "ϕ" for Wavefunction, "ψ" for RASWavefunction.
 
         function Base.isapprox(
                 ϕ1::Wavefunction{T}, ϕ2::Wavefunction{T}; kwargs...
@@ -431,8 +431,8 @@ using Test
         n_bath = 41
         U = 4.0
         μ = U / 2
-        n_v_bit = 1 # Amount of valence bath sites in bit component of CIWF
-        n_c_bit = 1 # Amount of conduction bath sites in bit component of CIWF
+        n_v_bit = 1 # Amount of valence bath sites in bit component of RASWavefunction
+        n_c_bit = 1 # Amount of conduction bath sites in bit component of RASWavefunction
         n_sites = 1 + n_bath
         M_ciwf = UInt64
         M_wf = BigMask{cld(2 * n_sites, 64)} # bitmask for Wavefunction
@@ -460,7 +460,7 @@ using Test
         @assert count_ones(s_start) == n_sites # Half filling
         ϕ_start = Wavefunction(Dict(s_start => 1.0))
 
-        # Using CIWavefunction.
+        # Using RASWavefunction.
         fock_space_ciwf = FockSpace(M_ciwf, M_ciwf, Orbitals(n_bit), FermionicSpin(1 // 2))
         n_ciwf = occupations(fock_space_ciwf)
         H_int_ciwf = U * n_ciwf[1, -1 // 2] * n_ciwf[1, 1 // 2]
@@ -468,18 +468,18 @@ using Test
         H_ciwf = natural_orbital_ci_operator(
             H_nat, H_int_ciwf, -μ, fock_space_ciwf, n_occ, n_v_bit, n_c_bit, e
         )
-        # Create starting CIWavefunction. Impurity filled with 10, bath b 01 accordingly.
+        # Create starting RASWavefunction. Impurity filled with 10, bath b 01 accordingly.
         s_start = slater_start(M_ciwf, 0b0110, n_v_bit, n_c_bit, 0, 0)
         @assert count_ones(s_start) + 2 * n_v_vector == n_sites
         n_vector = n_v_vector + n_c_vector
         v_start = zeros(sum(i -> binomial(2 * n_vector, i), 0:e))
         v_start[1] = one(eltype(v_start))
-        ψ_start = CIWavefunction(Dict(s_start => v_start), n_bit, n_v_vector, n_c_vector, e)
+        ψ_start = RASWavefunction(Dict(s_start => v_start), n_bit, n_v_vector, n_c_vector, e)
 
         # Masks for valence/conduction bath sites which are in vector.
         m_valence, m_conduction = mask_fe(M_wf, n_bit, n_v_vector, n_c_vector)
 
-        # Compare Wavefunction, CIWavefunction
+        # Compare Wavefunction, RASWavefunction
         ϕ = deepcopy(ϕ_start)
         ψ = deepcopy(ψ_start)
         for _ in 1:niter
@@ -490,7 +490,7 @@ using Test
             normalize!(ψ)
         end
 
-        # Convert CIWavefunction to Wavefunction
+        # Convert RASWavefunction to Wavefunction
         ϕ_ciwf = Wavefunction(ψ)
         # Remove all weights smaller than machine epsilon.
         Fermions.Wavefunctions.chop!(ϕ_ciwf, eps())
@@ -500,8 +500,8 @@ using Test
         @test ϕ ≈ ϕ_ciwf atol = 10 * eps()
         @test norm(ϕ - ϕ_ciwf) < 10 * eps()
 
-        # Convert Wavefunction to CIWavefunction
-        ψ_wf = CIWavefunction{Dict{M_ciwf, Vector{Float64}}}(
+        # Convert Wavefunction to RASWavefunction
+        ψ_wf = RASWavefunction{Dict{M_ciwf, Vector{Float64}}}(
             ϕ, n_bit, n_v_vector, n_c_vector, e
         )
         @test norm(ψ - ψ_wf) < 20 * eps()

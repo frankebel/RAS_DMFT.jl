@@ -19,15 +19,15 @@ function Wavefunction_singlet(
 end
 
 """
-    CIWavefunction_singlet(
+    RASWavefunction_singlet(
         D::Type, L_v::Integer, L_c::Integer, V_v::Integer, V_c::Integer, excitation::Integer
     )
 
-Initialize a `CIWavefunction` with
+Initialize a `RASWavefunction` with
 singlet in impurity and mirror site
 and all valence sites filled.
 """
-function CIWavefunction_singlet(
+function RASWavefunction_singlet(
         D::Type, L_v::Integer, L_c::Integer, V_v::Integer, V_c::Integer, excitation::Integer
     )
     K, V = keytype(D), valtype(D)
@@ -36,7 +36,7 @@ function CIWavefunction_singlet(
     v_dim = sum(i -> binomial(2 * (V_v + V_c), i), 0:excitation)
     vec = zeros(V, v_dim)
     vec[1] = 1 / sqrt(2)
-    result = CIWavefunction(
+    result = RASWavefunction(
         Dict(s1 => copy(vec), s2 => copy(vec)), 2 + L_v + L_c, V_v, V_c, excitation
     )
     return result
@@ -44,8 +44,8 @@ end
 
 """
     ground_state!(
-        H::CIOperator,
-        ψ_start::CIWavefunction,
+        H::RASOperator,
+        ψ_start::RASWavefunction,
         n_kryl::Integer,
         n_max_restart::Integer,
         variance::Real,
@@ -58,8 +58,8 @@ and at most `n_max_restart` restarts.
 Calculation is stopped early if `⟨H^2⟩ <= variance`.
 """
 function ground_state!(
-        H::CIOperator,
-        ψ_start::CIWavefunction,
+        H::RASOperator,
+        ψ_start::RASWavefunction,
         n_kryl::Integer,
         n_max_restart::Integer,
         variance::Real,

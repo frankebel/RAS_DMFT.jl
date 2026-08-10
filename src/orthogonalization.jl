@@ -53,10 +53,10 @@ function _orthonormalize_SVD(Q::AbstractMatrix{<:T}) where {T <: Number}
     _orthonormalize_SVD!(V1, M1, S_sqrt, Q_new, Q)
     return Q_new, S_sqrt
 end
-function _orthonormalize_SVD(Q::AbstractMatrix{<:C}) where {C <: CIWavefunction}
+function _orthonormalize_SVD(Q::AbstractMatrix{<:WF}) where {WF <: RASWavefunction}
     foo, q = size(Q)
     isone(foo) || throw(ArgumentError("input matrix must have 1 row"))
-    T = scalartype(C)
+    T = scalartype(WF)
     Q_new = similar(Q)
     V1 = Vector{real(T)}(undef, q)
     M1 = Matrix{T}(undef, q, q)

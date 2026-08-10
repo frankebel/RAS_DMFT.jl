@@ -21,7 +21,7 @@ export
 Return excitation of Slater determinant `s`.
 
 `m_filled`, `m_empty` are the masks of default filled/empty sites
-in vector of `CIWavefunction`.
+in vector of `RASWavefunction`.
 """
 @inline function get_excitation(s::S, m_filled::S, m_empty::S) where {S <: Unsigned}
     return count_ones((s & (m_filled | m_empty) ⊻ m_filled))
@@ -35,7 +35,7 @@ end
 In Wavefunction `ψ` remove entries higher than `excitation`.
 
 `m_filled`, `m_empty` are the masks of default filled/empty sites
-in vector of `CIWavefunction`.
+in vector of `RASWavefunction`.
 """
 function excitation!(
         ψ::Wavefunction, m_filled::S, m_empty::S, excitation::Int
@@ -100,7 +100,7 @@ Assumes that `ψ` only contains Slater determiants with
 excitation <= `excitation` in the first place.
 
 `m_filled`, `m_empty` are the masks of default filled/empty sites
-in vector of `CIWavefunction`.
+in vector of `RASWavefunction`.
 """
 function mul_excitation(
         H::Operator, ψ::Wavefunction, m_filled::S, m_empty::S, excitation::Int
