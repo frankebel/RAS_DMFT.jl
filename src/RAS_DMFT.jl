@@ -37,6 +37,7 @@ export
     discretize_similar_weight,
     discretize_to_grid,
     equal_weight_discretization,
+    evaluate,
     evaluate_gaussian,
     evaluate_lorentzian,
     filling,

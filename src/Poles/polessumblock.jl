@@ -210,30 +210,26 @@ function arrowhead_matrix(P::PolesSumBlock, args...; kwargs...)
     return result
 end
 
-function evaluate_gaussian(P::PolesSumBlock, ω::Real, σ::Real)
-    d = size(P, 1)
-    # dot multiplication loses Hermiticity
-    real = zeros(ComplexF64, d, d) # weights can be complex
-    imag = zero(real)
-    @inbounds for i in eachindex(P)
-        w = weight(P, i)
-        real .+= w .* sqrt(2) ./ (π * σ) .* dawson((ω - location(P, i)) / (sqrt(2) * σ))
-        imag .+= w .* pdf(Normal(location(P, i), σ), ω)
+function evaluate(P::PolesSumBlock, z::Number)
+    result = zeros(complex(float(eltype(P))), size(P))
+    @inbounds for (ϵ, w) in P
+        result .+= w .* inv(z - ϵ)
     end
-    result = real - im * imag
-    result .*= π # not spectral function
     return result
 end
 
-function evaluate_lorentzian(P::PolesSumBlock, ω::Real, δ::Real)
-    d = size(P, 1)
-    result = zeros(ComplexF64, d, d)
-    @inbounds for i in eachindex(P)
-        w = weight(P, i)
-        result .+= w ./ (ω + im * δ - location(P, i))
+function evaluate_gaussian(P::PolesSumBlock, ω::Real, σ::Real)
+    result = zeros(complex(float(eltype(P))), size(P))
+    @inbounds for (ϵ, w) in P
+        re = sqrt(2) / σ * dawson((ω - ϵ) / (sqrt(2) * σ))
+        im_part = pdf(Normal(ϵ, σ), ω)
+        z = re - im * π * im_part
+        result .+= w .* z
     end
     return result
 end
+
+evaluate_lorentzian(P::PolesSumBlock, ω::Real, δ::Real) = evaluate(P, ω + im * δ)
 
 function filling(P::PolesSumBlock{<:Any, B}, μ::Real = 0) where {B}
     result = zeros(B <: Real ? Float64 : ComplexF64, size(P)) # half weight changes Int → Float

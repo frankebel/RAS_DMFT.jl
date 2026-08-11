@@ -69,6 +69,36 @@ using Test
             @test amplitudes(P) === amps
         end # amplitudes
 
+        @testset "evaluate" begin
+            locs = [[1 2; 2 3], [4 5; 5 6]]
+            amps = [[7 8; 8 9]]
+            scl = [10 11; 11 12]
+            P = PolesContinuedFractionBlock(locs, amps, scl)
+            # upper/lower complex plane
+            z = 0.5 + 1.0im
+            @test norm(
+                evaluate(P, z) - [
+                    9.3868717682668326 - 1.7247467522667106im 10.275713626756321 - 1.872408526521784im
+                    10.275713626756325 - 1.8724085265217789im 11.250661306616291 - 2.0359262909579234im
+                ],
+            ) < 100 * eps()
+            @test norm(evaluate(P, conj(z)) - conj.(permutedims(evaluate(P, z)))) <
+                100 * eps()
+            # Matsubara frequency
+            z = 2im
+            @test norm(
+                evaluate(P, z) - [
+                    9.6216882806905861 - 3.3491825125308288im 10.540934044076694 - 3.6580774126819939im
+                    10.540934044076694 - 3.6580774126819948im 11.548094518259207 - 3.9976827909937138im
+                ],
+            ) < 100 * eps()
+            @test norm(evaluate(P, conj(z)) - conj.(permutedims(evaluate(P, z)))) <
+                100 * eps()
+            # grid
+            zs = [0.1 + 0.5im, 0.3 + 0.5im]
+            @test evaluate(P, zs) == [evaluate(P, zs[1]), evaluate(P, zs[2])]
+        end # evaluate
+
         @testset "evaluate_lorentzian" begin
             locs = [[1 2; 2 3], [4 5; 5 6]]
             amps = [[7 8; 8 9]]
@@ -76,14 +106,15 @@ using Test
             P = PolesContinuedFractionBlock(locs, amps, scl)
             # single point
             @test norm(
-                evaluate_lorentzian(P, 10, 1) - [
-                    0.10758121432383735 - 0.8486851180203552im 0.1192067097465451 - 0.9291288301545801im
-                    0.11920670974654493 - 0.92912883015458im 0.132513408476524 - 1.0172414419361508im
+                evaluate_lorentzian(P, 0.5, 1) - [
+                    9.3868717682668326 - 1.7247467522667106im 10.275713626756321 - 1.872408526521784im
+                    10.275713626756325 - 1.8724085265217789im 11.250661306616291 - 2.0359262909579234im
                 ],
             ) < 10 * eps()
             # grid
-            @test evaluate_lorentzian(P, [0.1, 0.3], 0.5) ==
-                [evaluate_lorentzian(P, 0.1, 0.5), evaluate_lorentzian(P, 0.3, 0.5)]
+            ω = [0.1, 0.3]
+            @test evaluate_lorentzian(P, ω, 0.5) ==
+                [evaluate_lorentzian(P, ω[1], 0.5), evaluate_lorentzian(P, ω[2], 0.5)]
         end # evaluate_lorentzian
 
         @testset "locations" begin

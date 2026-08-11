@@ -75,16 +75,18 @@ function PolesContinuedFractionBlock(
     return PolesContinuedFractionBlock{A, B}(locs, amps, scl)
 end
 
-function evaluate_lorentzian(P::PolesContinuedFractionBlock, ω::Real, δ::Real)
-    result = zeros(ComplexF64, size(P))
+function evaluate(P::PolesContinuedFractionBlock, z::Number)
+    result = zeros(complex(float(eltype(P))), size(P))
     locs = Iterators.reverse(locations(P))
     amps = Iterators.reverse(amplitudes(P))
     for (A, B) in zip(locs, amps)
-        result = B * inv((ω + im * δ) * I - A - result) * B
+        result = B * inv(z * I - A - result) * B
     end
-    result = scale(P) * inv((ω + im * δ) * I - location(P, 1) - result) * scale(P)
+    result = scale(P) * inv(z * I - location(P, 1) - result) * scale(P)
     return result
 end
+
+evaluate_lorentzian(P::PolesContinuedFractionBlock, ω::Real, δ::Real) = evaluate(P, ω + im * δ)
 
 function tridiagonal_matrix(P::PolesContinuedFractionBlock)
     n1 = length(P)

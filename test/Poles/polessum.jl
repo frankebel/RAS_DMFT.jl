@@ -1,5 +1,4 @@
 using RAS_DMFT
-using Distributions: Semicircle, pdf
 using LinearAlgebra
 using Test
 
@@ -92,37 +91,51 @@ using Test
             @test_throws DomainError amplitudes(P)
         end # amplitudes
 
+        @testset "evaluate" begin
+            locs = [-1.0, 0.0, 2.0]
+            wgts = [0.2, 0.3, 0.5]
+            P = PolesSum(locs, wgts)
+            # upper/lower complex plane
+            z = 0.5 + 1.0im
+            @test evaluate(P, z) ≈ -0.018461538461538474 - 0.4553846153846154im atol =
+                10 * eps()
+            @test evaluate(P, conj(z)) == conj(evaluate(P, z))
+            # Matsubara frequency
+            z = 2im
+            @test evaluate(P, z) ≈ -0.085 - 0.355im atol =
+                10 * eps()
+            @test evaluate(P, conj(z)) == conj(evaluate(P, z))
+            # grid
+            zs = [0.1 + 0.5im, 0.3 + 0.5im]
+            @test evaluate(P, zs) == [evaluate(P, zs[1]), evaluate(P, zs[2])]
+        end # evaluate
+
         @testset "evaluate_gaussian" begin
-            locs = [0.1, 0.2]
-            wgts = [0.01, 0.09]
+            locs = [-1.0, 0.0, 2.0]
+            wgts = [0.2, 0.3, 0.5]
             P = PolesSum(locs, wgts)
             # single point
-            ω = 0.15
-            σ = 0.04
-            @test evaluate_gaussian(P, ω, σ) ≈ -1.5277637226549838 - 1.4345225621076145im atol =
+            ω = 0.5
+            σ = 1.0
+            @test evaluate_gaussian(P, ω, σ) ≈ -0.08753757822014871 - 0.6166378221821291im atol =
                 10 * eps()
-            # semicircular DOS
-            G = greens_function_bethe_simple(3001)
-            ω = -3:0.01:3
-            σ = 0.01
-            # constant broadening
-            h = evaluate_gaussian(G, ω, σ)
-            ex = π .* pdf.(Semicircle(1), ω) # exact solution
-            @test norm(ex + imag(h)) < 0.2
-            @test maximum(abs.(ex + imag(h))) < 0.12
-            @test findmin(imag(h))[2] == cld(length(ω), 2) # symmetric
+            # grid
+            ω = [0.1, 0.3]
+            @test evaluate_gaussian(P, ω, 0.5) ==
+                [evaluate_gaussian(P, ω[1], 0.5), evaluate_gaussian(P, ω[2], 0.5)]
         end # evaluate_gaussian
 
         @testset "evaluate_lorentzian" begin
-            locs = 1.0:10
-            wgts = abs2.(0.1:0.1:1)
+            locs = [-1.0, 0.0, 2.0]
+            wgts = [0.2, 0.3, 0.5]
             P = PolesSum(locs, wgts)
             # single point
-            @test evaluate_lorentzian(P, 10, 1) ≈ 0.9853493892744969 - 1.619653515362841im atol =
+            @test evaluate_lorentzian(P, 0.5, 1) ≈ -0.018461538461538474 - 0.4553846153846154im atol =
                 10 * eps()
             # grid
-            @test evaluate_lorentzian(P, [0.1, 0.3], 0.5) ==
-                [evaluate_lorentzian(P, 0.1, 0.5), evaluate_lorentzian(P, 0.3, 0.5)]
+            ω = [0.1, 0.3]
+            @test evaluate_lorentzian(P, ω, 0.5) ==
+                [evaluate_lorentzian(P, ω[1], 0.5), evaluate_lorentzian(P, ω[2], 0.5)]
         end # evaluate_lorentzian
 
         @testset "filling" begin

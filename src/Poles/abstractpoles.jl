@@ -34,13 +34,24 @@ See also [`amplitude`](@ref) for details of `args...` and `kwargs...`.
 function amplitudes end
 
 """
+    evaluate(P::AbstractPoles, z)
+
+Evaluate `P` at the complex variable `z`.
+
+See also [`evaluate_gaussian`](@ref), [`evaluate_lorentzian`](@ref).
+"""
+function evaluate end
+function evaluate(P::AbstractPoles, z::AbstractVector{<:Number})
+    return map(i -> evaluate(P, i), z)
+end
+
+"""
     evaluate_gaussian(P::AbstractPoles, ω, σ)
 
 Evaluate `P` with Gaussian broadening ``σ``.
 """
 function evaluate_gaussian end
 function evaluate_gaussian(P::AbstractPoles, ω::AbstractVector{<:Real}, σ)
-    # map for each point in given grid
     return map(i -> evaluate_gaussian(P, i, σ), ω)
 end
 
@@ -51,7 +62,6 @@ Evaluate `P` with Lorentzian broadening ``P(ω + \\mathrm{i}δ)``.
 """
 function evaluate_lorentzian end
 function evaluate_lorentzian(P::AbstractPoles, ω::AbstractVector{<:Real}, δ)
-    # map for each point in given grid
     return map(i -> evaluate_lorentzian(P, i, δ), ω)
 end
 

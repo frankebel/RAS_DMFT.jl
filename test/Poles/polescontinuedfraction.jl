@@ -57,17 +57,38 @@ using Test
             @test amplitudes(P) == amps
         end # amplitudes
 
+        @testset "evaluate" begin
+            locs = [-1.0, 0.0, 2.0]
+            amps = [0.6, 0.4]
+            scl = 1.1
+            P = PolesContinuedFraction(locs, amps, scl)
+            # upper/lower complex plane
+            z = 0.5 + 1.0im
+            @test evaluate(P, z) ≈ 0.47743341980552373 - 0.44522565484288634im atol =
+                10 * eps()
+            @test evaluate(P, conj(z)) == conj(evaluate(P, z))
+            # Matsubara frequency
+            z = 2im
+            @test evaluate(P, z) ≈ 0.21044536856932053 - 0.45960359514387283im atol =
+                10 * eps()
+            @test evaluate(P, conj(z)) == conj(evaluate(P, z))
+            # grid
+            zs = [0.1 + 0.5im, 0.3 + 0.5im]
+            @test evaluate(P, zs) == [evaluate(P, zs[1]), evaluate(P, zs[2])]
+        end # evaluate
+
         @testset "evaluate_lorentzian" begin
-            locs = 1.0:10
-            amps = 0.1:0.1:0.9
+            locs = [-1.0, 0.0, 2.0]
+            amps = [0.6, 0.4]
             scl = 1.1
             # single point
             P = PolesContinuedFraction(locs, amps, scl)
-            @test evaluate_lorentzian(P, 10, 1) ≈
-                0.13282211074263575 - 0.014762307781571633im atol = 10 * eps()
+            @test evaluate_lorentzian(P, 0.5, 1) ≈
+                0.47743341980552373 - 0.44522565484288634im atol = 10 * eps()
             # grid
-            @test evaluate_lorentzian(P, [0.1, 0.3], 0.5) ==
-                [evaluate_lorentzian(P, 0.1, 0.5), evaluate_lorentzian(P, 0.3, 0.5)]
+            ω = [0.1, 0.3]
+            @test evaluate_lorentzian(P, ω, 0.5) ==
+                [evaluate_lorentzian(P, ω[1], 0.5), evaluate_lorentzian(P, ω[2], 0.5)]
         end # evaluate_lorentzian
 
         @testset "locations" begin

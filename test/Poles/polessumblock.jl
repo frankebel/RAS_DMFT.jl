@@ -116,37 +116,68 @@ using Test
             end
         end # amplitudes
 
+        @testset "evaluate" begin
+            locs = [-1.0, 0.0, 2.0]
+            amps = reshape(0.2:0.1:0.7, (2, 3))
+            P = PolesSumBlock(locs, amps)
+            # upper/lower complex plane
+            z = 0.5 + 1.0im
+            @test norm(
+                evaluate(P, z) - [
+                    -0.083692307692307677 - 0.25107692307692314im -0.08615384615384615 - 0.30769230769230771im
+                    -0.08615384615384615 - 0.30769230769230771im -0.084615384615384592 - 0.37846153846153846im
+                ],
+            ) < 100 * eps()
+            @test evaluate(P, conj(z)) == conj.(permutedims(evaluate(P, z)))
+            # Matsubara frequency
+            z = 2im
+            @test norm(
+                evaluate(P, z) - [
+                    -0.082 - 0.186im -0.093 - 0.229im
+                    -0.093 - 0.229im -0.1045 - 0.2835im
+                ],
+            ) < 100 * eps()
+            @test evaluate(P, conj(z)) == conj.(permutedims(evaluate(P, z)))
+            # grid
+            zs = [0.1 + 0.5im, 0.3 + 0.5im]
+            @test evaluate(P, zs) == [evaluate(P, zs[1]), evaluate(P, zs[2])]
+        end # evaluate
+
         @testset "evaluate_gaussian" begin
-            ω = 0.15
-            σ = 0.04
-            locs = [0.1, 0.2]
-            amps = reshape(0.1:0.1:0.4, (2, 2))
+            ω = 0.5
+            σ = 1.0
+            locs = [-1.0, 0.0, 2.0]
+            amps = reshape(0.2:0.1:0.7, (2, 3))
             P = PolesSumBlock(locs, amps)
             @test norm(
                 evaluate_gaussian(P, ω, σ) - [
-                    -1.5277637226549838 - 1.4345225621076145im -1.90970465331873 - 2.00833158695066im
-                    -1.90970465331873 - 2.00833158695066im -2.2916455839824765 - 2.8690451242152295im
+                    -0.16702850198727615 - 0.33972394588525767im -0.178700179083296 - 0.41651710181548046im
+                    -0.178700179083296 - 0.41651710181548046im -0.18576841335312091 - 0.51250854672825896im
                 ],
             ) < 10 * eps()
+            # grid
+            ω = [0.1, 0.3]
+            @test evaluate_gaussian(P, ω, 0.5) ==
+                [evaluate_gaussian(P, ω[1], 0.5), evaluate_gaussian(P, ω[2], 0.5)]
         end # evaluate_gaussian
 
         @testset "evaluate_lorentzian" begin
-            ω = 10.0
+            ω = 0.5
             δ = 1.0
-            locs = 1.0:10
-            amps = reshape(0.1:0.1:2, (2, 10))
+            locs = [-1.0, 0.0, 2.0]
+            amps = reshape(0.2:0.1:0.7, (2, 3))
             # single point
             P = PolesSumBlock(locs, amps)
             @test norm(
                 evaluate_lorentzian(P, ω, δ) - [
-                    3.419109056634164 - 5.796080126589452im 3.669440321902302 - 6.127487634859227im
-                    3.669440321902302 - 6.127487634859227im 3.9413975570979876 - 6.478614061451364im
+                    -0.083692307692307677 - 0.25107692307692314im -0.08615384615384615 - 0.30769230769230771im
+                    -0.08615384615384615 - 0.30769230769230771im -0.084615384615384592 - 0.37846153846153846im
                 ],
             ) < eps()
             # grid
-            ω = rand(2)
-            @test evaluate_lorentzian(P, ω, δ) ==
-                [evaluate_lorentzian(P, ω[1], δ), evaluate_lorentzian(P, ω[2], δ)]
+            ω = [0.1, 0.3]
+            @test evaluate_lorentzian(P, ω, 0.5) ==
+                [evaluate_lorentzian(P, ω[1], 0.5), evaluate_lorentzian(P, ω[2], 0.5)]
         end # evaluate_lorentzian
 
         @testset "filling" begin

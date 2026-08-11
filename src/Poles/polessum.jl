@@ -110,25 +110,26 @@ function arrowhead_matrix(P::PolesSum)
     return result
 end
 
-function evaluate_gaussian(P::PolesSum, ω::Real, σ::Real)
-    real = zero(ω)
-    imag = zero(ω)
-    @inbounds for i in eachindex(P)
-        w = weight(P, i)
-        real += w * sqrt(2) / (π * σ) * dawson((ω - location(P, i)) / (sqrt(2) * σ))
-        imag += w * pdf(Normal(location(P, i), σ), ω)
-    end
-    result = real - im * imag
-    return π * result # not spectral function
-end
-
-function evaluate_lorentzian(P::PolesSum, ω::Real, δ::Real)
-    result = zero(complex(ω))
-    @inbounds for i in eachindex(P)
-        result += weight(P, i) / (ω + im * δ - location(P, i))
+function evaluate(P::PolesSum, z::Number)
+    result = zero(complex(float(eltype(P))))
+    for (ϵ, w) in P
+        result += w / (z - ϵ)
     end
     return result
 end
+
+function evaluate_gaussian(P::PolesSum, ω::Real, σ::Real)
+    result = zero(complex(float(eltype(P))))
+    for (ϵ, w) in P
+        re = sqrt(2) / σ * dawson((ω - ϵ) / (sqrt(2) * σ))
+        im_part = pdf(Normal(ϵ, σ), ω)
+        z = re - im * π * im_part
+        result += w * z
+    end
+    return result
+end
+
+evaluate_lorentzian(P::PolesSum, ω::Real, δ::Real) = evaluate(P, ω + im * δ)
 
 function filling(P::PolesSum{<:Any, B}, μ::Real = 0) where {B}
     result = zero(Float64) # half weight changes Int → Float

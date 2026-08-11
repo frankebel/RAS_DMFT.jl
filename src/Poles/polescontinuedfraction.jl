@@ -45,16 +45,18 @@ function PolesContinuedFraction{A, B}(P::PolesContinuedFraction) where {A, B}
     )
 end
 
-function evaluate_lorentzian(P::PolesContinuedFraction, ω::Real, δ::Real)
-    result = zero(ComplexF64)
+function evaluate(P::PolesContinuedFraction, z::Number)
+    result = zero(complex(float(eltype(P))))
     locs = Iterators.reverse(locations(P))
     amps = Iterators.reverse(amplitudes(P))
     for (a, b) in zip(locs, amps)
-        result = abs2(b) / (ω + im * δ - a - result)
+        result = abs2(b) / (z - a - result)
     end
-    result = abs2(scale(P)) / (ω + im * δ - location(P, 1) - result)
+    result = abs2(scale(P)) / (z - location(P, 1) - result)
     return result
 end
+
+evaluate_lorentzian(P::PolesContinuedFraction, ω::Real, δ::Real) = evaluate(P, ω + im * δ)
 
 tridiagonal_matrix(P::PolesContinuedFraction) = Matrix(SymTridiagonal(P))
 
