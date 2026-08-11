@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - calculate thin rectangular amplitude ([#195](https://github.com/frankebel/RAS_DMFT.jl/pull/195)) (bfc7348)
 - local lattice Greens function in resolvent formalism ([#201](https://github.com/frankebel/RAS_DMFT.jl/pull/201)) (5b8c250)
 - enforce canonical representation for `AbstractPolesSum` (strictly increasing with no duplicates) ([#203](https://github.com/frankebel/RAS_DMFT.jl/pull/203)) (3ea3db4)
+- evaluate a pole representation at an arbitrary complex frequency `z` ([#209](https://github.com/frankebel/RAS_DMFT.jl/pull/209)) (273a6b0)
 
 ### Changed
 
