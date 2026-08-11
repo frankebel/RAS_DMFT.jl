@@ -338,7 +338,7 @@ function merge_small_weight!(P::PolesSumBlock, tol::Real)
 end
 
 function moment(P::PolesSumBlock, n::Int = 0)
-    return sum(i -> i[1]^n * i[2], zip(locations(P), weights(P)))
+    return sum(loc^n * w for (loc, w) in P)
 end
 
 function Base.:+(A::PolesSumBlock{LA, WA}, B::PolesSumBlock{LB, WB}) where {LA, WA, LB, WB}

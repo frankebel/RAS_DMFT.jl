@@ -321,7 +321,7 @@ function merge_small_weight!(P::PolesSum, tol::Real)
 end
 
 function moment(P::PolesSum, n::Int = 0)
-    foo = map(i -> i[1]^n * i[2], zip(locations(P), weights(P)))
+    foo = [loc^n * w for (loc, w) in P]
     # sort by abs to guarantee that odd moments are zero for symmetric input
     sort!(foo; by = abs)
     return sum(foo)
@@ -352,15 +352,9 @@ b_i δ(ω) →
 function spectral_function_loggaussian(P::PolesSum, ω::Real, b::Real)
     result = zero(ω)
     iszero(ω) && return result # no weight at ω == 0
-    @inbounds for i in eachindex(P)
-        if sign(ω) == sign(location(P, i))
-            # only contribute weight if on same side of real axis
-            w = weight(P, i)
-            loc = location(P, i)
-        else
-            # frequency has opposite sign compared to pole location
-            continue
-        end
+    for (loc, w) in P
+        # only contribute weight if ω is on the same side of the real axis
+        sign(ω) == sign(loc) || continue
         prefactor = w * exp(-b^2 / 4) / (b * abs(loc) * sqrt(π))
         result += prefactor * exp(-(log(ω / loc) / b)^2)
     end

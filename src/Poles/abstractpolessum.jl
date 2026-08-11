@@ -204,9 +204,7 @@ function to_grid(P::AbstractPolesSum, grid::AbstractVector{<:Real})
     weights_new = [zero(first(weights(P))) for _ in eachindex(grid)]
 
     # run through each existing pole and split weight to new locations
-    @inbounds for i in eachindex(P)
-        loc = location(P, i)
-        w = weight(P, i)
+    @inbounds for (loc, w) in P
         if loc <= first(grid)
             # no pole to the left
             weights_new[begin] += w
