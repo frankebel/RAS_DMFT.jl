@@ -427,13 +427,6 @@ using Test
             @test weights(foo) == [[6 7; 7 8], [3 4; 4 5]]
         end # reverse
 
-        @testset "size" begin
-            P = PolesSumBlock(rand(10), rand(4, 10))
-            @test size(P) == (4, 4)
-            @test size(P, 1) === 4
-            @test size(P, 2) === 4
-        end # size
-
         @testset "show" begin
             P = PolesSumBlock(Int[], Matrix{Float64}[])
             @test sprint(show, P) == "PolesSumBlock{Int64, Float64} with 0 poles"
@@ -442,6 +435,13 @@ using Test
             P = PolesSumBlock(rand(Int, 2), [hermitianpart!(rand(Float64, 3, 3)) for _ in 1:2])
             @test sprint(show, P) == "PolesSumBlock{Int64, Float64} with 2 poles of size 3×3"
         end # show
+
+        @testset "size" begin
+            P = PolesSumBlock(rand(10), rand(4, 10))
+            @test size(P) == (4, 4)
+            @test size(P, 1) === 4
+            @test size(P, 2) === 4
+        end # size
 
         @testset "sort!" begin
             locs = [2, 1]
