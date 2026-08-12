@@ -144,6 +144,13 @@ using Test
             P = PolesContinuedFraction(locs, amps)
             @test length(P) == 2
         end # length
+
+        @testset "show" begin
+            P = PolesContinuedFraction([0.1], Float64[])
+            @test sprint(show, P) == "PolesContinuedFraction{Float64, Float64} with 1 poles"
+            P = PolesContinuedFraction([0.1, 0.2], [1.0])
+            @test sprint(show, P) == "PolesContinuedFraction{Float64, Float64} with 2 poles"
+        end # show
     end # Base
 
     @testset "LinearAlgebra" begin

@@ -197,5 +197,14 @@ using Test
             @test size(P, 1) === 2
             @test size(P, 2) === 2
         end # size
+
+        @testset "show" begin
+            locs = [[1 2; 2 3], [4 5; 5 6]]
+            amps = [[7 8; 8 9]]
+            scl = [10 11; 11 12]
+            P = PolesContinuedFractionBlock(locs, amps, scl)
+            @test sprint(show, P) ==
+                "PolesContinuedFractionBlock{Int64, Int64} with 2 poles of size 2×2"
+        end # show
     end # Base
 end # PolesContinuedFractionBlock

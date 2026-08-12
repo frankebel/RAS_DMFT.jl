@@ -122,3 +122,9 @@ Base.eltype(::Type{<:PolesContinuedFractionBlock{A, B}}) where {A, B} = promote_
 
 Base.size(P::PolesContinuedFractionBlock) = size(scale(P))
 Base.size(P::PolesContinuedFractionBlock, i) = size(scale(P), i)
+
+function Base.show(io::IO, P::PolesContinuedFractionBlock)
+    return print(
+        io, summary(P), " with ", length(P), " poles of size ", size(P, 1), "×", size(P, 2)
+    )
+end
