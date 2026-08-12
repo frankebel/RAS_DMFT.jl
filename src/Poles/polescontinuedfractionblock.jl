@@ -30,7 +30,10 @@ struct PolesContinuedFractionBlock{A <: Number, B <: Number} <: AbstractPolesCon
             throw(DimensionMismatch("locations do not have matching size"))
         allequal(size, amplitudes)::Bool ||
             throw(DimensionMismatch("amplitudes do not have matching size"))
-        size(first(locations)) == size(first(amplitudes)) == size(scale) ||
+        size(first(locations)) == size(scale) ||
+            throw(DimensionMismatch("matrix size mismatch"))
+        isempty(amplitudes) ||
+            size(first(amplitudes)) == size(scale) ||
             throw(DimensionMismatch("matrix size mismatch"))
         return new{A, B}(locations, amplitudes, scale)
     end

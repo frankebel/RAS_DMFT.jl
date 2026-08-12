@@ -199,6 +199,9 @@ using Test
         end # size
 
         @testset "show" begin
+            P = PolesContinuedFractionBlock([fill(1.0, 1, 1)], Matrix{Float64}[], fill(1.0, 1, 1))
+            @test sprint(show, P) ==
+                "PolesContinuedFractionBlock{Float64, Float64} with 1 poles of size 1×1"
             locs = [[1 2; 2 3], [4 5; 5 6]]
             amps = [[7 8; 8 9]]
             scl = [10 11; 11 12]
