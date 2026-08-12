@@ -162,7 +162,7 @@ using Test
             amps = [[7 8; 8 9]]
             scl = [10 11; 11 12]
             P = PolesContinuedFractionBlock(locs, amps, scl)
-            @test_throws MethodError weight(P, 1)
+            @test !hasmethod(weight, Tuple{typeof(P), Int})
         end # weight
 
         @testset "weights" begin
@@ -170,7 +170,7 @@ using Test
             amps = [[7 8; 8 9]]
             scl = [10 11; 11 12]
             P = PolesContinuedFractionBlock(locs, amps, scl)
-            @test_throws MethodError weights(P)
+            @test !hasmethod(weights, Tuple{typeof(P)})
         end # weights
     end # custom functions
 
