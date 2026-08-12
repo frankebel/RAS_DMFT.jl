@@ -14,7 +14,7 @@ using Test
         @test P.amplitudes === amps
         @test P.scale === scl
         # wrong input
-        # matrices not hermitian
+        # matrices not Hermitian
         @test_throws ArgumentError PolesContinuedFractionBlock{Int, Int}(locs, locs, scl)
         @test_throws ArgumentError PolesContinuedFractionBlock{Int, Int}(
             [[1 2; 3 4], [4 5; 5 6]], amps, scl
@@ -36,14 +36,15 @@ using Test
 
         # outer constructor
         P = PolesContinuedFractionBlock(locs, amps, scl)
-        @test P.locations === locs
-        @test P.amplitudes === amps
-        @test P.scale === scl
+        @test P.locations !== locs
+        @test P.locations == locs
+        @test P.amplitudes !== amps
+        @test P.amplitudes == amps
+        @test P.scale !== scl
+        @test P.scale == scl
         # # default scale
         P = PolesContinuedFractionBlock(locs, amps)
-        @test P.locations === locs
-        @test P.amplitudes === amps
-        @test P.scale == [1 0; 0 1]
+        @test P.scale == I
 
         # conversion of type
         P = PolesContinuedFractionBlock(locs, amps, scl)
@@ -59,14 +60,14 @@ using Test
             locs = [[1 2; 2 3], [4 5; 5 6]]
             amps = [[7 8; 8 9]]
             P = PolesContinuedFractionBlock(locs, amps)
-            @test amplitude(P, 1) === amps[1]
+            @test amplitude(P, 1) == amps[1]
         end # amplitude
 
         @testset "amplitudes" begin
             locs = [[1 2; 2 3], [4 5; 5 6]]
             amps = [[7 8; 8 9]]
             P = PolesContinuedFractionBlock(locs, amps)
-            @test amplitudes(P) === amps
+            @test amplitudes(P) == amps
         end # amplitudes
 
         @testset "evaluate" begin
@@ -121,7 +122,7 @@ using Test
             locs = [[1 2; 2 3], [4 5; 5 6]]
             amps = [[7 8; 8 9]]
             P = PolesContinuedFractionBlock(locs, amps)
-            @test locations(P) === locs
+            @test locations(P) == locs
         end # locations
 
         @testset "scale" begin
@@ -129,7 +130,7 @@ using Test
             amps = [[7 8; 8 9]]
             scl = [10 11; 11 12]
             P = PolesContinuedFractionBlock(locs, amps, scl)
-            @test scale(P) === scl
+            @test scale(P) == scl
         end # scale
 
         @testset "tridiagonal_matrix" begin

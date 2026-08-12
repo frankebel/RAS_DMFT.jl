@@ -4,11 +4,11 @@
 Representation of poles on the real axis with as a continued fraction with
 locations ``A_i`` of type `A` and amplitudes ``B_i`` of type `B`.
 
-All matrices must be hermitian.
+All matrices must be Hermitian.
 The scale factor ``S`` rescales the whole object.
 
 ```math
-P(ω) = S \\frac{1}{ω-A_1-B_1\\frac{1}{ω-A_2-…}B_1} S
+P(z) = S \\frac{1}{z - A_1 - B_1 \\frac{1}{z - A_2 - …} B_1} S
 ```
 """
 struct PolesContinuedFractionBlock{A <: Number, B <: Number} <: AbstractPolesContinuedFraction
@@ -19,12 +19,12 @@ struct PolesContinuedFractionBlock{A <: Number, B <: Number} <: AbstractPolesCon
     function PolesContinuedFractionBlock{A, B}(locations, amplitudes, scale) where {A, B}
         length(locations) == length(amplitudes) + 1 ||
             throw(ArgumentError("length mismatch"))
-        # hermitian
+        # Hermitian
         all(ishermitian, locations)::Bool ||
-            throw(ArgumentError("locations are not hermitian"))
+            throw(ArgumentError("locations are not Hermitian"))
         all(ishermitian, amplitudes)::Bool ||
-            throw(ArgumentError("amplitudes are not hermitian"))
-        ishermitian(scale) || throw(ArgumentError("scale is not hermitian"))
+            throw(ArgumentError("amplitudes are not Hermitian"))
+        ishermitian(scale) || throw(ArgumentError("scale is not Hermitian"))
         # size
         allequal(size, locations)::Bool ||
             throw(DimensionMismatch("locations do not have matching size"))
@@ -55,6 +55,20 @@ function PolesContinuedFractionBlock(
         amps::AbstractVector{<:AbstractMatrix{<:B}},
         scl::AbstractMatrix{<:B},
     ) where {A, B}
+    locs = [Matrix{A}(i) for i in locs]
+    amps = [Matrix{B}(i) for i in amps]
+    scl = Matrix{B}(scl)
+    # all matrices must be Hermitian
+    for w in locs
+        isapprox(w, w') || throw(ArgumentError("location is not hermitian"))
+        ishermitian(w) || hermitianpart!(w)
+    end
+    for w in amps
+        isapprox(w, w') || throw(ArgumentError("amplitude is not hermitian"))
+        ishermitian(w) || hermitianpart!(w)
+    end
+    isapprox(scl, scl') || throw(ArgumentError("scale is not hermitian"))
+    ishermitian(scl) || hermitianpart!(scl)
     return PolesContinuedFractionBlock{A, B}(locs, amps, scl)
 end
 

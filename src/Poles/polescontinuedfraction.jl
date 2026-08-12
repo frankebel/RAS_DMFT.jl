@@ -1,5 +1,5 @@
 """
-    PolesContinuedFraction{A<:Real,B<:Real} <: AbstractPolesContinuedFraction
+    PolesContinuedFraction{A <: Real, B <: Real} <: AbstractPolesContinuedFraction
 
 Representation of poles on the real axis as a continued fraction with
 locations ``a_i`` of type `A` and amplitudes ``b_i`` of type `B`.
@@ -7,7 +7,7 @@ locations ``a_i`` of type `A` and amplitudes ``b_i`` of type `B`.
 The scale factor ``s`` of type `B` rescales the whole object.
 
 ```math
-P(ω) = \\frac{s^2}{ω - a_1 - \\frac{b_1^2}{ω - a_2 - …}}
+P(z) = \\frac{s^2}{z - a_1 - \\frac{b_1^2}{z - a_2 - …}}
 ```
 """
 struct PolesContinuedFraction{A <: Real, B <: Real} <: AbstractPolesContinuedFraction
@@ -35,7 +35,7 @@ By default the scale is set to ``1``.
 function PolesContinuedFraction(
         locs::AbstractVector{A}, amps::AbstractVector{B}, scl = one(B)
     ) where {A, B}
-    return PolesContinuedFraction{A, B}(locs, amps, scl)
+    return PolesContinuedFraction{A, B}(collect(A, locs), collect(B, amps), B(scl))
 end
 
 # convert type

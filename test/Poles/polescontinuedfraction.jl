@@ -4,15 +4,15 @@ using Test
 
 @testset "PolesContinuedFraction" begin
     @testset "constructor" begin
-        locs = 0:5
-        amps = 6:10
-        scl = 11
+        locs = [1, 2, 3]
+        amps = [4, 5]
+        scl = 6
 
         # inner constructor
         P = PolesContinuedFraction{Int, Int}(locs, amps, scl)
-        @test P.locations == locs
-        @test P.amplitudes == amps
-        @test P.scale == scl
+        @test P.locations === locs
+        @test P.amplitudes === amps
+        @test P.scale === scl
         # wrong input
         @test_throws ArgumentError PolesContinuedFraction{Int, Int}(
             rand(Int, 5), rand(Int, 3), 1
@@ -23,19 +23,19 @@ using Test
 
         # outer constructor
         P = PolesContinuedFraction(locs, amps, scl)
+        @test P.locations !== locs
         @test P.locations == locs
+        @test P.amplitudes !== amps
         @test P.amplitudes == amps
         @test P.scale == scl
         # default scale
         P = PolesContinuedFraction(locs, amps)
-        @test P.locations == locs
-        @test P.amplitudes == amps
-        @test P.scale == one(Int)
+        @test P.scale === one(Int)
 
         # conversion of type
         P = PolesContinuedFraction(locs, amps, scl)
         P_new = PolesContinuedFraction{UInt, Float64}(P)
-        @test typeof(P_new) === PolesContinuedFraction{UInt, Float64}
+        @test P_new isa PolesContinuedFraction{UInt, Float64}
         @test P_new.locations == locs
         @test P_new.amplitudes == amps
         @test P_new.scale == scl
