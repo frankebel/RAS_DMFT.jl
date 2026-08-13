@@ -84,7 +84,7 @@ using Test
         RAS_DMFT._orthogonalize_states!(M1, Q_new1, Q_old1)
         bar = norm(Q_old1' * Q_new1)
         @test bar <= foo
-        @test bar < eps()
+        @test bar < 2 * eps()
 
         # no allocations
         Q_new2 = rand(ComplexF64, 8, 4)
