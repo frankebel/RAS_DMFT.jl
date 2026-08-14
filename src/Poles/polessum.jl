@@ -35,10 +35,10 @@ julia> wgts = 5:10;
 julia> P = PolesSum(locs, wgts)
 PolesSum{Int64, Int64} with 6 poles
 
-julia> locations(P) == loc
+julia> locations(P) == locs
 true
 
-julia> weights(P) == wgt
+julia> weights(P) == wgts
 true
 ```
 """

@@ -43,10 +43,10 @@ julia> wgts = [[1 0; 0 1], [2 1; 1 2], [2 -1; -1 2]];
 julia> P = PolesSumBlock(locs, wgts)
 PolesSumBlock{Int64, Int64} with 3 poles of size 2×2
 
-julia> locations(P) == loc
+julia> locations(P) == locs
 true
 
-julia> weights(P) == wgt
+julia> weights(P) == wgts
 true
 ```
 """
