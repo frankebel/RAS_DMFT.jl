@@ -30,8 +30,9 @@ The documentation resides in `docs`.
 Currently, it needs to be compiled manually
 
 ```sh
-julia --project=path/to/package/docs --exec 'using Pkg; Pkg.develop(path=".."); Pkg.instantiate()'
-julia --project=path/to/package/docs make.jl
+cd path/to/package
+julia --project=docs --eval 'using Pkg; Pkg.develop(path=pwd()); Pkg.instantiate()'
+julia --project=docs docs/make.jl
 ```
 
 It can then be viewed with, e.g. [LiveServer.jl](https://github.com/tlienart/LiveServer.jl)

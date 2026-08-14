@@ -14,7 +14,9 @@ Changelog.generate(
 )
 
 # generate documentation
-Literate.markdown("src/tutorial.jl", "src/generated")
+Literate.markdown(
+    joinpath(@__DIR__, "src/tutorial.jl"), joinpath(@__DIR__, "src", "generated")
+)
 
 makedocs(;
     modules = [RAS_DMFT],
