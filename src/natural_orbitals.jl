@@ -201,7 +201,7 @@ function natural_orbital_operator(
 end
 
 """
-    natural_orbital_ci_operator(
+    natural_orbital_ras_operator(
         H_nat::Matrix{T},
         H_int::Operator,
         ϵ_imp::T,
@@ -227,7 +227,7 @@ Convert natural orbital Hamiltonian `H_nat` to `RASOperator`.
 
 See also `RASOperator`.
 """
-function natural_orbital_ci_operator(
+function natural_orbital_ras_operator(
         H_nat::Matrix{T},
         H_int::Operator,
         ϵ_imp::T,
@@ -238,7 +238,7 @@ function natural_orbital_ci_operator(
         excitation::Int = 1,
     ) where {T <: Real}
     # Check if function for zero chain length should be used.
-    n_v_bit === n_c_bit === 0 && return _natural_orbital_ci_operator_zero(
+    n_v_bit === n_c_bit === 0 && return _natural_orbital_ras_operator_zero(
         H_nat, H_int, ϵ_imp, fock_space, n_occ, excitation
     )
     # check input
@@ -329,7 +329,7 @@ function natural_orbital_ci_operator(
 end
 
 # Same as `natural_orbital_operator` but with `n_v_bit === n_c_bit === 0`.
-function _natural_orbital_ci_operator_zero(
+function _natural_orbital_ras_operator_zero(
         H_nat::Matrix{T},
         H_int::Operator,
         ϵ_imp::T,

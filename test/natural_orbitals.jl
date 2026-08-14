@@ -205,8 +205,8 @@ using Test
             fs = FockSpace(Orbitals(4), FermionicSpin(1 // 2))
             n = occupations(fs)
             H_int = U * n[1, -1 // 2] * n[1, 1 // 2]
-            H1 = natural_orbital_ci_operator(H_nat1, H_int, -μ, fs, n_occ, 1, 1, 0)
-            H2 = natural_orbital_ci_operator(H_nat2, H_int, -μ, fs, n_occ, 1, 1, 0)
+            H1 = natural_orbital_ras_operator(H_nat1, H_int, -μ, fs, n_occ, 1, 1, 0)
+            H2 = natural_orbital_ras_operator(H_nat2, H_int, -μ, fs, n_occ, 1, 1, 0)
             @test typeof(H1) == typeof(H2)
             @test H1 == H2
 
@@ -263,8 +263,8 @@ using Test
             a = repeat([30 - 15, 30 + 36], 2)
             b = zeros(Int, 3)
             one = SymTridiagonal(a, b)
-            H1 = natural_orbital_ci_operator(H_nat1, H_int, -μ, fs, n_occ, 1, 1, 1)
-            H2 = natural_orbital_ci_operator(H_nat2, H_int, -μ, fs, n_occ, 1, 1, 1)
+            H1 = natural_orbital_ras_operator(H_nat1, H_int, -μ, fs, n_occ, 1, 1, 1)
+            H2 = natural_orbital_ras_operator(H_nat2, H_int, -μ, fs, n_occ, 1, 1, 1)
             H_mix = [
                 RASOperatorMixed(only((9 * c[3, -1 // 2]').terms), 0x0000000000000008, 1, 2),
                 RASOperatorMixed(only((9 * c[3, -1 // 2]).terms), 0x0000000000000008, 2, 1),
@@ -300,8 +300,8 @@ using Test
                     ]
                 ),
             )
-            H1 = natural_orbital_ci_operator(H_nat1, H_int, -μ, fs, n_occ, 1, 1, 2)
-            H2 = natural_orbital_ci_operator(H_nat2, H_int, -μ, fs, n_occ, 1, 1, 2)
+            H1 = natural_orbital_ras_operator(H_nat1, H_int, -μ, fs, n_occ, 1, 1, 2)
+            H2 = natural_orbital_ras_operator(H_nat2, H_int, -μ, fs, n_occ, 1, 1, 2)
             H_mix = [
                 RASOperatorMixed(only((9 * c[3, -1 // 2]').terms), 0x0000000000000008, 1, 2),
                 RASOperatorMixed(only((9 * c[3, -1 // 2]).terms), 0x0000000000000008, 2, 1),
@@ -358,7 +358,7 @@ using Test
             H_int = U1 * n[1, -1 // 2] * n[1, 1 // 2]
             Δ = hybridization_function_bethe_simple(11)
             H_nat, n_occ1 = to_natural_orbitals(arrowhead_matrix(Δ))
-            H = natural_orbital_ci_operator(H_nat, H_int, -μ1, fs, n_occ1, 2, 2, 2)
+            H = natural_orbital_ras_operator(H_nat, H_int, -μ1, fs, n_occ1, 2, 2, 2)
             @test length(H.opbit.terms) == 1 + 2 * 6 + 4 * 7
             @test length(H.opmix) == 96 # didn't calculate myself
             @test H.zero isa Float64
@@ -366,12 +366,12 @@ using Test
             @test size(H.two) == (binomial(2 * 6, 2), binomial(2 * 6, 2))
 
             # no site of each chain in bit component
-            # natural_orbital_ci_operator_zero
+            # natural_orbital_ras_operator_zero
             fs = FockSpace(Orbitals(4), FermionicSpin(1 // 2)) # too many Orbitals on purpose
             n = occupations(fs)
             H_int = U * n[1, -1 // 2] * n[1, 1 // 2]
-            H1 = RAS_DMFT._natural_orbital_ci_operator_zero(H_nat1, H_int, -μ, fs, n_occ, 2)
-            H2 = RAS_DMFT._natural_orbital_ci_operator_zero(H_nat2, H_int, -μ, fs, n_occ, 2)
+            H1 = RAS_DMFT._natural_orbital_ras_operator_zero(H_nat1, H_int, -μ, fs, n_occ, 2)
+            H2 = RAS_DMFT._natural_orbital_ras_operator_zero(H_nat2, H_int, -μ, fs, n_occ, 2)
             @test typeof(H1) == typeof(H2)
             @test H1 == H2
 
@@ -434,7 +434,7 @@ using Test
         n_v_bit = 1 # Amount of valence bath sites in bit component of RASWavefunction
         n_c_bit = 1 # Amount of conduction bath sites in bit component of RASWavefunction
         n_sites = 1 + n_bath
-        M_ciwf = UInt64
+        M_raswf = UInt64
         M_wf = BigMask{cld(2 * n_sites, 64)} # bitmask for Wavefunction
         e = 2
         niter = 20
@@ -461,15 +461,15 @@ using Test
         ϕ_start = Wavefunction(Dict(s_start => 1.0))
 
         # Using RASWavefunction.
-        fock_space_ciwf = FockSpace(M_ciwf, M_ciwf, Orbitals(n_bit), FermionicSpin(1 // 2))
-        n_ciwf = occupations(fock_space_ciwf)
-        H_int_ciwf = U * n_ciwf[1, -1 // 2] * n_ciwf[1, 1 // 2]
+        fock_space_raswf = FockSpace(M_raswf, M_raswf, Orbitals(n_bit), FermionicSpin(1 // 2))
+        n_raswf = occupations(fock_space_raswf)
+        H_int_raswf = U * n_raswf[1, -1 // 2] * n_raswf[1, 1 // 2]
         # Create Hamiltonian.
-        H_ciwf = natural_orbital_ci_operator(
-            H_nat, H_int_ciwf, -μ, fock_space_ciwf, n_occ, n_v_bit, n_c_bit, e
+        H_raswf = natural_orbital_ras_operator(
+            H_nat, H_int_raswf, -μ, fock_space_raswf, n_occ, n_v_bit, n_c_bit, e
         )
         # Create starting RASWavefunction. Impurity filled with 10, bath b 01 accordingly.
-        s_start = slater_start(M_ciwf, 0b0110, n_v_bit, n_c_bit, 0, 0)
+        s_start = slater_start(M_raswf, 0b0110, n_v_bit, n_c_bit, 0, 0)
         @assert count_ones(s_start) + 2 * n_v_vector == n_sites
         n_vector = n_v_vector + n_c_vector
         v_start = zeros(sum(i -> binomial(2 * n_vector, i), 0:e))
@@ -484,24 +484,24 @@ using Test
         ψ = deepcopy(ψ_start)
         for _ in 1:niter
             ϕ = RAS_DMFT.Debug.mul_excitation(H_wf, ϕ, m_valence, m_conduction, e)
-            ψ = H_ciwf * ψ
+            ψ = H_raswf * ψ
             # normalize
             normalize!(ϕ)
             normalize!(ψ)
         end
 
         # Convert RASWavefunction to Wavefunction
-        ϕ_ciwf = Wavefunction(ψ)
+        ϕ_raswf = Wavefunction(ψ)
         # Remove all weights smaller than machine epsilon.
-        Fermions.Wavefunctions.chop!(ϕ_ciwf, eps())
+        Fermions.Wavefunctions.chop!(ϕ_raswf, eps())
         Fermions.Wavefunctions.chop!(ϕ, eps())
 
-        @test ϕ ≈ ϕ_ciwf rtol = 1.0e-11
-        @test ϕ ≈ ϕ_ciwf atol = 10 * eps()
-        @test norm(ϕ - ϕ_ciwf) < 10 * eps()
+        @test ϕ ≈ ϕ_raswf rtol = 1.0e-11
+        @test ϕ ≈ ϕ_raswf atol = 10 * eps()
+        @test norm(ϕ - ϕ_raswf) < 10 * eps()
 
         # Convert Wavefunction to RASWavefunction
-        ψ_wf = RASWavefunction{Dict{M_ciwf, Vector{Float64}}}(
+        ψ_wf = RASWavefunction{Dict{M_raswf, Vector{Float64}}}(
             ϕ, n_bit, n_v_vector, n_c_vector, e
         )
         @test norm(ψ - ψ_wf) < 20 * eps()

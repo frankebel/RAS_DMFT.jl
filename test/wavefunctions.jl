@@ -63,7 +63,7 @@ using Test
         fs = FockSpace(Orbitals(n_bit), FermionicSpin(1 // 2))
         n = occupations(fs)
         H_int = U * n[1, -1 // 2] * n[1, 1 // 2]
-        H = natural_orbital_ci_operator(H_nat, H_int, -μ, fs, n_occ, L_v, L_c, p)
+        H = natural_orbital_ras_operator(H_nat, H_int, -μ, fs, n_occ, L_v, L_c, p)
         ψ_start = RASWavefunction_singlet(Dict{UInt64, Float64}, L_v, L_c, V_v, V_c, p)
 
         # 10 steps total

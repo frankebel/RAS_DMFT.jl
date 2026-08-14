@@ -40,7 +40,7 @@ function init_system(
     H_nat, n_occ = to_natural_orbitals(arr)
     n_bit, V_v, V_c = get_RAS_parameters(n_sites, n_occ, L_c, L_v)
     fs = FockSpace(Orbitals(n_bit), FermionicSpin(1 // 2))
-    H = natural_orbital_ci_operator(H_nat, H_int, ϵ_imp, fs, n_occ, L_v, L_c, p)
+    H = natural_orbital_ras_operator(H_nat, H_int, ϵ_imp, fs, n_occ, L_v, L_c, p)
     ψ_start = RASWavefunction_singlet(Dict{UInt64, Float64}, L_v, L_c, V_v, V_c, p)
     E0, ψ0 = ground_state!(H, ψ_start, 5, typemax(Int), var)
     return H, E0, ψ0
