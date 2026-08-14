@@ -44,6 +44,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `self_energy_IFG_gaussian`
   - `self_energy_IFG_lorentzian`
   - `δ_gaussian`
+- `equal_weight_discretization` ([#217](https://github.com/frankebel/RAS_DMFT.jl/pull/217)) (0d6582e)
 
 ### Fixed
 
