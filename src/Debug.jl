@@ -124,7 +124,6 @@ end
 function diffkeys(
         ϕ1::Wavefunction{<:Any, <:Any, T}, ϕ2::Wavefunction{<:Any, <:Any, T}
     ) where {T}
-    length(ϕ1) >= length(ϕ2)
     result = keytype(T)[]
     for k in keys(ϕ1)
         haskey(ϕ2, k) || push!(result, k)
@@ -132,29 +131,30 @@ function diffkeys(
     return Set(result)
 end
 
-# # Check sign of amplitude.
-# # Check if amplitudes are similar.
-# function showdiff(ϕ1::Wavefunction{T}, ϕ2::Wavefunction{T}; kwargs...) where {T}
-#     length(ϕ1) == length(ϕ2) || throw(ArgumentError("Wavefunction length mismatch"))
-#     for (k, v) in ϕ1
-#         try
-#             # check anticommutator sign relation
-#             sign(v) == sign(ϕ2[k]) || @info "sign mismatch" k ϕ1[k] ϕ2[k]
-#             # check if values are similar
-#             isapprox(v, ϕ2[k]; kwargs...) || @info "amplitudes" k ϕ1[k] ϕ2[k]
-#         catch err
-#             isa(err, KeyError) && return KeyError(k)
-#         end
-#     end
-# end
+# Check sign of amplitude.
+# Check if amplitudes are similar.
+function showdiff(ϕ1::Wavefunction{T}, ϕ2::Wavefunction{T}; kwargs...) where {T}
+    length(ϕ1) == length(ϕ2) || throw(ArgumentError("Wavefunction length mismatch"))
+    for (k, v) in ϕ1
+        try
+            # check anticommutator sign relation
+            sign(v) == sign(ϕ2[k]) || @info "sign mismatch" k ϕ1[k] ϕ2[k]
+            # check if values are similar
+            isapprox(v, ϕ2[k]; kwargs...) || @info "amplitudes" k ϕ1[k] ϕ2[k]
+        catch err
+            isa(err, KeyError) && return KeyError(k)
+        end
+    end
+    return nothing
+end
 
-# """
-#     highest_amplitudes(ψ::Wavefunction, n_det::Int=20)
-#
-# Print `n_det` most important amplitudes of `ψ`.
-# """
-# function highest_amplitudes(ψ::Wavefunction, n_det::Int=20)
-#     return display(sort(collect(ψ.terms); by=x -> abs(x[2]), rev=true)[1:n_det])
-# end
+"""
+    highest_amplitudes(ψ::Wavefunction, n_det::Int=20)
+
+Print `n_det` most important amplitudes of `ψ`.
+"""
+function highest_amplitudes(ψ::Wavefunction, n_det::Int = 20)
+    return display(sort(collect(ψ.terms); by = x -> abs(x[2]), rev = true)[1:n_det])
+end
 
 end
