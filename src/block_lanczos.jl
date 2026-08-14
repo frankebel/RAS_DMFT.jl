@@ -38,7 +38,7 @@ function block_lanczos(
     for j in 2:N
         # orthonormalize Q_new
         zerovector!(Q_int)
-        @inline B[j - 1] = Matrix{T}(undef, q, q)
+        @inbounds B[j - 1] = Matrix{T}(undef, q, q)
         _orthonormalize_SVD!(V1, M1, B[j - 1], Q_int, Q_new)
         # TODO: Stop early if norm is small.
         Q_new, Q_int = Q_int, Q_new
@@ -52,7 +52,7 @@ function block_lanczos(
         rmul!(M1, -1)
         mul!(Q_new, Q_old, M1, true, true)
         # A_j = Q^† Q_new
-        @inline A[j] = Matrix{T}(undef, q, q)
+        @inbounds A[j] = Matrix{T}(undef, q, q)
         mul!(A[j], Q_curr', Q_new)
         hermitianpart!(A[j]) # enforce due to finite precision
         # Q_new -= Q A_j
@@ -109,8 +109,8 @@ function block_lanczos_full_ortho(
             norm(v) < tol && (v .= 0)
         end
 
-        @inline B[j - 1] = Matrix{T}(undef, q, q)
-        @inline Q[j] = Matrix{T}(undef, n, q)
+        @inbounds B[j - 1] = Matrix{T}(undef, q, q)
+        @inbounds Q[j] = Matrix{T}(undef, n, q)
         _orthonormalize_SVD!(V1, M1, B[j - 1], Q[j], Q_new)
         _orthonormalize_GramSchmidt!(Q[j]) # numerical instability
         _orthonormalize_GramSchmidt!(Q[j]) # numerical instability

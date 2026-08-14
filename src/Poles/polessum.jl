@@ -452,7 +452,7 @@ function LinearAlgebra.axpby!(α::Number, x::P, β::Number, y::P) where {P <: Po
     ly = locations(y)
     sizehint!(ly, length(y) + length(x))
     sizehint!(wy, length(y) + length(x))
-    @inbounds @inline for i in eachindex(x)
+    @inbounds for i in eachindex(x)
         push!(ly, lx[i])
         push!(wy, α * wx[i])
     end

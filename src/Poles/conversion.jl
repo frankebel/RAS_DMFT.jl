@@ -22,7 +22,7 @@ function anderson_matrix(P::PolesSum)
         H_A = zero(h)
         H_A[1, 1] = h[1, 1]
         for i in 2:N
-            @inline H_A[i, i] = F.values[i - 1]
+            @inbounds H_A[i, i] = F.values[i - 1]
         end
         h21 = @view h[2:end, 1]
         H_A21 = @view H_A[1, 2:end]
@@ -57,7 +57,7 @@ function anderson_matrix(P::PolesSumBlock)
         H_A = zero(h)
         H_A[1:n_b, 1:n_b] .= @view h[1:n_b, 1:n_b]
         for i in (n_b + 1):(N * n_b)
-            @inline H_A[i, i] = F.values[i - n_b]
+            @inbounds H_A[i, i] = F.values[i - n_b]
         end
         h21 = @view h[(n_b + 1):end, 1:n_b]
         H_A21 = @view H_A[(n_b + 1):end, 1:n_b]
