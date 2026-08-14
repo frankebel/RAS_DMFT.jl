@@ -41,7 +41,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `quasiparticle_weight_gaussian`
   - `self_energy_IFG_gaussian`
   - `self_energy_IFG_lorentzian`
-  - `spectral_function_loggaussian`
   - `δ_gaussian`
 
 ### Fixed
