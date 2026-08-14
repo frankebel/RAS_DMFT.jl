@@ -17,7 +17,7 @@ Return the scale of `P`.
 scale(P::AbstractPolesContinuedFraction) = P.scale
 
 """
-    tridiagonal_matrix(P::AbstractPolesSum)
+    tridiagonal_matrix(P::AbstractPolesContinuedFraction)
 
 Calculate the (block) tridiagonal representation of `P`
 
@@ -30,5 +30,7 @@ B_1 & A_2 & B_2 &         &         \\\\
     &     &     & B_{N-1} & A_N
 \\end{pmatrix} .
 ```
+
+The overall scale of `P` is not part of the matrix.
 """
 function tridiagonal_matrix end
