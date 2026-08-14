@@ -1,5 +1,7 @@
 # RAS_DMFT
 
+[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://frankebel.github.io/RAS_DMFT.jl/stable)
+[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://frankebel.github.io/RAS_DMFT.jl/dev)
 [![Build Status](https://github.com/frankebel/RAS_DMFT.jl/actions/workflows/CI.yml/badge.svg)](https://github.com/frankebel/RAS_DMFT.jl/actions/workflows/CI.yml)
 [![codecov](https://codecov.io/gh/frankebel/RAS_DMFT.jl/graph/badge.svg?token=5ACAMMA64E)](https://codecov.io/gh/frankebel/RAS_DMFT.jl)
 [![Aqua QA](https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
@@ -22,22 +24,4 @@ If the package is installed, you can run all tests with
 
 ```julia
 julia --project=path/to/project --eval 'using Pkg; Pkg.test("RAS_DMFT")'
-```
-
-## Documentation
-
-The documentation resides in `docs`.
-Currently, it needs to be compiled manually
-
-```sh
-cd path/to/package
-julia --project=docs --eval 'using Pkg; Pkg.develop(path=pwd()); Pkg.instantiate()'
-julia --project=docs docs/make.jl
-```
-
-It can then be viewed with, e.g. [LiveServer.jl](https://github.com/tlienart/LiveServer.jl)
-
-```julia
-using LiveServer
-serve(dir="build")
 ```
