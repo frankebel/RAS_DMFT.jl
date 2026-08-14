@@ -33,5 +33,4 @@ makedocs(;
     ],
 )
 
-# only works for public repos, see <https://github.com/frankebel/RAS_DMFT.jl/settings/pages>
-# deploydocs(; repo="github.com/frankebel/RAS_DMFT.jl", devbranch="main")
+deploydocs(; repo = "github.com/frankebel/RAS_DMFT.jl", devbranch = "main")
