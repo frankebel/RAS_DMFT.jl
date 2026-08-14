@@ -25,7 +25,7 @@ function self_energy_dyson(
     )
 
     # invert impurity Green's function
-    a0, G_imp_inv = inv(G_imp)
+    a0, G_imp_inv = inverse(G_imp)
 
     # Hartree term
     Σ_H = a0 - ϵ_imp

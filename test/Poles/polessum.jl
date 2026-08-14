@@ -167,6 +167,35 @@ using Test
             @test weights(foo) == [0.4, 0.3]
         end # flip_spectrum
 
+        @testset "inverse" begin
+            grid = range(-1, 1; length = 101)
+            G = greens_function_bethe_grid(grid)
+            a0, P = inverse(G)
+            @test length(P) === 100 # originally 101 poles
+            # poles are symmetric
+            @test abs(a0) < eps()
+            @test norm(locations(P) + reverse(locations(P))) < 50 * eps()
+            @test norm(weights(P) - reverse(weights(P))) < 10 * eps()
+            @test moment(P, 0) ≈ 0.25 atol = 1.0e-4 # total weight
+            # evaluate
+            δ = 0.1
+            @test norm(
+                evaluate_lorentzian(G, 0, δ) -
+                    1 / (im * δ - a0 - evaluate_lorentzian(P, 0, δ)),
+            ) < 50 * eps()
+            ω = 1.0
+            δ = 0.1
+            @test norm(
+                evaluate_lorentzian(G, ω, δ) -
+                    1 / (ω + im * δ - a0 - evaluate_lorentzian(P, ω, δ)),
+            ) < 10 * eps()
+            # symmetry
+            z1 = 1 / (-0.8 + 0.1im - a0 - evaluate_lorentzian(P, -0.8, 0.1))
+            z2 = 1 / (0.8 + 0.1im - a0 - evaluate_lorentzian(P, 0.8, 0.1))
+            @test real(z1) ≈ -real(z2) rtol = 20 * eps()
+            @test imag(z1) ≈ imag(z2) rtol = 20 * eps()
+        end # inverse
+
         @testset "location" begin
             P = PolesSum(0:5, 5:10)
             @test location(P, 1) == 0
@@ -479,35 +508,6 @@ using Test
             @test eltype(PolesSum([0, 1], [0.0, 1.0])) === Float64
             @test eltype(PolesSum([0.0, 1.0], [0.0im, 1.0])) === ComplexF64
         end # eltype
-
-        @testset "inv" begin
-            grid = range(-1, 1; length = 101)
-            G = greens_function_bethe_grid(grid)
-            a0, P = inv(G)
-            @test length(P) === 100 # originally 101 poles
-            # poles are symmetric
-            @test abs(a0) < eps()
-            @test norm(locations(P) + reverse(locations(P))) < 50 * eps()
-            @test norm(weights(P) - reverse(weights(P))) < 10 * eps()
-            @test moment(P, 0) ≈ 0.25 atol = 1.0e-4 # total weight
-            # evaluate
-            δ = 0.1
-            @test norm(
-                evaluate_lorentzian(G, 0, δ) -
-                    1 / (im * δ - a0 - evaluate_lorentzian(P, 0, δ)),
-            ) < 50 * eps()
-            ω = 1.0
-            δ = 0.1
-            @test norm(
-                evaluate_lorentzian(G, ω, δ) -
-                    1 / (ω + im * δ - a0 - evaluate_lorentzian(P, ω, δ)),
-            ) < 10 * eps()
-            # symmetry
-            z1 = 1 / (-0.8 + 0.1im - a0 - evaluate_lorentzian(P, -0.8, 0.1))
-            z2 = 1 / (0.8 + 0.1im - a0 - evaluate_lorentzian(P, 0.8, 0.1))
-            @test real(z1) ≈ -real(z2) rtol = 20 * eps()
-            @test imag(z1) ≈ imag(z2) rtol = 20 * eps()
-        end # inv
 
         @testset "isempty" begin
             @test isempty(PolesSum(Int[], Float64[]))

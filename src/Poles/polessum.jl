@@ -146,6 +146,30 @@ function filling(P::PolesSum{<:Any, B}, μ::Real = 0) where {B}
     return result
 end
 
+"""
+    inverse(P::PolesSum)
+
+Return the Anderson/star decomposition `(a0::Real, D::PolesSum)` by inverting the input:
+
+```math
+P(z) = \\frac{1}{z - a0 - D(z)}
+```
+
+for a normalized `P`.
+"""
+function inverse(P::PolesSum)
+    isapprox(moment(P, 0), 1; atol = 1000 * eps(float(eltype(P)))) ||
+        throw(ArgumentError("P does not have total weight 1"))
+
+    b0, HA = anderson_matrix(P)
+    locs = diag(HA)
+    a0 = popfirst!(locs)
+    wgts = b0 * HA[1, 2:end]
+    map!(abs2, wgts)
+
+    return a0, PolesSum(locs, wgts)
+end
+
 function merge_degenerate_poles!(P::PolesSum, tol::Real = 0)
     # check input
     tol >= 0 || throw(ArgumentError("tol must not be negative"))
@@ -425,19 +449,6 @@ function Base.copy(P::PolesSum{A, B}) where {A, B}
 end
 
 Base.eltype(::Type{<:PolesSum{A, B}}) where {A, B} = promote_type(A, B)
-
-function Base.inv(P::PolesSum)
-    isapprox(moment(P, 0), 1; atol = 1000 * eps(float(eltype(P)))) ||
-        throw(ArgumentError("P does not have total weight 1"))
-
-    b0, HA = anderson_matrix(P)
-    locs = diag(HA)
-    a0 = popfirst!(locs)
-    wgts = b0 * HA[1, 2:end]
-    map!(abs2, wgts)
-
-    return a0, PolesSum(locs, wgts)
-end
 
 Base.show(io::IO, P::PolesSum) = print(io, summary(P), " with ", length(P), " poles")
 

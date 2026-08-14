@@ -59,6 +59,7 @@ export
     hybridization_function_bethe_grid_hubbard3,
     hybridization_function_bethe_simple,
     init_system,
+    inverse,
     location,
     locations,
     mask_fe,
