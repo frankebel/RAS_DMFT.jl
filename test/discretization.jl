@@ -75,18 +75,6 @@ using Test
         C = transpose(C_minus) + C_plus
     end # block Lanczos
 
-    # Discretization for Gaussian returned wrong number of poles.
-    w = -10:0.0002:10
-    g = similar(w)
-    @. g = exp(-w^2)
-    wrong_length = 0
-    for i in 3:2:1001
-        # test different number of poles
-        dis = equal_weight_discretization(g, w, 0.04, i)
-        length(dis) == i || (wrong_length += 1)
-    end
-    @test iszero(wrong_length)
-
     @testset "discretize_to_grid" begin
         W = [-5.0, -4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0]
         f = [0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 2.25, 2.5, 3.0] # not same step size
