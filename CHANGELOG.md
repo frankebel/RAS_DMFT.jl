@@ -31,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - explicitly specify matrix representation for given pole representation ([#196](https://github.com/frankebel/RAS_DMFT.jl/pull/196)) (80d9ae7)
   New methods are `anderson_matrix`, `arrowhead_matrix`, or `tridiagonal_matrix`.
 - `Base.inv(::PolesSum)` → `inverse` ([#215](https://github.com/frankebel/RAS_DMFT.jl/pull/215)) (7dbfc91)
+- `natural_orbital_ci_operator` → `natural_orbital_ras_operator` ([#216](https://github.com/frankebel/RAS_DMFT.jl/pull/216)) (d515549)
 
 ### Removed
 
