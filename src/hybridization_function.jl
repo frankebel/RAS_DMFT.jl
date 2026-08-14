@@ -4,10 +4,10 @@
 # as Δ(ω) = D^2/4 G(ω).
 
 """
-    hybridization_function_bethe_analytic(z::Number, D::Real=1.0)
-    hybridization_function_bethe_analytic(Z::AbstractVector{<:Number}, D::Real=1.0)
+    hybridization_function_bethe_analytic(z::Number, D::Real = 1.0)
+    hybridization_function_bethe_analytic(Z::AbstractVector{<:Number}, D::Real = 1.0)
 
-Calculate the hybrid function for a Bethe lattice
+Calculate the hybridization function for a Bethe lattice
 given a frequency `z` in the upper complex plane,
 and half-bandwidth `D`.
 
@@ -26,7 +26,7 @@ function hybridization_function_bethe_analytic(Z::AbstractVector{<:Number}, D::R
 end
 
 """
-    hybridization_function_bethe_simple(n_bath::Int, D::Real=1.0)
+    hybridization_function_bethe_simple(n_bath::Int, D::Real = 1.0)
 
 Return the [`PolesSum`](@ref) representation of the semicircular density of states
 with half-bandwidth `D` on `n_bath` poles.
@@ -45,7 +45,7 @@ function hybridization_function_bethe_simple(n_bath::Int, D::Real = 1.0)
 end
 
 """
-    hybridization_function_bethe_grid(grid::AbstractVector{<:Real}, D::Real=1.0)
+    hybridization_function_bethe_grid(grid::AbstractVector{<:Real}, D::Real = 1.0)
 
 Return the [`PolesSum`](@ref) representation of the semicircular density of states
 with half-bandwidth `D` with poles given in `grid`.
@@ -62,8 +62,8 @@ end
 
 """
     hybridization_function_bethe_grid_hubbard3(
-    grid::AbstractVector{<:Real}, U::Real=0.0, D::Real=1.0
-)
+        grid::AbstractVector{<:Real}, U::Real = 0.0, D::Real = 1.0
+    )
 
 Return the [`PolesSum`](@ref) representation of the Hubbard III approximation
 with half-bandwidth `D` and poles given in `grid`.
@@ -79,7 +79,7 @@ function hybridization_function_bethe_grid_hubbard3(
 end
 
 """
-    hybridization_bethe_equal_weight(n_bath::Int, D::Real=1.0)
+    hybridization_function_bethe_equal_weight(n_bath::Int, D::Real = 1.0)
 
 Return the [`PolesSum`](@ref) representation of the semicircular density of states
 with half-bandwidth `D` on `n_bath` poles.

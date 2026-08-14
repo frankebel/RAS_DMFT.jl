@@ -1,7 +1,7 @@
 # IO to read/write data in HDF5 format.
 
 """
-    read_hdf5(filename::Abstractstring, T::Type)
+    read_hdf5(filename::AbstractString, T::Type)
 
 Read data of type `T` from `filename`.
 
@@ -10,7 +10,7 @@ See also [`write_hdf5`](@ref).
 function read_hdf5 end
 
 """
-    write_hdf5(filename::Abstractstring, content)
+    write_hdf5(filename::AbstractString, content)
 
 Write `content` to `filename` in HDF5 format.
 

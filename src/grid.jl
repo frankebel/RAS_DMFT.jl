@@ -23,10 +23,10 @@ end
 """
     grid_interpolate(a::AbstractVector{<:R}, n::Int) where {R<:Real}
 
-For each point ``a_i`` linearly interpolate `n` point in the interval
+For each point ``a_i`` linearly interpolate `n` points in the interval
 
 ```math
-\\left[\\frac{a_{i-1} + a_i}{2}, \\frac{a_i + a_{i+1}}{2}\\right].
+\\left[\\frac{a_{i-1} + a_i}{2}, \\frac{a_i + a_{i+1}}{2}\\right] \\,.
 ```
 """
 function grid_interpolate(a::AbstractVector{<:Real}, n::Int)

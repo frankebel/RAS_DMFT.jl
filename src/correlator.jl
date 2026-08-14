@@ -75,7 +75,7 @@ function correlator_plus(
     if !isempty(idx_neg)
         n_neg = length(idx_neg)
         weight_neg = sum(weights(C)[idx_neg])
-        @warn "C+ has negative specral weight $(weight_neg) on $(n_neg) pole(s)"
+        @warn "C+ has negative spectral weight $(weight_neg) on $(n_neg) pole(s)"
     end
 
     return C
@@ -135,7 +135,7 @@ function correlator_minus(
     if !isempty(idx_pos)
         n_pos = length(idx_pos)
         weight_pos = sum(weights(C)[idx_pos])
-        @warn "C- has positive specral weight $(weight_pos) on $(n_pos) pole(s)"
+        @warn "C- has positive spectral weight $(weight_pos) on $(n_pos) pole(s)"
     end
 
     return C
