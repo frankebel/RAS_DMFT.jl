@@ -1,8 +1,8 @@
 """
     lanczos!(
-        states::Vector{WF},
         a::Vector{Float64},
         b::Vector{Float64},
+        states::Vector{WF},
         H::RASOperator,
         q::WF,
         M::Integer,
@@ -21,8 +21,8 @@ function lanczos!(
     ) where {WF <: RASWavefunction}
     # check input
     length(states) == M + 1 || throw(ArgumentError("length of states must be M+1")) # need space for one more
-    length(a) == M || throw(ArgumentError("length of a must be M-1"))
-    length(b) == M - 1 || throw(ArgumentError("length of a must be M"))
+    length(a) == M || throw(ArgumentError("length of a must be M"))
+    length(b) == M - 1 || throw(ArgumentError("length of b must be M-1"))
     M >= 1 || throw(ArgumentError("M must be >= 1"))
     # first step
     copy!(states[1], q)
