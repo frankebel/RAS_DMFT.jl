@@ -8,7 +8,6 @@ using Fermions.Wavefunctions
 using HDF5
 using LinearAlgebra
 using SpecialFunctions
-using Statistics
 
 # Types
 export
