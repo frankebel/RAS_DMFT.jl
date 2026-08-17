@@ -136,12 +136,15 @@ function find_chemical_potential(
     # bisect chemical potential μ
     μ_new = 0.0
     n_new = 0.0
+    n_bisect = 0
     for _ in 1:b_max
+        n_bisect += 1
         μ_new = 0.5 * (μ_min + μ_max)
         n_new = _filling_mu(H_k, Σ_stat, Σ_A, μ_new)
         n_new > n_fill ? μ_max = μ_new : μ_min = μ_new
         (μ_max - μ_min) < μ_tol && break
     end
+    @debug "chemical potential bisection" n_bisect μ_new μ_min μ_max n_fill n_new
 
     return μ_new, n_new
 end
