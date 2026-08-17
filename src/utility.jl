@@ -78,7 +78,7 @@ end
 Find chemical potential ``μ``, such that desired filling ``n_\\mathrm{fill}`` is fulfilled
 
 ```math
-\\begin{align}
+\\begin{aligned}
 n_\\mathrm{fill}
 & ≡
 ∫_{-∞}^0 \\mathrm{d}ω~\\mathrm{Tr}
@@ -91,7 +91,7 @@ n_\\mathrm{fill}
 -\\frac{1}{π}\\mathrm{Im}~
 \\frac{1}{N_k} ∑_k \\frac{1}{ω + \\mathrm{i}0^+ +μ - H_k - Σ(ω + \\mathrm{i}0^+)}
 \\right] .
-\\end{align}
+\\end{aligned}
 ```
 
 A bisection algorithm is used which stops once `Δμ < μ_tol`

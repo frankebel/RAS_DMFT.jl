@@ -159,13 +159,13 @@ xlims!(ax, first(W), last(W))
 
 # We can calculate the quasiparticle weight
 # ```math
-# \begin{align}
+# \begin{aligned}
 # Z
 # &=
 # \left(1 - \left.\frac{∂\mathrm{Re}~Σ}{∂ω}\right|_{ω=0}\right)^{-1} \\
 # &=
 # \left(1 + \sum_i \frac{w_i}{ϵ_i^2}\right)^{-1}
-# \end{align}
+# \end{aligned}
 # ```
 # directly on the real axis without the use of a difference quotient.
 # Due to poles at $ϵ_i≈0$ this will diverge,
