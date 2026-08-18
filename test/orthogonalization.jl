@@ -71,8 +71,8 @@ using Test
 
     @testset "_orthogonalize_states!" begin
         Q_new1 = rand(ComplexF64, 8, 4)
-        Q_old1 = rand(ComplexF64, 8, 4)
-        Q_old1, _ = RAS_DMFT._orthonormalize_SVD(Q_old1)
+        Q_old0 = rand(ComplexF64, 8, 4)
+        Q_old1, _ = RAS_DMFT._orthonormalize_SVD(Q_old0)
         RAS_DMFT._orthonormalize_GramSchmidt!(Q_old1)
         RAS_DMFT._orthonormalize_GramSchmidt!(Q_old1) # twice because unstable
         M1 = Matrix{ComplexF64}(undef, 4, 4)

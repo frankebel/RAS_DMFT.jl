@@ -43,9 +43,7 @@ using Test
         @test_throws ArgumentError to_natural_orbitals(m)
 
         # complex matrix
-        m = rand(ComplexF64, 10, 10)
-        m = 0.5 * (m + m')
-        @test_throws MethodError to_natural_orbitals(m)
+        @test !hasmethod(to_natural_orbitals, Tuple{Matrix{ComplexF64}})
 
         # sites with zero hybridization, Löwdin must not return negative eigenvalues
         Δ = hybridization_function_bethe_grid(range(-2, 2; length = 31))
@@ -413,21 +411,6 @@ using Test
         # Convert to Wavefunction and show that both have numerically the same result.
         # Use symbol "ϕ" for Wavefunction, "ψ" for RASWavefunction.
 
-        function Base.isapprox(
-                ϕ1::Wavefunction{T}, ϕ2::Wavefunction{T}; kwargs...
-            ) where {T}
-            length(ϕ1) == length(ϕ2) || throw(ArgumentError("Wavefunction length mismatch"))
-            for (k, v) in ϕ1
-                try
-                    # check if values are similar
-                    isapprox(v, ϕ2[k]; kwargs...) || return false
-                catch err
-                    isa(err, KeyError) && return KeyError(k)
-                end
-            end
-            return true
-        end
-
         n_bath = 41
         U = 4.0
         μ = U / 2
@@ -495,9 +478,6 @@ using Test
         # Remove all weights smaller than machine epsilon.
         Fermions.Wavefunctions.chop!(ϕ_raswf, eps())
         Fermions.Wavefunctions.chop!(ϕ, eps())
-
-        @test ϕ ≈ ϕ_raswf rtol = 1.0e-11
-        @test ϕ ≈ ϕ_raswf atol = 10 * eps()
         @test norm(ϕ - ϕ_raswf) < 10 * eps()
 
         # Convert Wavefunction to RASWavefunction

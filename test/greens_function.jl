@@ -129,8 +129,6 @@ using Test
         H_k = [[1 + 0im 2; 2 1], [3 4; 4 3]]
         Σ_stat = Diagonal([1, 0])
         Σ_dyn = PolesSumBlock([-2, 3], [[0 im; -im 5], [0 0; 0 6]]) # self-energy only on [2, 2] index
-        Z = (-10:-9) .+ 0.1im
-        Σ = [Diagonal([0, 5 + im]), Diagonal([0, 6 + im])] # self-energy only on [2, 2] index
 
         @testset "non-interacting" begin
             @inferred greens_function_local(H_k, 0.5)

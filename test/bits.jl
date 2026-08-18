@@ -30,7 +30,7 @@ using Test
         @test_throws ArgumentError mask_fe(UInt64, 1, -1, 1)
         @test_throws ArgumentError mask_fe(UInt64, 1, 1, -1)
 
-        @test_throws MethodError mask_fe(Int64, 1, 1, 1)
+        @test !hasmethod(mask_fe, Tuple{Type{Int64}, Int, Int, Int})
     end # mask_fe
 
     @testset "slater_start" begin

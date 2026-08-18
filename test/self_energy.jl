@@ -14,9 +14,6 @@ using Test
     p = 2
     n_kryl = 100
     var = eps()
-    step_size = 0.02
-    W = -10:step_size:10
-    δ = 0.08
     tol = 1.0e-8 # merge weights smaller than this
 
     Δ0 = hybridization_function_bethe_simple(n_bath)
@@ -24,13 +21,12 @@ using Test
     fs = FockSpace(Orbitals(2 + L_v + L_c), FermionicSpin(1 // 2))
     c = annihilators(fs)
     n = occupations(fs)
-    H_int = U * n[1, 1 // 2] * n[1, -1 // 2]
     d_dag = c[1, -1 // 2]' # d_↓^†
 
     # only interacting part
     H_int = U * n[1, 1 // 2] * n[1, -1 // 2]
     q_dag = H_int * d_dag - d_dag * H_int  # q_↓^† = [H_int, d^†]
-    H, E0, ψ0 = init_system(Δ0, H_int, ϵ_imp, L_v, L_c, p, var)
+    H, _, ψ0 = init_system(Δ0, H_int, ϵ_imp, L_v, L_c, p, var)
     O_Σ_H = q_dag' * d_dag + d_dag * q_dag'
     Σ_H = dot(ψ0, O_Σ_H, ψ0)
 

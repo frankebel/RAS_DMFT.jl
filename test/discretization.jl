@@ -15,11 +15,7 @@ using Test
     n_kryl = 100
     var = eps()
     W = -5:0.001:5
-    δ = 0.04
-    # do not change parameters below
-    Z = W .+ im * δ
 
-    Δ0_analytic = hybridization_function_bethe_analytic
     Δ0 = hybridization_function_bethe_simple(n_bath)
 
     # Operators for positive frequencies. Negative ones are calculated by adjoint.
@@ -68,11 +64,21 @@ using Test
         # Hartree term
         O_H = O[1]' * O[2] + O[2] * O[1]'
         Σ_H = dot(ψ0, O_H, ψ0)
+        @test Σ_H ≈ U / 2 rtol = 1.0e3 * eps() # half-filling
 
         # impurity correlators
         C_plus = correlator_plus(H, ψ0, O, n_kryl)
         C_minus = correlator_minus(H, ψ0, map(adjoint, O), n_kryl)
+        @test length(C_plus) == length(O) * n_kryl
+        @test all(>=(0), locations(C_plus))
+        @test all(<=(0), locations(C_minus))
+
+        # moments for half-filling
         C = transpose(C_minus) + C_plus
+        m0 = [U^2 / 2 U / 2; U / 2 1]
+        @test isapprox(moment(C, 0), m0; atol = 1.0e3 * eps())
+        m1 = [U^3 / 4 U^2 / 4; U^2 / 4 0]
+        @test isapprox(moment(C, 1), m1; atol = 1.0e7 * eps())
     end # block Lanczos
 
     @testset "discretize_to_grid" begin
