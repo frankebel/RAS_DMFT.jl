@@ -72,6 +72,7 @@ export
     natural_orbital_ras_operator,
     orgtr!,
     quasiparticle_weight,
+    quasiparticle_weight_inflections,
     read_hdf5,
     remove_zero_weight,
     remove_zero_weight!,
