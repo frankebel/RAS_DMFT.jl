@@ -33,7 +33,6 @@ export
     correlator,
     correlator_minus,
     correlator_plus,
-    discretize_similar_weight,
     discretize_to_grid,
     evaluate,
     evaluate_gaussian,
