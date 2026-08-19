@@ -33,7 +33,6 @@ export
     correlator,
     correlator_minus,
     correlator_plus,
-    discretize_to_grid,
     evaluate,
     evaluate_gaussian,
     evaluate_lorentzian,
@@ -114,7 +113,6 @@ include("block_lanczos.jl")
 include("correlator.jl")
 include("self_energy.jl")
 include("update_hybridization_function.jl")
-include("discretization.jl")
 include("Combinatorics.jl")
 include("Debug.jl")
 

@@ -27,7 +27,6 @@ include("aqua.jl")
     include("self_energy.jl")
     include("update_hybridization_function.jl")
     include("dmft_cycle.jl")
-    include("discretization.jl")
     include("Combinatorics.jl")
     include("Debug.jl")
 end
