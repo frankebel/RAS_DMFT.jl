@@ -30,7 +30,7 @@ using Test
     O_Σ_H = q_dag' * d_dag + d_dag * q_dag'
     Σ_H = dot(ψ0, O_Σ_H, ψ0)
 
-    # quadratic shift
+    # linear shift
     q_dag_tilde = q_dag - Σ_H * d_dag
     O = [q_dag_tilde, d_dag]
 
