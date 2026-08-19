@@ -1,7 +1,7 @@
-using RAS_DMFT
 using Fermions
 using Fermions.Wavefunctions
 using LinearAlgebra
+using RAS_DMFT
 using SparseArrays
 using Test
 
@@ -404,86 +404,4 @@ using Test
             @test H1.excitation === 2
         end # RASOperator
     end # operator
-
-    @testset "operator comparison" begin
-        # Compare results between "Wavefunction", "RASWavefunction".
-        # Create single determinant state and run H*ψ for both methods.
-        # Convert to Wavefunction and show that both have numerically the same result.
-        # Use symbol "ϕ" for Wavefunction, "ψ" for RASWavefunction.
-
-        n_bath = 41
-        U = 4.0
-        μ = U / 2
-        n_v_bit = 1 # Amount of valence bath sites in bit component of RASWavefunction
-        n_c_bit = 1 # Amount of conduction bath sites in bit component of RASWavefunction
-        n_sites = 1 + n_bath
-        M_raswf = UInt64
-        M_wf = BigMask{cld(2 * n_sites, 64)} # bitmask for Wavefunction
-        e = 2
-        niter = 20
-        n_bit = 2 + n_v_bit + n_c_bit
-
-        # Single particle part of the Hamiltonian as a Matrix H0.
-        Δ = hybridization_function_bethe_simple(n_bath)
-        H_nat, n_occ = to_natural_orbitals(arrowhead_matrix(Δ))
-        n_emp = n_sites - n_occ
-        n_v_vector = n_occ - 1 - n_v_bit
-        n_c_vector = n_emp - 1 - n_c_bit
-
-        # Using Wavefunction.
-        fock_space_wf = FockSpace(M_wf, M_wf, Orbitals(n_sites), FermionicSpin(1 // 2))
-        n_wf = occupations(fock_space_wf)
-        H_int_wf = U * n_wf[1, -1 // 2] * n_wf[1, 1 // 2]
-        # Create Hamiltonian.
-        H_wf = natural_orbital_operator(
-            H_nat, H_int_wf, -μ, fock_space_wf, n_occ, n_v_bit, n_c_bit
-        )
-        # Create starting Wavefunction. Impurity filled with 10, bath b 01 accordingly.
-        s_start = slater_start(M_wf, 0b0110, n_v_bit, n_c_bit, n_v_vector, n_c_vector)
-        @assert count_ones(s_start) == n_sites # Half filling
-        ϕ_start = Wavefunction(Dict(s_start => 1.0))
-
-        # Using RASWavefunction.
-        fock_space_raswf = FockSpace(M_raswf, M_raswf, Orbitals(n_bit), FermionicSpin(1 // 2))
-        n_raswf = occupations(fock_space_raswf)
-        H_int_raswf = U * n_raswf[1, -1 // 2] * n_raswf[1, 1 // 2]
-        # Create Hamiltonian.
-        H_raswf = natural_orbital_ras_operator(
-            H_nat, H_int_raswf, -μ, fock_space_raswf, n_occ, n_v_bit, n_c_bit, e
-        )
-        # Create starting RASWavefunction. Impurity filled with 10, bath b 01 accordingly.
-        s_start = slater_start(M_raswf, 0b0110, n_v_bit, n_c_bit, 0, 0)
-        @assert count_ones(s_start) + 2 * n_v_vector == n_sites
-        n_vector = n_v_vector + n_c_vector
-        v_start = zeros(sum(i -> binomial(2 * n_vector, i), 0:e))
-        v_start[1] = one(eltype(v_start))
-        ψ_start = RASWavefunction(Dict(s_start => v_start), n_bit, n_v_vector, n_c_vector, e)
-
-        # Masks for valence/conduction bath sites which are in vector.
-        m_valence, m_conduction = mask_fe(M_wf, n_bit, n_v_vector, n_c_vector)
-
-        # Compare Wavefunction, RASWavefunction
-        ϕ = deepcopy(ϕ_start)
-        ψ = deepcopy(ψ_start)
-        for _ in 1:niter
-            ϕ = RAS_DMFT.Debug.mul_excitation(H_wf, ϕ, m_valence, m_conduction, e)
-            ψ = H_raswf * ψ
-            # normalize
-            normalize!(ϕ)
-            normalize!(ψ)
-        end
-
-        # Convert RASWavefunction to Wavefunction
-        ϕ_raswf = Wavefunction(ψ)
-        # Remove all weights smaller than machine epsilon.
-        Fermions.Wavefunctions.chop!(ϕ_raswf, eps())
-        Fermions.Wavefunctions.chop!(ϕ, eps())
-        @test norm(ϕ - ϕ_raswf) < 10 * eps()
-
-        # Convert Wavefunction to RASWavefunction
-        ψ_wf = RASWavefunction{Dict{M_raswf, Vector{Float64}}}(
-            ϕ, n_bit, n_v_vector, n_c_vector, e
-        )
-        @test norm(ψ - ψ_wf) < 20 * eps()
-    end # operator comparison
 end # natural orbitals

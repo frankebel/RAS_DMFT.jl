@@ -28,5 +28,4 @@ include("aqua.jl")
     include("update_hybridization_function.jl")
     include("dmft_cycle.jl")
     include("Combinatorics.jl")
-    include("Debug.jl")
 end

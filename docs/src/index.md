@@ -56,9 +56,8 @@ The main module is called `RAS_DMFT` and can be put into the namespace by
 using RAS_DMFT
 ```
 
-There are also submodules
+There is also a submodule
 
 - `RAS_DMFT.Combinatorics`
-- `RAS_DMFT.Debug`
 
-which are not necessary to be called in 99 % of all cases.
+which is not necessary to be called in 99 % of all cases.

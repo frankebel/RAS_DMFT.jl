@@ -1,51 +1,8 @@
-# Methods used for debugging and development.
-# There is almost no reason to ever call this module.
-
-module Debug
+# Tools for inspecting Slater determinants and wavefunctions.
 
 using Fermions
 using Fermions.Bits
 using Fermions.Wavefunctions
-
-export
-    # Functions
-    colorprint,
-    diffkeys,
-    excitation!,
-    get_excitation,
-    mul_excitation
-
-"""
-    get_excitation(s::S, m_filled::S, m_empty::S) where {S<:Unsigned}
-
-Return excitation of Slater determinant `s`.
-
-`m_filled`, `m_empty` are the masks of default filled/empty sites
-in vector of `RASWavefunction`.
-"""
-@inline function get_excitation(s::S, m_filled::S, m_empty::S) where {S <: Unsigned}
-    return count_ones((s & (m_filled | m_empty) ⊻ m_filled))
-end
-
-"""
-    excitation!(
-        ψ::Wavefunction, m_filled::S, m_empty::S, excitation::Int
-    ) where {S<:Unsigned}
-
-In Wavefunction `ψ` remove entries higher than `excitation`.
-
-`m_filled`, `m_empty` are the masks of default filled/empty sites
-in vector of `RASWavefunction`.
-"""
-function excitation!(
-        ψ::Wavefunction, m_filled::S, m_empty::S, excitation::Int
-    ) where {S <: Unsigned}
-    excitation >= 0 || throw(ArgumentError("`excitation` >= 0"))
-    for k in keys(ψ)
-        get_excitation(k, m_filled, m_empty) <= excitation || delete!(ψ, k)
-    end
-    return
-end
 
 # Colored print of Slater determinant
 function colorprint(
@@ -89,37 +46,6 @@ function colorprint(
     return colorprint(stdout, s, nfilled_bit, nempty_bit, nfilled, nempty)
 end
 
-"""
-    mul_excitation(
-        H::Operator, ψ::Wavefunction, m_filled::S, m_empty::S, excitation::Int
-    ) where {S}
-
-Calculate `H * ψ` excluding higher excitations than `excitation`.
-
-Assumes that `ψ` only contains Slater determiants with
-excitation <= `excitation` in the first place.
-
-`m_filled`, `m_empty` are the masks of default filled/empty sites
-in vector of `RASWavefunction`.
-"""
-function mul_excitation(
-        H::Operator, ψ::Wavefunction, m_filled::S, m_empty::S, excitation::Int
-    ) where {S <: Unsigned}
-    ϕ = Wavefunction(ψ)
-    for (k, v) in ψ, t in H.terms
-        Fermions.Terms.is_mapped_right(t, k) || continue
-        k_new, amp = Fermions.Terms.map_state_right(t, k)
-        get_excitation(k_new, m_filled, m_empty) > excitation && continue
-        if haskey(ϕ, k_new)
-            ϕ[k_new] += amp * v
-            iszero(ϕ[k_new]) && delete!(ϕ, k_new)
-        else
-            ϕ[k_new] = amp * v
-        end
-    end
-    return ϕ
-end
-
 # Return all keys not present in other Wavefunction
 function diffkeys(
         ϕ1::Wavefunction{<:Any, <:Any, T}, ϕ2::Wavefunction{<:Any, <:Any, T}
@@ -129,6 +55,12 @@ function diffkeys(
         haskey(ϕ2, k) || push!(result, k)
     end
     return Set(result)
+end
+
+# Print `n_det` most important amplitudes of `ψ`.
+function highest_amplitudes(ψ::Wavefunction, n_det::Int = 20)
+    display(sort(collect(ψ.terms); by = x -> abs(x[2]), rev = true)[1:n_det])
+    return nothing
 end
 
 # Check sign of amplitude.
@@ -146,15 +78,4 @@ function showdiff(ϕ1::Wavefunction{T}, ϕ2::Wavefunction{T}; kwargs...) where {
         end
     end
     return nothing
-end
-
-"""
-    highest_amplitudes(ψ::Wavefunction, n_det::Int=20)
-
-Print `n_det` most important amplitudes of `ψ`.
-"""
-function highest_amplitudes(ψ::Wavefunction, n_det::Int = 20)
-    return display(sort(collect(ψ.terms); by = x -> abs(x[2]), rev = true)[1:n_det])
-end
-
 end
