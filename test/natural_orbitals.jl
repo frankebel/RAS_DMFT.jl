@@ -48,6 +48,14 @@ using Test
         # sites with zero hybridization, Löwdin must not return negative eigenvalues
         Δ = hybridization_function_bethe_grid(range(-2, 2; length = 31))
         to_natural_orbitals(arrowhead_matrix(Δ))
+
+        # multiply degenerate zero-energy states
+        U = 0.5 * [1 1 1 1; 1 1 -1 -1; 1 -1 1 -1; 1 -1 -1 1]
+        H0 = Diagonal([-2.0, 0.0, 0.0, 2.0])
+        H_nat, n_occ = to_natural_orbitals(U * H0 * U')
+        @test n_occ === 2
+        @test ishermitian(H_nat)
+        @test sort(eigvals(H_nat)) ≈ sort(eigvals(H0)) atol = 1.0e3 * eps()
     end # matrix transformation
 
     @testset "operator" begin

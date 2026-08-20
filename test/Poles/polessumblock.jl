@@ -239,6 +239,16 @@ using Test
             @test merge_degenerate_poles!(foo, 0.11) === foo
             @test locations(foo) == [0.2, 0.6]
             @test weights(foo) == [[2 0; 0 1], [2 1; 1 2]]
+            # merge poles within [-tol, tol] into zero
+            P = PolesSumBlock([-0.05, 0.05, 0.6], [[1 0; 0 1], [1 0; 0 0], [2 1; 1 2]])
+            @test merge_degenerate_poles!(P, 0.1) === P
+            @test locations(P) == [0.0, 0.6]
+            @test weights(P) == [[2 0; 0 1], [2 1; 1 2]]
+            # merge negative poles
+            P = PolesSumBlock([-0.8, -0.6, 0.4], [[1 0; 0 1], [1 0; 0 0], [2 1; 1 2]])
+            @test merge_degenerate_poles!(P, 0.25) === P
+            @test locations(P) == [-0.6, 0.4]
+            @test weights(P) == [[2 0; 0 1], [2 1; 1 2]]
         end # merge_degenerate_poles!
 
         @testset "merge_negative_locations_to_zero!" begin
@@ -367,6 +377,13 @@ using Test
             @test weights(P) == [[1 0; 0 1], [0 0; 0 0], [6 6; 6 6]]
             @test weight(P, 1) !== weight(A, 1)
             @test weight(P, 2) !== weight(B, 1)
+
+            # B exhausted before A -> append remaining A-poles
+            A = PolesSumBlock([1, 3], [[1 0; 0 1], [2 1; 1 0]])
+            B = PolesSumBlock([2], [[4 5; 5 6]])
+            P = A + B
+            @test locations(P) == [1, 2, 3]
+            @test weights(P) == [[1 0; 0 1], [4 5; 5 6], [2 1; 1 0]]
         end
 
         @testset "convert" begin

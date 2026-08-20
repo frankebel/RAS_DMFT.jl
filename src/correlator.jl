@@ -69,14 +69,7 @@ function correlator_plus(
         H::RASOperator, ψ0::RASWavefunction, O::Operator, n_kryl::Int
     )
     C = correlator(H, ψ0, O, n_kryl)
-
-    # poles at negative locatiions (never happens on exact arithmetic)
-    idx_neg = findall(<(0), locations(C))
-    if !isempty(idx_neg)
-        n_neg = length(idx_neg)
-        weight_neg = sum(weights(C)[idx_neg])
-        @warn "C+ has negative spectral weight $(weight_neg) on $(n_neg) pole(s)"
-    end
+    _warn_wrong_sign(C, :plus)
 
     return C
 end
@@ -98,13 +91,7 @@ function correlator_plus(
         H::RASOperator, ψ0::RASWavefunction, O::AbstractVector{<:Operator}, n_kryl::Int
     )
     C = correlator(H, ψ0, O, n_kryl)
-
-    # poles at negative energies (never happens on exact arithmetic)
-    idx_neg = findall(<(0), locations(C))
-    if !isempty(idx_neg)
-        n_neg = length(idx_neg)
-        @warn "C+ has $(n_neg) negative pole location(s)"
-    end
+    _warn_wrong_sign(C, :plus)
 
     return C
 end
@@ -130,14 +117,7 @@ function correlator_minus(
     map!(-, locations(C)) # flip sign of eigenvalues
     reverse!(C) # order form lowest to highest
 
-    # poles at positive energies (never happens on exact arithmetic)
-    idx_pos = findall(>(0), locations(C))
-    if !isempty(idx_pos)
-        n_pos = length(idx_pos)
-        weight_pos = sum(weights(C)[idx_pos])
-        @warn "C- has positive spectral weight $(weight_pos) on $(n_pos) pole(s)"
-    end
-
+    _warn_wrong_sign(C, :minus)
     return C
 end
 
@@ -149,7 +129,7 @@ end
 Calculate the negative spectrum of the block correlator.
 
 ```math
-C^+(ω) = \\left⟨ ψ_0 O^† \\frac{1}{ω + H} O ψ_0 \\right⟩
+C^-(ω) = \\left⟨ ψ_0 O^† \\frac{1}{ω + H} O ψ_0 \\right⟩
 ```
 
 See also [`correlator_minus`](@ref).
@@ -162,12 +142,24 @@ function correlator_minus(
     map!(-, locations(C)) # flip sign of eigenvalues
     reverse!(C) # order form lowest to highest
 
-    # poles at positive energies (never happens on exact arithmetic)
-    idx_pos = findall(>(0), locations(C))
-    if !isempty(idx_pos)
-        n_pos = length(idx_pos)
-        @warn "C- has $(n_pos) positive pole location(s)"
-    end
-
+    _warn_wrong_sign(C, :minus)
     return C
+end
+
+# Warn if the correlator `C` carries spectral weight on poles of the wrong sign.
+# Never happens on exact arithmetic.
+function _warn_wrong_sign(C::AbstractPolesSum, side::Symbol)
+    side in (:plus, :minus) || throw(ArgumentError("`side` must be `:plus` or `:minus`"))
+    neg = side === :plus
+    locs = locations(C)
+    isempty(locs) && return nothing
+    f = x -> neg ? x < 0 : x > 0
+    f(locs[1]) || f(locs[end]) || return nothing # any wrong-sign pole?
+    n = count(f, locs)
+    rng = neg ? (1:n) : (lastindex(locs) - n + 1):lastindex(locs)
+    weight = sum(tr(weights(C)[i]) for i in rng)
+    name = neg ? "C+" : "C-"
+    word = neg ? "negative" : "positive"
+    @warn "$name has $word spectral weight $weight on $n pole(s)"
+    return nothing
 end

@@ -73,4 +73,15 @@ using Test
         Σ_H = dot(ψ0, O_H, ψ0)
         @test Σ_H ≈ U / 2 rtol = 1.0e3 * eps()
     end # block Lanczos
+
+    @testset "unphysical" begin
+        U = 0.0
+        H_int = U * n[1, 1 // 2] * n[1, -1 // 2]
+        d_dag = c[1, -1 // 2]'
+        q_dag = H_int * d_dag - d_dag * H_int  # q_↓^† = [H_int, d^†]
+        O = [d_dag, q_dag]
+
+        @test_logs (:warn, r"C\+ has negative spectral weight") correlator_plus(H, ψ0, O, 200)
+        @test_logs (:warn, r"C\- has positive spectral weight") correlator_minus(H, ψ0, map(adjoint, O), 200)
+    end # unphysical
 end # correlator
