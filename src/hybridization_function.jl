@@ -40,7 +40,7 @@ See also
 function hybridization_function_bethe_simple(n_bath::Int, D::Real = 1.0)
     # Take Green's function and rescale weights by D/2.
     Δ = greens_function_bethe_simple(n_bath, D)
-    weights(Δ) .*= D^2 / 4
+    rmul!(Δ, D^2 / 4)
     return Δ
 end
 
@@ -56,7 +56,7 @@ See also
 """
 function hybridization_function_bethe_grid(grid::AbstractVector{<:Real}, D::Real = 1.0)
     Δ = greens_function_bethe_grid(grid, D)
-    weights(Δ) .*= D^2 / 4
+    rmul!(Δ, D^2 / 4)
     return Δ
 end
 
@@ -74,7 +74,7 @@ function hybridization_function_bethe_grid_hubbard3(
         grid::AbstractVector{<:Real}, U::Real = 0.0, D::Real = 1.0
     )
     Δ = greens_function_bethe_grid_hubbard3(grid, U, D)
-    weights(Δ) .*= D^2 / 4
+    rmul!(Δ, D^2 / 4)
     return Δ
 end
 
@@ -93,6 +93,6 @@ See also
 function hybridization_function_bethe_equal_weight(n_bath::Int, D::Real = 1.0)
     # Take Green's function and rescale weights by D/2.
     Δ = greens_function_bethe_equal_weight(n_bath, D)
-    weights(Δ) .*= D^2 / 4
+    rmul!(Δ, D^2 / 4)
     return Δ
 end
