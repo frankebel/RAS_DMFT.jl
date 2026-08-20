@@ -44,8 +44,9 @@ S^{-1/2} &= U Λ^{-1/2} U^†.
 
 Objects of interest are ``Q S^{-1/2}`` and ``S^{1/2}``.
 """
-function _orthonormalize_SVD(Q::AbstractMatrix{<:T}) where {T <: Number}
+function _orthonormalize_SVD(Q::AbstractMatrix)
     q = size(Q, 2)
+    T = _scalartype(eltype(Q))
     Q_new = similar(Q)
     V1 = Vector{real(T)}(undef, q)
     M1 = Matrix{T}(undef, q, q)
@@ -53,17 +54,9 @@ function _orthonormalize_SVD(Q::AbstractMatrix{<:T}) where {T <: Number}
     _orthonormalize_SVD!(V1, M1, S_sqrt, Q_new, Q)
     return Q_new, S_sqrt
 end
-function _orthonormalize_SVD(Q::AbstractMatrix{<:WF}) where {WF <: RASWavefunction}
-    foo, q = size(Q)
-    isone(foo) || throw(ArgumentError("input matrix must have 1 row"))
-    T = scalartype(WF)
-    Q_new = similar(Q)
-    V1 = Vector{real(T)}(undef, q)
-    M1 = Matrix{T}(undef, q, q)
-    S_sqrt = similar(M1)
-    _orthonormalize_SVD!(V1, M1, S_sqrt, Q_new, Q)
-    return Q_new, S_sqrt
-end
+
+_scalartype(::Type{T}) where {T <: Number} = T
+_scalartype(::Type{WF}) where {WF <: RASWavefunction} = scalartype(WF)
 
 """
     orthonormalize_GramSchmidt!(V::AbstractMatrix{<:Number})
