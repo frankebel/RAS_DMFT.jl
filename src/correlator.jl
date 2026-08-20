@@ -6,7 +6,7 @@
 Calculate the correlator
 
 ```math
-C(ω) = \\left⟨ ψ_0 O^† \\frac{1}{ω - H} O ψ_0 \\right⟩.
+C(z) = \\left⟨ ψ_0 O^† \\frac{1}{z - H} O ψ_0 \\right⟩.
 ```
 """
 function correlator(
@@ -34,7 +34,7 @@ end
 Calculate the block correlator
 
 ```math
-C(ω) = \\left⟨ ψ_0 O^† \\frac{1}{ω - H} O ψ_0 \\right⟩.
+C(z) = \\left⟨ ψ_0 O^† \\frac{1}{z - H} O ψ_0 \\right⟩.
 ```
 """
 function correlator(
@@ -54,41 +54,25 @@ end
 
 """
     correlator_plus(
-        H::RASOperator, ψ0::RASWavefunction, O::Operator, n_kryl::Int
+        H::RASOperator, ψ0::RASWavefunction, O, n_kryl::Int
     )
 
-Calculate the positive spectrum of the correlator.
+Calculate the positive spectrum of the (block) correlator.
 
 ```math
-C^+(ω) = \\left⟨ ψ_0 O^† \\frac{1}{ω - H} O ψ_0 \\right⟩
+C^+(z) = \\left⟨ ψ_0 O^† \\frac{1}{z - H} O ψ_0 \\right⟩
 ```
+
+For a single operator a scalar [`PolesSum`](@ref) is returned,
+for a vector of operators a block [`PolesSumBlock`](@ref).
 
 See also [`correlator_minus`](@ref).
 """
 function correlator_plus(
-        H::RASOperator, ψ0::RASWavefunction, O::Operator, n_kryl::Int
-    )
-    C = correlator(H, ψ0, O, n_kryl)
-    _warn_wrong_sign(C, :plus)
-
-    return C
-end
-
-"""
-    correlator_plus(
-        H::RASOperator, ψ0::RASWavefunction, O::AbstractVector{<:Operator}, n_kryl::Int
-    )
-
-Calculate the positive spectrum of the block correlator.
-
-```math
-C^+(ω) = \\left⟨ ψ_0 O^† \\frac{1}{ω - H} O ψ_0 \\right⟩
-```
-
-See also [`correlator_minus`](@ref).
-"""
-function correlator_plus(
-        H::RASOperator, ψ0::RASWavefunction, O::AbstractVector{<:Operator}, n_kryl::Int
+        H::RASOperator,
+        ψ0::RASWavefunction,
+        O::Union{Operator, AbstractVector{<:Operator}},
+        n_kryl::Int,
     )
     C = correlator(H, ψ0, O, n_kryl)
     _warn_wrong_sign(C, :plus)
@@ -98,44 +82,25 @@ end
 
 """
     correlator_minus(
-        H::RASOperator, ψ0::RASWavefunction, O::Operator, n_kryl::Int
+        H::RASOperator, ψ0::RASWavefunction, O, n_kryl::Int
     )
 
-Calculate the negative spectrum of the correlator.
+Calculate the negative spectrum of the (block) correlator.
 
 ```math
-C^-(ω) = \\left⟨ ψ_0 O^† \\frac{1}{ω + H} O ψ_0 \\right⟩
+C^-(z) = \\left⟨ ψ_0 O^† \\frac{1}{z + H} O ψ_0 \\right⟩
 ```
+
+For a single operator a scalar [`PolesSum`](@ref) is returned,
+for a vector of operators a block [`PolesSumBlock`](@ref).
 
 See also [`correlator_plus`](@ref).
 """
 function correlator_minus(
-        H::RASOperator, ψ0::RASWavefunction, O::Operator, n_kryl::Int
-    )
-    C = correlator(H, ψ0, O, n_kryl)
-
-    map!(-, locations(C)) # flip sign of eigenvalues
-    reverse!(C) # order form lowest to highest
-
-    _warn_wrong_sign(C, :minus)
-    return C
-end
-
-"""
-    correlator_minus(
-        H::RASOperator, ψ0::RASWavefunction, O::AbstractVector{<:Operator}, n_kryl::Int
-    )
-
-Calculate the negative spectrum of the block correlator.
-
-```math
-C^-(ω) = \\left⟨ ψ_0 O^† \\frac{1}{ω + H} O ψ_0 \\right⟩
-```
-
-See also [`correlator_minus`](@ref).
-"""
-function correlator_minus(
-        H::RASOperator, ψ0::RASWavefunction, O::AbstractVector{<:Operator}, n_kryl::Int
+        H::RASOperator,
+        ψ0::RASWavefunction,
+        O::Union{Operator, AbstractVector{<:Operator}},
+        n_kryl::Int,
     )
     C = correlator(H, ψ0, O, n_kryl)
 
