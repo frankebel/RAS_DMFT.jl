@@ -1,12 +1,12 @@
 """
-    AbstractPolesSum
+    AbstractPolesSum{A, B} <: AbstractPoles{A, B}
 
 Supertype which represents a (block) function on the real axis as a sum of poles.
 
 The canonical representation requires the locations to be strictly increasing
 (sorted with no duplicates).
 """
-abstract type AbstractPolesSum <: AbstractPoles end
+abstract type AbstractPolesSum{A, B} <: AbstractPoles{A, B} end
 
 amplitudes(P::AbstractPolesSum, args...; kwargs...) = map(i -> amplitude(P, i, args...; kwargs...), eachindex(P))
 

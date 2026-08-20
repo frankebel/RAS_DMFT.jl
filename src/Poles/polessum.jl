@@ -1,5 +1,5 @@
 """
-    PolesSum{A<:Real,B<:Number} <: AbstractPolesSum
+    PolesSum{A <: Real, B <: Number} <: AbstractPolesSum{A, B}
 
 Representation of poles on the real axis with locations ``a_i`` of type `A`
 and weights ``w_i`` of type `B`
@@ -10,7 +10,7 @@ P(z) = ∑_i \\frac{w_i}{z-a_i}.
 
 For a block variant see [`PolesSumBlock`](@ref).
 """
-struct PolesSum{A <: Real, B <: Number} <: AbstractPolesSum
+struct PolesSum{A <: Real, B <: Number} <: AbstractPolesSum{A, B}
     locations::Vector{A}
     weights::Vector{B}
 
@@ -128,8 +128,6 @@ function evaluate_gaussian(P::PolesSum, ω::Real, σ::Real)
     end
     return result
 end
-
-evaluate_lorentzian(P::PolesSum, ω::Real, δ::Real) = evaluate(P, ω + im * δ)
 
 function filling(P::PolesSum{<:Any, B}, μ::Real = 0) where {B}
     result = zero(Float64) # half weight changes Int → Float
@@ -447,10 +445,6 @@ end
 function Base.copy(P::PolesSum{A, B}) where {A, B}
     return PolesSum{A, B}(copy(locations(P)), copy(weights(P)))
 end
-
-Base.eltype(::Type{<:PolesSum{A, B}}) where {A, B} = promote_type(A, B)
-
-Base.show(io::IO, P::PolesSum) = print(io, summary(P), " with ", length(P), " poles")
 
 function LinearAlgebra.axpby!(α::Number, x::P, β::Number, y::P) where {P <: PolesSum}
     wy = weights(y)

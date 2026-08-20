@@ -1,5 +1,5 @@
 """
-    PolesSumBlock{A <: Real, B <: Number} <: AbstractPolesSum
+    PolesSumBlock{A <: Real, B <: Number} <: AbstractPolesSum{A, B}
 
 Representation of block of poles on the real axis with locations ``a_i`` of type `A`
 and weights ``W_i`` of type `Matrix{B}`.
@@ -15,7 +15,7 @@ The latter is not enforced at construction to reduce computational cost.
 
 For a scalar variant see [`PolesSum`](@ref).
 """
-struct PolesSumBlock{A <: Real, B <: Number} <: AbstractPolesSum
+struct PolesSumBlock{A <: Real, B <: Number} <: AbstractPolesSum{A, B}
     locations::Vector{A}
     weights::Vector{Matrix{B}}
 
@@ -229,8 +229,6 @@ function evaluate_gaussian(P::PolesSumBlock, ω::Real, σ::Real)
     return result
 end
 
-evaluate_lorentzian(P::PolesSumBlock, ω::Real, δ::Real) = evaluate(P, ω + im * δ)
-
 function filling(P::PolesSumBlock{<:Any, B}, μ::Real = 0) where {B}
     result = zeros(B <: Real ? Float64 : ComplexF64, size(P)) # half weight changes Int → Float
 
@@ -397,14 +395,10 @@ function Base.copy(P::PolesSumBlock{A, B}) where {A, B}
     return PolesSumBlock{A, B}(copy(locations(P)), map(copy, weights(P)))
 end
 
-Base.eltype(::Type{<:PolesSumBlock{A, B}}) where {A, B} = promote_type(A, B)
-
 function Base.show(io::IO, P::PolesSumBlock)
-    print(
-        io, summary(P), " with ", length(P), " poles"
-    )
+    _show_poles(io, P)
     isempty(P) || print(io, " of size ", size(P, 1), "×", size(P, 2))
-    return Nothing
+    return nothing
 end
 
 Base.size(P::PolesSumBlock) = size(first(weights(P)))

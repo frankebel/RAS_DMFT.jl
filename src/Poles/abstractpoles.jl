@@ -1,9 +1,11 @@
 """
-    AbstractPoles
+    AbstractPoles{A, B}
 
 Supertype which represents a function on the real axis as a collection of poles.
+
+The locations are described by `A`, the weights/amplitudes by `B`.
 """
-abstract type AbstractPoles end
+abstract type AbstractPoles{A, B} end
 
 """
     amplitude(P::AbstractPoles, i::Integer, tol_amp::Real = 0; thin::Bool = false)
@@ -60,7 +62,7 @@ end
 
 Evaluate `P` with Lorentzian broadening ``P(ω + \\mathrm{i}δ)``.
 """
-function evaluate_lorentzian end
+evaluate_lorentzian(P::AbstractPoles, ω::Real, δ::Real) = evaluate(P, ω + im * δ)
 function evaluate_lorentzian(P::AbstractPoles, ω::AbstractVector{<:Real}, δ)
     return map(i -> evaluate_lorentzian(P, i, δ), ω)
 end
@@ -101,5 +103,12 @@ See also [`weight`](@ref).
 """
 function weights end
 
+function _show_poles(io::IO, P::AbstractPoles)
+    print(io, summary(P), " with ", length(P), " poles")
+    return nothing
+end
+
+Base.eltype(::Type{<:AbstractPoles{A, B}}) where {A, B} = promote_type(A, B)
 Base.isempty(P::AbstractPoles) = iszero(length(P))
 Base.length(P::AbstractPoles) = length(locations(P))
+Base.show(io::IO, P::AbstractPoles) = _show_poles(io, P)

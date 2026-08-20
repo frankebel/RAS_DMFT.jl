@@ -1,5 +1,5 @@
 """
-    PolesContinuedFraction{A <: Real, B <: Real} <: AbstractPolesContinuedFraction
+    PolesContinuedFraction{A <: Real, B <: Real} <: AbstractPolesContinuedFraction{A, B}
 
 Representation of poles on the real axis as a continued fraction with
 locations ``a_i`` of type `A` and amplitudes ``b_i`` of type `B`.
@@ -10,7 +10,7 @@ The scale factor ``s`` of type `B` rescales the whole object.
 P(z) = \\frac{s^2}{z - a_1 - \\frac{b_1^2}{z - a_2 - …}}
 ```
 """
-struct PolesContinuedFraction{A <: Real, B <: Real} <: AbstractPolesContinuedFraction
+struct PolesContinuedFraction{A <: Real, B <: Real} <: AbstractPolesContinuedFraction{A, B}
     locations::Vector{A}
     amplitudes::Vector{B}
     scale::B
@@ -56,19 +56,11 @@ function evaluate(P::PolesContinuedFraction, z::Number)
     return result
 end
 
-evaluate_lorentzian(P::PolesContinuedFraction, ω::Real, δ::Real) = evaluate(P, ω + im * δ)
-
 tridiagonal_matrix(P::PolesContinuedFraction) = Matrix(SymTridiagonal(P))
 
 weight(P::PolesContinuedFraction, i::Integer) = abs2(amplitudes(P)[i])
 
 weights(P::PolesContinuedFraction) = abs2.(amplitudes(P))
-
-Base.eltype(::Type{<:PolesContinuedFraction{A, B}}) where {A, B} = promote_type(A, B)
-
-function Base.show(io::IO, P::PolesContinuedFraction)
-    return print(io, summary(P), " with ", length(P), " poles")
-end
 
 function LinearAlgebra.SymTridiagonal(P::PolesContinuedFraction)
     # lose information about scale

@@ -1,5 +1,5 @@
 """
-    PolesContinuedFractionBlock{A<:Number,B<:Number} <: AbstractPolesContinuedFraction
+    PolesContinuedFractionBlock{A <: Number, B <: Number} <: AbstractPolesContinuedFraction{A, B}
 
 Representation of poles on the real axis with as a continued fraction with
 locations ``A_i`` of type `A` and amplitudes ``B_i`` of type `B`.
@@ -11,7 +11,7 @@ The scale factor ``S`` rescales the whole object.
 P(z) = S \\frac{1}{z - A_1 - B_1 \\frac{1}{z - A_2 - …} B_1} S
 ```
 """
-struct PolesContinuedFractionBlock{A <: Number, B <: Number} <: AbstractPolesContinuedFraction
+struct PolesContinuedFractionBlock{A <: Number, B <: Number} <: AbstractPolesContinuedFraction{A, B}
     locations::Vector{Matrix{A}}
     amplitudes::Vector{Matrix{B}}
     scale::Matrix{B}
@@ -103,8 +103,6 @@ function evaluate(P::PolesContinuedFractionBlock, z::Number)
     return result
 end
 
-evaluate_lorentzian(P::PolesContinuedFractionBlock, ω::Real, δ::Real) = evaluate(P, ω + im * δ)
-
 function tridiagonal_matrix(P::PolesContinuedFractionBlock)
     n1 = length(P)
     n2 = size(P, 1)
@@ -121,13 +119,11 @@ function tridiagonal_matrix(P::PolesContinuedFractionBlock)
     return result
 end
 
-Base.eltype(::Type{<:PolesContinuedFractionBlock{A, B}}) where {A, B} = promote_type(A, B)
-
 Base.size(P::PolesContinuedFractionBlock) = size(scale(P))
 Base.size(P::PolesContinuedFractionBlock, i) = size(scale(P), i)
 
 function Base.show(io::IO, P::PolesContinuedFractionBlock)
-    return print(
-        io, summary(P), " with ", length(P), " poles of size ", size(P, 1), "×", size(P, 2)
-    )
+    _show_poles(io, P)
+    print(io, " of size ", size(P, 1), "×", size(P, 2))
+    return nothing
 end

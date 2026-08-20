@@ -1,9 +1,9 @@
 """
-    AbstractPolesContinuedFraction
+    AbstractPolesContinuedFraction{A, B} <: AbstractPoles{A, B}
 
 Supertype which represents a (block) function on the real axis as a continued fraction.
 """
-abstract type AbstractPolesContinuedFraction <: AbstractPoles end
+abstract type AbstractPolesContinuedFraction{A, B} <: AbstractPoles{A, B} end
 
 amplitude(P::AbstractPolesContinuedFraction, i::Integer) = amplitudes(P)[i]
 
