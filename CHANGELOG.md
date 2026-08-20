@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 
 - `discretize_similar_weight`, `discretize_to_grid` ([#225](https://github.com/frankebel/RAS_DMFT.jl/pull/225)) (b010ad3)
+- submodule `Debug` from the public API ([#228](https://github.com/frankebel/RAS_DMFT.jl/pull/228)) (8c953db)
 
 ## [0.11.0] - 2026-08-14
 
