@@ -74,14 +74,17 @@ using Test
         @test Σ_H ≈ U / 2 rtol = 1.0e3 * eps()
     end # block Lanczos
 
-    @testset "unphysical" begin
-        U = 0.0
-        H_int = U * n[1, 1 // 2] * n[1, -1 // 2]
-        d_dag = c[1, -1 // 2]'
-        q_dag = H_int * d_dag - d_dag * H_int  # q_↓^† = [H_int, d^†]
-        O = [d_dag, q_dag]
+    @testset "_warn_wrong_sign" begin
+        # scalar
+        P = PolesSum([-0.5, 1.0, 2.0], [2.0, 1.0, 1.0])
+        @test_logs (:warn, r"C\+ has negative spectral weight 2\.0 on 1 pole\(s\)") RAS_DMFT._warn_wrong_sign(P, :plus)
+        @test_logs (:warn, r"C\- has positive spectral weight 2\.0 on 2 pole\(s\)") RAS_DMFT._warn_wrong_sign(P, :minus)
+        @test_nowarn RAS_DMFT._warn_wrong_sign(PolesSum([1.0, 2.0], [2.0, 1.0]), :plus)
 
-        @test_logs (:warn, r"C\+ has negative spectral weight") correlator_plus(H, ψ0, O, 200)
-        @test_logs (:warn, r"C\- has positive spectral weight") correlator_minus(H, ψ0, map(adjoint, O), 200)
-    end # unphysical
+        # block
+        Pb = PolesSumBlock([-0.5, 1.0], [[1.0 0; 0 1], [2.0 0; 0 2]])
+        @test_logs (:warn, r"C\+ has negative spectral weight 2\.0 on 1 pole\(s\)") RAS_DMFT._warn_wrong_sign(Pb, :plus)
+        @test_logs (:warn, r"C\- has positive spectral weight 4\.0 on 1 pole\(s\)") RAS_DMFT._warn_wrong_sign(Pb, :minus)
+        @test_throws ArgumentError RAS_DMFT._warn_wrong_sign(P, :foo)
+    end # _warn_wrong_sign
 end # correlator
