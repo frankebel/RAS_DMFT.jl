@@ -21,10 +21,10 @@ struct PolesContinuedFractionBlock{A <: Number, B <: Number} <: AbstractPolesCon
             throw(ArgumentError("length mismatch"))
         # Hermitian
         all(ishermitian, locations)::Bool ||
-            throw(ArgumentError("locations are not Hermitian"))
+            throw(ArgumentError("locations violate Hermiticity"))
         all(ishermitian, amplitudes)::Bool ||
-            throw(ArgumentError("amplitudes are not Hermitian"))
-        ishermitian(scale) || throw(ArgumentError("scale is not Hermitian"))
+            throw(ArgumentError("amplitudes violate Hermiticity"))
+        ishermitian(scale) || throw(ArgumentError("scale violates Hermiticity"))
         # size
         allequal(size, locations)::Bool ||
             throw(DimensionMismatch("locations do not have matching size"))
@@ -63,14 +63,14 @@ function PolesContinuedFractionBlock(
     scl = Matrix{B}(scl)
     # all matrices must be Hermitian
     for w in locs
-        isapprox(w, w') || throw(ArgumentError("location is not hermitian"))
+        isapprox(w, w') || throw(ArgumentError("location violates Hermiticity"))
         ishermitian(w) || hermitianpart!(w)
     end
     for w in amps
-        isapprox(w, w') || throw(ArgumentError("amplitude is not hermitian"))
+        isapprox(w, w') || throw(ArgumentError("amplitude violates Hermiticity"))
         ishermitian(w) || hermitianpart!(w)
     end
-    isapprox(scl, scl') || throw(ArgumentError("scale is not hermitian"))
+    isapprox(scl, scl') || throw(ArgumentError("scale violates Hermiticity"))
     ishermitian(scl) || hermitianpart!(scl)
     return PolesContinuedFractionBlock{A, B}(locs, amps, scl)
 end

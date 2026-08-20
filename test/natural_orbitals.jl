@@ -38,7 +38,7 @@ using Test
         E = eigvals(H)
         @test norm(E[1:151] + reverse(E[152:end])) < sqrt(eps())
 
-        # non-hermitian matrix
+        # non-Hermitian matrix
         m = rand(10, 10)
         @test_throws ArgumentError to_natural_orbitals(m)
 
@@ -200,7 +200,7 @@ using Test
                 30 * c[6, 1 // 2]' * c[5, 1 // 2]
             @test H1 == H3
 
-            # non-hermitian
+            # non-Hermitian
             @test_throws ArgumentError natural_orbital_operator(
                 rand(Int, 6, 6), H_int, -μ, fs, n_occ, 1, 1
             )

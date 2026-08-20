@@ -7,7 +7,7 @@ Transforms a single particle Hamiltonian `H` to natural orbital basis.
 States with energies `E ∈ (-ϵ, ϵ)` are considered degenerate.
 """
 function to_natural_orbitals(H::AbstractMatrix{<:Real}, ϵ::Real = 1.0e-8)
-    ishermitian(H) || throw(ArgumentError("`H` not hermitian"))
+    ishermitian(H) || throw(ArgumentError("`H` not Hermitian"))
     E, T = LAPACK.syev!('V', 'U', copy(H))
     n_lower = count(<=(-ϵ), E)
     n_zero = count(x -> abs(x) < ϵ, E)
@@ -85,7 +85,7 @@ function to_natural_orbitals(H::AbstractMatrix{<:Real}, ϵ::Real = 1.0e-8)
     T[:, 1] = v1
     T[:, n_occ + 1] = v2
     H_trafo = T' * H_tri * T
-    H_trafo = 0.5 * (H_trafo' + H_trafo) # hermitize
+    H_trafo = 0.5 * (H_trafo' + H_trafo) # take the Hermitian part
     return H_trafo, n_occ
 end
 
@@ -122,7 +122,7 @@ function natural_orbital_operator(
         n_v_bit::Int = 1,
         n_c_bit::Int = 1,
     ) where {T <: Real}
-    ishermitian(H_nat) || throw(ArgumentError("H_nat not hermitian"))
+    ishermitian(H_nat) || throw(ArgumentError("H_nat not Hermitian"))
     n = size(H_nat, 1)
     n_emp = n - n_occ
     n_v = n_occ - 1
@@ -242,7 +242,7 @@ function natural_orbital_ras_operator(
         H_nat, H_int, ϵ_imp, fock_space, n_occ, excitation
     )
     # check input
-    ishermitian(H_nat) || throw(ArgumentError("H_nat not hermitian"))
+    ishermitian(H_nat) || throw(ArgumentError("H_nat not Hermitian"))
     nflavours(fock_space) >= 2 + n_v_bit + n_c_bit ||
         throw(ArgumentError("fock_space too small"))
     n_v_bit >= 1 || throw(ArgumentError("invalid n_v_bit"))
@@ -337,7 +337,7 @@ function _natural_orbital_ras_operator_zero(
         n_occ::Int,
         excitation::Int = 1,
     ) where {T <: Real}
-    ishermitian(H_nat) || throw(ArgumentError("H_nat not hermitian"))
+    ishermitian(H_nat) || throw(ArgumentError("H_nat not Hermitian"))
     nflavours(fock_space) >= 2 || throw(ArgumentError("fock_space too small"))
     excitation >= 0 || throw(ArgumentError("negative excitation"))
     n = size(H_nat, 1)

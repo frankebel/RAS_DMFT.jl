@@ -83,7 +83,7 @@ function block_lanczos_full_ortho(
     n, q = size(Q1)
 
     # check input
-    ishermitian(H)::Bool || throw(ArgumentError("H is not hermitian"))
+    ishermitian(H)::Bool || throw(ArgumentError("H is not Hermitian"))
     size(H, 2) == n || throw(DimensionMismatch("dimensions of H and Q1 don't match"))
     N >= 1 || throw(ArgumentError("N must be >= 1"))
 

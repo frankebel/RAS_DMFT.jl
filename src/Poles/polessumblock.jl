@@ -21,7 +21,7 @@ struct PolesSumBlock{A <: Real, B <: Number} <: AbstractPolesSum
 
     function PolesSumBlock{A, B}(locations, weights) where {A, B}
         length(locations) == length(weights) || throw(DimensionMismatch("length mismatch"))
-        all(ishermitian, weights)::Bool || throw(ArgumentError("weights are not hermitian"))
+        all(ishermitian, weights)::Bool || throw(ArgumentError("weights violate Hermiticity"))
         allequal(size, weights)::Bool ||
             throw(DimensionMismatch("weights do not have matching size"))
         _issorted_and_unique(locations)
@@ -58,7 +58,7 @@ function PolesSumBlock(locs::AbstractVector{A}, wgts::Vector{<:AbstractMatrix{B}
     locs = collect(A, locs)
     wgts = [copy(w) for w in wgts]
     for w in wgts
-        isapprox(w, w') || throw(ArgumentError("weight is not hermitian"))
+        isapprox(w, w') || throw(ArgumentError("weight violates Hermiticity"))
         ishermitian(w) || hermitianpart!(w)
     end
 
