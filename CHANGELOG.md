@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `quasiparticle_weight_inflections` to calculate inflection of $Z(\lambda)$ ([#222](https://github.com/frankebel/RAS_DMFT.jl/pull/222)) (3c473bc)
 
+### Changed
+
+- `AbstractPoles`, `AbstractPolesSum`, and `AbstractPolesContinuedFraction` are now parameterized by `(A, B)` ([#232](https://github.com/frankebel/RAS_DMFT.jl/pull/232)) (ec0b81a)
+
 ### Removed
 
 - `discretize_similar_weight`, `discretize_to_grid` ([#225](https://github.com/frankebel/RAS_DMFT.jl/pull/225)) (b010ad3)
