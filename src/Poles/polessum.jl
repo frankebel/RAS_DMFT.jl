@@ -168,51 +168,6 @@ function inverse(P::PolesSum)
     return a0, PolesSum(locs, wgts)
 end
 
-function merge_degenerate_poles!(P::PolesSum, tol::Real = 0)
-    # check input
-    tol >= 0 || throw(ArgumentError("tol must not be negative"))
-    # get information from P
-    locs = locations(P)
-    wgts = weights(P)
-    # pole(s) at [-tol, tol]
-    idx_zeros = findall(i -> abs(i) <= tol, locs)
-    if !isempty(idx_zeros)
-        i0 = popfirst!(idx_zeros)
-        locs[i0] = 0
-        for i in reverse!(idx_zeros)
-            wgts[i0] += popat!(wgts, i)
-            deleteat!(locs, i)
-        end
-    end
-    # pole(s) at tol → ∞
-    i = findfirst(>(0), locs)
-    isnothing(i) && (i = lastindex(locs)) # enforce `i` to be a number
-    while i < lastindex(locs)
-        if locs[i + 1] - locs[i] <= tol
-            # merge
-            wgts[i] += popat!(wgts, i + 1)
-            deleteat!(locs, i + 1) # keep location closer to zero
-        else
-            # increment index
-            i += 1
-        end
-    end
-    # pole(s) at -tol → -∞
-    i = findlast(<(0), locs)
-    isnothing(i) && (i = firstindex(locs)) # enforce `i` to be a number
-    while i > firstindex(locs)
-        if locs[i] - locs[i - 1] <= tol
-            # merge
-            wgts[i - 1] += popat!(wgts, i)
-            deleteat!(locs, i - 1) # keep location closer to zero
-            i -= 1
-        else
-            # decrement index
-            i -= 1
-        end
-    end
-    return P
-end
 
 """
     merge_negative_weight!(P::PolesSum)
