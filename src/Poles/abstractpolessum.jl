@@ -97,7 +97,7 @@ function merge_degenerate_poles!(P::AbstractPolesSum, tol::Real = 0)
         i0 = popfirst!(idx_zeros)
         locs[i0] = 0
         for i in reverse!(idx_zeros)
-            wgts[i0] = _addu!(wgts[i0], popat!(wgts, i))
+            wgts[i0] = _axpy!(true, popat!(wgts, i), wgts[i0])
             deleteat!(locs, i)
         end
     end
@@ -107,7 +107,7 @@ function merge_degenerate_poles!(P::AbstractPolesSum, tol::Real = 0)
     while i < lastindex(locs)
         if locs[i + 1] - locs[i] <= tol
             # merge
-            wgts[i] = _addu!(wgts[i], popat!(wgts, i + 1))
+            wgts[i] = _axpy!(true, popat!(wgts, i + 1), wgts[i])
             deleteat!(locs, i + 1) # keep location closer to zero
         else
             # increment index
@@ -120,7 +120,7 @@ function merge_degenerate_poles!(P::AbstractPolesSum, tol::Real = 0)
     while i > firstindex(locs)
         if locs[i] - locs[i - 1] <= tol
             # merge
-            wgts[i - 1] = _addu!(wgts[i - 1], popat!(wgts, i))
+            wgts[i - 1] = _axpy!(true, popat!(wgts, i), wgts[i - 1])
             deleteat!(locs, i - 1) # keep location closer to zero
             i -= 1
         else
@@ -131,9 +131,9 @@ function merge_degenerate_poles!(P::AbstractPolesSum, tol::Real = 0)
     return P
 end
 
-# Add weights for both scalar and block variants.
-_addu!(x::Number, y) = x + y
-_addu!(x::AbstractArray, y) = (x .+= y; x)
+# y ← α*x + y for both scalar and block weights.
+_axpy!(α, x::Number, y::Number) = α * x + y
+_axpy!(α, x::AbstractArray, y::AbstractArray) = axpy!(α, x, y)
 
 """
     merge_negative_locations_to_zero!(P::AbstractPolesSum)
@@ -166,8 +166,48 @@ Merge poles with weight `<= tol` to its neighbors.
 
 A given pole is split locally using the law of levers.
 This conserves the zeroth and first moment for scalars.
+For block weights, the pole size is measured by the largest eigenvalue.
 """
-function merge_small_weight! end
+function merge_small_weight!(P::AbstractPolesSum, tol::Real)
+    # check input
+    tol >= 0 || throw(ArgumentError("negative tol is invalid"))
+    # loop over all poles
+    i = 1
+    while i <= length(P)
+        loc = location(P, i)
+        wgt = weight(P, i)
+        if _mag(wgt) > tol
+            # enough weight, go to next
+            i += 1
+            continue
+        end
+        if i == 1
+            # add weight to next pole
+            weights(P)[2] = _axpy!(true, wgt, weights(P)[2])
+            deleteat!(locations(P), 1)
+            deleteat!(weights(P), 1)
+        elseif i == length(P)
+            # add weight to previous pole
+            weights(P)[end - 1] = _axpy!(true, wgt, weights(P)[end - 1])
+            pop!(locations(P))
+            pop!(weights(P))
+        else
+            # split weight such that zeroth and first moment is conserved
+            loc_prev = location(P, i - 1)
+            loc_next = location(P, i + 1)
+            α = (loc_next - loc) / (loc_next - loc_prev)
+            weights(P)[i - 1] = _axpy!(α, wgt, weights(P)[i - 1])
+            weights(P)[i + 1] = _axpy!(1 - α, wgt, weights(P)[i + 1])
+            deleteat!(locations(P), i)
+            deleteat!(weights(P), i)
+        end
+    end
+    return P
+end
+
+# Size of a (block) weight for the small-weight threshold.
+_mag(x::Number) = x
+_mag(x::AbstractArray) = eigmax(Hermitian(x))
 
 """
     moment(P::AbstractPolesSum, n::Int=0)

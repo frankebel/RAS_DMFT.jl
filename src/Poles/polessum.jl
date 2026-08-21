@@ -260,43 +260,6 @@ function merge_negative_weight!(P::PolesSum)
     return P
 end
 
-function merge_small_weight!(P::PolesSum, tol::Real)
-    # check input
-    tol >= 0 || throw(ArgumentError("negative tol is invalid"))
-    # loop over all poles
-    i = 1
-    while i <= length(P)
-        loc = location(P, i)
-        wgt = weight(P, i)
-        if wgt > tol
-            # enough weight, go to next
-            i += 1
-            continue
-        end
-        if i == 1
-            # add weight to next pole
-            weights(P)[2] += weight(P, 1)
-            deleteat!(locations(P), 1)
-            deleteat!(weights(P), 1)
-        elseif i == length(P)
-            # add weight to previous pole
-            weights(P)[end - 1] += wgt
-            pop!(locations(P))
-            pop!(weights(P))
-        else
-            # split weight such that zeroth and first moment is conserved
-            loc_prev = location(P, i - 1)
-            loc_next = location(P, i + 1)
-            α = (loc_next - loc) / (loc_next - loc_prev)
-            weights(P)[i - 1] += α * wgt
-            weights(P)[i + 1] += (1 - α) * wgt
-            deleteat!(locations(P), i)
-            deleteat!(weights(P), i)
-        end
-    end
-    return P
-end
-
 function moment(P::PolesSum, n::Int = 0)
     foo = [loc^n * w for (loc, w) in P]
     # sort by abs to guarantee that odd moments are zero for symmetric input

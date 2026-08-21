@@ -246,47 +246,6 @@ function filling(P::PolesSumBlock{<:Any, B}, μ::Real = 0) where {B}
 end
 
 
-function merge_small_weight!(P::PolesSumBlock, tol::Real)
-    # check input
-    tol >= 0 || throw(ArgumentError("negative tol is invalid"))
-    # loop over all poles
-    i = 1
-    while i <= length(P)
-        loc = location(P, i)
-        wgt = weight(P, i)
-        if norm(wgt, Inf) > tol
-            # enough weight, go to next
-            i += 1
-            continue
-        end
-        if i == 1
-            # add weight to next pole
-            wgt_next = weight(P, i + 1)
-            wgt_next .+= wgt
-            deleteat!(locations(P), 1)
-            deleteat!(weights(P), 1)
-        elseif i == length(P)
-            # add weight to previous pole
-            wgt_prev = weight(P, i - 1)
-            wgt_prev .+= wgt
-            pop!(locations(P))
-            pop!(weights(P))
-        else
-            # split weight such that zeroth and first moment is conserved
-            loc_prev = location(P, i - 1)
-            loc_next = location(P, i + 1)
-            wgt_prev = weight(P, i - 1)
-            wgt_next = weight(P, i + 1)
-            α = (loc_next - loc) / (loc_next - loc_prev)
-            wgt_prev .+= α * wgt
-            wgt_next .+= (1 - α) * wgt
-            deleteat!(locations(P), i)
-            deleteat!(weights(P), i)
-        end
-    end
-    return P
-end
-
 function moment(P::PolesSumBlock, n::Int = 0)
     return sum(loc^n * w for (loc, w) in P)
 end
