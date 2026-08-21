@@ -100,7 +100,6 @@ end
         n_c_bit::Int=1,
     ) where {T<:Real}
 
-
 Convert natural orbital Hamiltonian `H_nat` to `Operator`.
 
 # Arguments
@@ -205,7 +204,6 @@ end
         excitation::Int=1,
     ) where {T<:Real}
 
-
 Convert natural orbital Hamiltonian `H_nat` to `RASOperator`.
 
 # Arguments
@@ -254,43 +252,9 @@ function natural_orbital_ras_operator(
     H_bit = _add_impurity_terms(H_int, c, H_nat, ϵ_imp, n_occ)
     for σ in axes(c, 2)
         # valence bath sites
-        for i in 1:n_v_bit
-            j = 1 + i # Index in H_nat.
-            k = 2 + i # Index in bit component.
-            # bath site
-            H_bit += H_nat[j, j] * c[k, σ]' * c[k, σ]
-            if i == 1
-                # hopping v_1 <-> i
-                H_bit += H_nat[j, 1] * c[1, σ]' * c[k, σ]
-                H_bit += H_nat[j, 1] * c[k, σ]' * c[1, σ]
-                # hopping v_1 <-> b
-                H_bit += H_nat[j, n_occ + 1] * c[2, σ]' * c[k, σ]
-                H_bit += H_nat[j, n_occ + 1] * c[k, σ]' * c[2, σ]
-            else
-                # Hopping to previous neighbor.
-                H_bit += H_nat[j - 1, j] * c[k - 1, σ]' * c[k, σ]
-                H_bit += H_nat[j - 1, j] * c[k, σ]' * c[k - 1, σ]
-            end
-        end
+        H_bit = _add_bath_chain(H_bit, c, σ, H_nat, n_occ, 1, 2, n_v_bit)
         # conduction bath sites
-        for i in 1:n_c_bit
-            j = n_occ + 1 + i # Index in H_nat.
-            k = 2 + n_v_bit + i  # Index in bit component.
-            # bath site
-            H_bit += H_nat[j, j] * c[k, σ]' * c[k, σ]
-            if i == 1
-                # hopping c_1 <-> i
-                H_bit += H_nat[j, 1] * c[1, σ]' * c[k, σ]
-                H_bit += H_nat[j, 1] * c[k, σ]' * c[1, σ]
-                # hopping c_1 <-> b
-                H_bit += H_nat[j, n_occ + 1] * c[2, σ]' * c[k, σ]
-                H_bit += H_nat[j, n_occ + 1] * c[k, σ]' * c[2, σ]
-            else
-                # Hopping to previous neighbor.
-                H_bit += H_nat[j - 1, j] * c[k - 1, σ]' * c[k, σ]
-                H_bit += H_nat[j - 1, j] * c[k, σ]' * c[k - 1, σ]
-            end
-        end
+        H_bit = _add_bath_chain(H_bit, c, σ, H_nat, n_occ, n_occ + 1, 2 + n_v_bit, n_c_bit)
     end
 
     # Create VectorOperator
@@ -366,6 +330,29 @@ function _add_impurity_terms(H, c, H_nat::AbstractMatrix, ϵ_imp, n_occ::Int)
         # hopping i <-> b
         H += H_nat[n_occ + 1, 1] * c[1, σ]' * c[2, σ]
         H += H_nat[n_occ + 1, 1] * c[2, σ]' * c[1, σ]
+    end
+    return H
+end
+
+# Add the on-site energies and nearest-neighbor hopping of one bath-site chain
+# (valence or conduction) inside the RAS bit component.
+function _add_bath_chain(H, c, σ, H_nat::AbstractMatrix, n_occ::Int, base_nat::Int, base_bit::Int, n_chain::Int)
+    for i in 1:n_chain
+        site_nat = base_nat + i # site index in H_nat
+        site_bit = base_bit + i # site index in bit component
+        # bath site
+        H += H_nat[site_nat, site_nat] * c[site_bit, σ]' * c[site_bit, σ]
+        if i == 1
+            # hopping chain start <-> i and chain start <-> b
+            H += H_nat[site_nat, 1] * c[1, σ]' * c[site_bit, σ]
+            H += H_nat[site_nat, 1] * c[site_bit, σ]' * c[1, σ]
+            H += H_nat[site_nat, n_occ + 1] * c[2, σ]' * c[site_bit, σ]
+            H += H_nat[site_nat, n_occ + 1] * c[site_bit, σ]' * c[2, σ]
+        else
+            # hopping to previous neighbor
+            H += H_nat[site_nat - 1, site_nat] * c[site_bit - 1, σ]' * c[site_bit, σ]
+            H += H_nat[site_nat - 1, site_nat] * c[site_bit, σ]' * c[site_bit - 1, σ]
+        end
     end
     return H
 end
