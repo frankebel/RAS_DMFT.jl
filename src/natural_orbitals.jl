@@ -130,16 +130,9 @@ function natural_orbital_operator(
     0 < n_v_bit <= n_v || throw(ArgumentError(lazy"violating 0 < $(n_v_bit) <= $(n_v)"))
     0 < n_c_bit <= n_c || throw(ArgumentError(lazy"violating 0 < $(n_c_bit) <= $(n_c)"))
     c = annihilators(fock_space)
-    # impurity i
-    H = H_int
-    H += ϵ_imp * c[1, -1 // 2]' * c[1, -1 // 2]
-    H += ϵ_imp * c[1, 1 // 2]' * c[1, 1 // 2]
+    # impurity i and mirror bath site b
+    H = _add_impurity_terms(H_int, c, H_nat, ϵ_imp, n_occ)
     for σ in axes(c, 2)
-        # mirror bath site b
-        H += H_nat[n_occ + 1, n_occ + 1] * c[2, σ]' * c[2, σ]
-        # hopping i <-> b
-        H += H_nat[n_occ + 1, 1] * c[1, σ]' * c[2, σ]
-        H += H_nat[n_occ + 1, 1] * c[2, σ]' * c[1, σ]
         # valence bath sites
         for i in 1:n_v
             j = 1 + i # Index in H_nat.
@@ -258,16 +251,8 @@ function natural_orbital_ras_operator(
     c = annihilators(fock_space)
 
     # Create Bitoperator H_bit.
-    H_bit = H_int
-    # impurity i
-    H_bit += ϵ_imp * c[1, -1 // 2]' * c[1, -1 // 2]
-    H_bit += ϵ_imp * c[1, 1 // 2]' * c[1, 1 // 2]
+    H_bit = _add_impurity_terms(H_int, c, H_nat, ϵ_imp, n_occ)
     for σ in axes(c, 2)
-        # mirror bath site b
-        H_bit += H_nat[n_occ + 1, n_occ + 1] * c[2, σ]' * c[2, σ]
-        # hopping i <-> b
-        H_bit += H_nat[1, n_occ + 1] * c[1, σ]' * c[2, σ]
-        H_bit += H_nat[1, n_occ + 1] * c[2, σ]' * c[1, σ]
         # valence bath sites
         for i in 1:n_v_bit
             j = 1 + i # Index in H_nat.
@@ -348,17 +333,7 @@ function _natural_orbital_ras_operator_zero(
     c = annihilators(fock_space)
 
     # Create Bitoperator H_bit.
-    H_bit = H_int
-    # impurity i
-    H_bit += ϵ_imp * c[1, -1 // 2]' * c[1, -1 // 2]
-    H_bit += ϵ_imp * c[1, 1 // 2]' * c[1, 1 // 2]
-    for σ in axes(c, 2)
-        # mirror bath site b
-        H_bit += H_nat[n_occ + 1, n_occ + 1] * c[2, σ]' * c[2, σ]
-        # hopping i <-> b
-        H_bit += H_nat[1, n_occ + 1] * c[1, σ]' * c[2, σ]
-        H_bit += H_nat[1, n_occ + 1] * c[2, σ]' * c[1, σ]
-    end
+    H_bit = _add_impurity_terms(H_int, c, H_nat, ϵ_imp, n_occ)
 
     # Create VectorOperator
     n_v_vector = n_v
@@ -378,4 +353,19 @@ function _natural_orbital_ras_operator_zero(
     )
 
     return RASOperator(H_bit, mixed, esite, ehop, n_bit, n_v_vector, n_c_vector, excitation)
+end
+
+# Add the impurity on-site energy and the impurity–mirror-site hopping.
+# This block is identical for the full and RAS operator constructions.
+function _add_impurity_terms(H, c, H_nat::AbstractMatrix, ϵ_imp, n_occ::Int)
+    for σ in axes(c, 2)
+        # impurity i
+        H += ϵ_imp * c[1, σ]' * c[1, σ]
+        # mirror bath site b
+        H += H_nat[n_occ + 1, n_occ + 1] * c[2, σ]' * c[2, σ]
+        # hopping i <-> b
+        H += H_nat[n_occ + 1, 1] * c[1, σ]' * c[2, σ]
+        H += H_nat[n_occ + 1, 1] * c[2, σ]' * c[1, σ]
+    end
+    return H
 end
