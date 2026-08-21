@@ -67,30 +67,7 @@ function greens_function_bethe_grid(grid::AbstractVector{<:Real}, D::Real = 1.0)
 
     s = Semicircle(D)
     locations = Vector(grid)
-    weights = similar(locations)
-    n = length(locations)
-    if n == 1
-        weights[1] = 1
-        return PolesSum(locations, weights)
-    end
-    # For each pole location a[i] we bisect the interval to its neighbors
-    # a_low = 0.5 * (a[i-1] + a[i])
-    # a_high = 0.5 * (a[i] + a[i+1])
-    # and calculate the weight as
-    # wgt ∝ cdf(a_high) - cdf(a_low)
-    for i in eachindex(locations)
-        if i == 1
-            # cdf(-Inf) = 0
-            @inbounds weights[i] = cdf(s, 0.5 * (locations[i] + locations[i + 1]))
-        elseif i == n
-            # cdf(Inf) = 1
-            @inbounds weights[i] = 1 - cdf(s, 0.5 * (locations[i - 1] + locations[i]))
-        else
-            @inbounds weights[i] =
-                cdf(s, 0.5 * (locations[i] + locations[i + 1])) -
-                cdf(s, 0.5 * (locations[i - 1] + locations[i]))
-        end
-    end
+    weights = _bethe_bisection_weights(locations, x -> cdf(s, x))
     return PolesSum(locations, weights)
 end
 
@@ -113,34 +90,9 @@ function greens_function_bethe_grid_hubbard3(
 
     s = Semicircle(D)
     locations = Vector(grid)
-    weights = similar(locations)
-    n = length(locations)
-    if n == 1
-        weights[1] = 1
-        return PolesSum(locations, weights)
-    end
-    # For each pole location a[i] we bisect the interval to its neighbors
-    # a_low = 0.5 * (a[i-1] + a[i])
-    # a_high = 0.5 * (a[i] + a[i+1])
-    # and calculate the weight as
-    # b ∝ cdf(a_high) - cdf(a_low)
-    for i in eachindex(locations)
-        if i == 1
-            # cdf(-Inf) = 0
-            a_high = 0.5 * (locations[i] + locations[i + 1])
-            @inbounds weights[i] = cdf(s, a_high + U / 2) + cdf(s, a_high - U / 2)
-        elseif i == n
-            # cdf(Inf) = 2
-            a_low = 0.5 * (locations[i - 1] + locations[i])
-            @inbounds weights[i] = 2 - cdf(s, a_low + U / 2) - cdf(s, a_low - U / 2)
-        else
-            a_low = 0.5 * (locations[i - 1] + locations[i])
-            a_high = 0.5 * (locations[i] + locations[i + 1])
-            @inbounds weights[i] =
-                cdf(s, a_high + U / 2) + cdf(s, a_high - U / 2) - cdf(s, a_low + U / 2) -
-                cdf(s, a_low - U / 2)
-        end
-    end
+    weights = _bethe_bisection_weights(
+        locations, x -> cdf(s, x + U / 2) + cdf(s, x - U / 2), 2
+    )
     weights ./= 2 # normalize 2 distributions
     return PolesSum(locations, weights)
 end
@@ -294,4 +246,30 @@ function greens_function_local(
     rmul!(G, inv(n_k))
 
     return G
+end
+
+# For each grid point, bisect the interval to its neighbors and compute the pole weight
+# as the mass of the distribution with `cdf(Inf) = total`.
+function _bethe_bisection_weights(locations, cdf, total = 1)
+    n = length(locations)
+    weights = similar(locations)
+    if n == 1
+        weights[1] = total
+        return weights
+    end
+    # wgt ∝ cdf(a_high) - cdf(a_low)
+    for i in eachindex(locations)
+        if i == 1
+            # cdf(-Inf) = 0
+            @inbounds weights[i] = cdf(0.5 * (locations[i] + locations[i + 1]))
+        elseif i == n
+            # cdf(Inf) = total
+            @inbounds weights[i] = total - cdf(0.5 * (locations[i - 1] + locations[i]))
+        else
+            @inbounds weights[i] =
+                cdf(0.5 * (locations[i] + locations[i + 1])) -
+                cdf(0.5 * (locations[i - 1] + locations[i]))
+        end
+    end
+    return weights
 end
