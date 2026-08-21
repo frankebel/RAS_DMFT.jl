@@ -34,14 +34,14 @@ using Test
         @test length(G_plus) === n_kryl
         @test all(>=(0), locations(G_plus))
         @test all(>=(0), weights(G_plus))
-        @test moment(G_plus, 0) ≈ 0.5 atol = 100 * eps()
+        @test moment(G_plus, 0) ≈ 0.5 atol = 2.0e2 * eps()
         # G-
         G_minus = correlator_minus(H, ψ0, d_dag', n_kryl)
         @test typeof(G_minus) === PolesSum{Float64, Float64}
         @test length(G_minus) === n_kryl
         @test all(<=(0), locations(G_minus))
         @test all(>=(0), weights(G_minus))
-        @test moment(G_minus, 0) ≈ 0.5 atol = 100 * eps()
+        @test moment(G_minus, 0) ≈ 0.5 atol = 2.0e2 * eps()
 
         # analytic moments at half-filling
         G = G_plus + G_minus

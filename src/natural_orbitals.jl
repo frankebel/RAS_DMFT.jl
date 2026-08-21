@@ -48,24 +48,14 @@ function to_natural_orbitals(H::AbstractMatrix{<:Real}, ϵ::Real = 1.0e-8)
 
     # Löwdin on valence states
     base_occ[:, 1] .= w
-    B = @view base_occ[:, 2:end]
-    S = B' * B
-    E, V = LAPACK.syev!('V', 'U', S)
-    tol_v = maximum(E) * sqrt(eps(typeof(ϵ))) # set all eigenvalues smaller to zero
-    R = V * Diagonal(map(x -> x >= tol_v ? 1 / sqrt(x) : 0, E)) * V'
-    B .= B * R
+    _lowdin!(base_occ)
     h = base_occ' * H * base_occ
 
     a_occ, b_occ, _ = sytrd!('L', h)
 
     # Löwdin on conduction states
     base_emp[:, 1] .= u
-    B = @view base_emp[:, 2:end]
-    S = B' * B
-    E, V = LAPACK.syev!('V', 'U', S)
-    tol_c = maximum(E) * sqrt(eps(typeof(ϵ))) # set all eigenvalues smaller to zero
-    R = V * Diagonal(map(x -> x >= tol_c ? 1 / sqrt(x) : 0, E)) * V'
-    B .= B * R
+    _lowdin!(base_emp)
     h = base_emp' * H * base_emp
 
     a_emp, b_emp, _ = sytrd!('L', h)
@@ -355,4 +345,11 @@ function _add_bath_chain(H, c, σ, H_nat::AbstractMatrix, n_occ::Int, base_nat::
         end
     end
     return H
+end
+
+# Löwdin-orthonormalize the bath states of `B` in place, keeping the impurity weight as-is.
+function _lowdin!(B::AbstractMatrix)
+    bb = @view B[:, 2:end]
+    bb .= first(_orthonormalize_SVD(bb))
+    return nothing
 end
