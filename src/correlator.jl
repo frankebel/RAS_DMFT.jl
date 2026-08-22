@@ -104,8 +104,7 @@ function correlator_minus(
     )
     C = correlator(H, ψ0, O, n_kryl)
 
-    map!(-, locations(C)) # flip sign of eigenvalues
-    reverse!(C) # order form lowest to highest
+    flip_spectrum!(C)
 
     _warn_wrong_sign(C, :minus)
     return C
