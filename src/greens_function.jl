@@ -17,7 +17,7 @@ G(z) = \\frac{2}{D^2} \\left(z - \\mathrm{sgn}(\\mathrm{Re}(z)) \\sqrt{z^2 - D^2
 with ``\\mathrm{sgn}(0) = \\mathrm{sgn}(0^±)``.
 """
 function greens_function_bethe_analytic(z::Number, D::Real = 1.0)
-    D > 0 || throw(DomainError(D, "negative half-bandwidth"))
+    _check_half_width(D)
     s = (-1)^signbit(real(z)) # sign(0) = sign(0^±)
     return 2 / D^2 * (z - s * sqrt((z + 0.0im)^2 - D^2))
 end
@@ -40,7 +40,7 @@ See also
 """
 function greens_function_bethe_simple(n_bath::Int, D::Real = 1.0)
     # check input
-    D > 0 || throw(DomainError(D, "negative half-bandwidth"))
+    _check_half_width(D)
 
     dv = zeros(n_bath)
     ev = fill(D / 2, n_bath - 1) # hopping t = D/2
@@ -63,8 +63,6 @@ See also
 function greens_function_bethe_grid(grid::AbstractVector{<:Real}, D::Real = 1.0)
     # check input
     _issorted_and_unique(grid)
-    D > 0 || throw(DomainError(D, "negative half-bandwidth"))
-
     s = Semicircle(D)
     locations = Vector(grid)
     weights = _bethe_bisection_weights(locations, x -> cdf(s, x))
@@ -86,8 +84,6 @@ function greens_function_bethe_grid_hubbard3(
     )
     # check input
     _issorted_and_unique(grid)
-    D > 0 || throw(DomainError(D, "negative half-bandwidth"))
-
     s = Semicircle(D)
     locations = Vector(grid)
     weights = _bethe_bisection_weights(
@@ -242,6 +238,11 @@ function greens_function_local(
     rmul!(G, inv(n_k))
 
     return G
+end
+
+function _check_half_width(D::Real)
+    D > 0 || throw(DomainError(D, "negative half-bandwidth"))
+    return nothing
 end
 
 # For each grid point, bisect the interval to its neighbors and compute the pole weight
