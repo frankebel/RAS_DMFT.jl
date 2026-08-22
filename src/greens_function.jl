@@ -230,11 +230,7 @@ function greens_function_local(
     amps = Matrix{T}(undef, n_b, n_p)
     locs, amps = let locs = locs, amps = amps, Σ_A = Σ_A, n_b = n_b, dim = dim
         Threads.@threads for i in eachindex(H_k)
-            foo = copy(Σ_A)
-            foo[1:n_b, 1:n_b] = H_k[i]
-            foo[1:n_b, 1:n_b] += Σ_stat
-            foo[1:n_b, 1:n_b] -= μ * I
-            F = eigen!(Hermitian(foo))
+            F = _arrowhead_eigen(Σ_A, H_k[i], Σ_stat, μ, n_b)
             idx_low = 1 + dim * (i - 1)
             idx_high = idx_low + dim - 1
             @inbounds locs[idx_low:idx_high] = F.values

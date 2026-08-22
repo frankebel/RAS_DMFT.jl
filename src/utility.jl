@@ -149,6 +149,19 @@ function find_chemical_potential(
     return μ_new, n_new
 end
 
+# Diagonalize `Σ_A` with its top-left `n_b × n_b` block replaced by `H + Σ_stat - μ * I`.
+function _arrowhead_eigen(
+        Σ_A::AbstractMatrix,
+        H::AbstractMatrix,
+        Σ_stat::AbstractMatrix,
+        μ::Real,
+        n_b::Int,
+    )
+    foo = copy(Σ_A)
+    view(foo, 1:n_b, 1:n_b) .= H .+ Σ_stat .- μ * one(H) # one fused broadcast, no temporaries
+    return eigen!(Hermitian(foo))
+end
+
 # Calculate filling for given chemical potential μ.
 function _filling_mu(H_k, Σ_stat, Σ_A::AbstractMatrix, μ)
     n_b = LinearAlgebra.checksquare(first(H_k)) # number of bands
@@ -156,14 +169,10 @@ function _filling_mu(H_k, Σ_stat, Σ_A::AbstractMatrix, μ)
     result = Threads.Atomic{typeof(z)}(z)
 
     Threads.@threads for i in eachindex(H_k)
-        foo = copy(Σ_A)
-        foo[1:n_b, 1:n_b] = H_k[i]
-        foo[1:n_b, 1:n_b] -= μ * I
-        foo[1:n_b, 1:n_b] += Σ_stat
-        # NOTE: `foo` is a sparse (block arrowhead matrix).
+        # NOTE: `Σ_A` is a sparse (block arrowhead matrix).
         # One can use Krylov methods to approximate spectrum
         # if full decomposition is too slow.
-        F = eigen!(Hermitian(foo))
+        F = _arrowhead_eigen(Σ_A, H_k[i], Σ_stat, μ, n_b)
         n_loc = z # local filling
         @inbounds for j in axes(Σ_A, 2)
             ϵ = F.values[j]
