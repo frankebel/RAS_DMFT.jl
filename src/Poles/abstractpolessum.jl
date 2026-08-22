@@ -214,7 +214,9 @@ _mag(x::AbstractArray) = eigmax(Hermitian(x))
 
 Return the `n`-th moment.
 """
-function moment end
+function moment(P::AbstractPolesSum, n::Int = 0)
+    return sum(loc^n * w for (loc, w) in P)
+end
 
 """
     moments(P::AbstractPolesSum, ns)

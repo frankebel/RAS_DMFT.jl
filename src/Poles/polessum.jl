@@ -260,13 +260,6 @@ function merge_negative_weight!(P::PolesSum)
     return P
 end
 
-function moment(P::PolesSum, n::Int = 0)
-    foo = [loc^n * w for (loc, w) in P]
-    # sort by abs to guarantee that odd moments are zero for symmetric input
-    sort!(foo; by = abs)
-    return sum(foo)
-end
-
 """
     spectral_function_loggaussian(P::PolesSum, ω, b::Real)
 

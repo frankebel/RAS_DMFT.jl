@@ -245,11 +245,6 @@ function filling(P::PolesSumBlock{<:Any, B}, μ::Real = 0) where {B}
     return Hermitian(result)
 end
 
-
-function moment(P::PolesSumBlock, n::Int = 0)
-    return sum(loc^n * w for (loc, w) in P)
-end
-
 function Base.:+(A::PolesSumBlock{LA, WA}, B::PolesSumBlock{LB, WB}) where {LA, WA, LB, WB}
     L = promote_type(LA, LB)
     W = promote_type(WA, WB)
