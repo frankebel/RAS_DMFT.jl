@@ -135,6 +135,28 @@ end
 _axpy!(α, x::Number, y::Number) = α * x + y
 _axpy!(α, x::AbstractArray, y::AbstractArray) = axpy!(α, x, y)
 
+# Sort ascending and merge degenerate locations.
+function _sort_merge_degenerate(locs, wgts)
+    p = sortperm(locs)
+    locs = locs[p]
+    wgts = wgts[p]
+    locs_canonical = similar(locs, 0)
+    wgts_canonical = similar(wgts, 0)
+    i = 1
+    while i <= length(locs)
+        loc = locs[i]
+        wgt = copy(wgts[i])
+        i += 1
+        while i <= length(locs) && locs[i] == loc
+            wgt = _axpy!(true, wgts[i], wgt)
+            i += 1
+        end
+        push!(locs_canonical, loc)
+        push!(wgts_canonical, wgt)
+    end
+    return locs_canonical, wgts_canonical
+end
+
 """
     merge_negative_locations_to_zero!(P::AbstractPolesSum)
 

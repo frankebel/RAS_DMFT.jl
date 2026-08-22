@@ -43,30 +43,9 @@ true
 ```
 """
 function PolesSum(locs::AbstractVector{A}, wgts::AbstractVector{B}) where {A, B}
-    # Check length for permutation below.
     length(locs) == length(wgts) || throw(DimensionMismatch("length mismatch"))
-
-    # sort
-    p = sortperm(locs)
-    locs = locs[p]
-    wgts = wgts[p]
-
-    # Merge degenerate locations.
-    loc_out = similar(locs, 0)
-    wgt_out = similar(wgts, 0)
-    i = 1
-    while i <= length(locs)
-        l = locs[i]
-        w = wgts[i]
-        i += 1
-        while i <= length(locs) && locs[i] == l
-            w += wgts[i]
-            i += 1
-        end
-        push!(loc_out, l)
-        push!(wgt_out, w)
-    end
-    return PolesSum{A, B}(loc_out, wgt_out)
+    locs, wgts = _sort_merge_degenerate(locs, wgts)
+    return PolesSum{A, B}(locs, wgts)
 end
 
 PolesSum{A, B}(P::PolesSum) where {A, B} = convert(PolesSum{A, B}, P)

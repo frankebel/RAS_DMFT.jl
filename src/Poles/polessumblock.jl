@@ -51,38 +51,17 @@ true
 ```
 """
 function PolesSumBlock(locs::AbstractVector{A}, wgts::Vector{<:AbstractMatrix{B}}) where {A, B}
-    # Check length for permutation below.
     length(locs) == length(wgts) || throw(DimensionMismatch("length mismatch"))
 
     # Do no mutate user input.
-    locs = collect(A, locs)
     wgts = [copy(w) for w in wgts]
     for w in wgts
         isapprox(w, w') || throw(ArgumentError("weight violates Hermiticity"))
         ishermitian(w) || hermitianpart!(w)
     end
 
-    # sort
-    p = sortperm(locs)
-    locs = locs[p]
-    wgts = wgts[p]
-
-    # Merge degenerate locations.
-    loc_out = similar(locs, 0)
-    wgt_out = similar(wgts, 0)
-    i = 1
-    while i <= length(locs)
-        l = locs[i]
-        w = copy(wgts[i])
-        i += 1
-        while i <= length(locs) && locs[i] == l
-            w .+= wgts[i]
-            i += 1
-        end
-        push!(loc_out, l)
-        push!(wgt_out, w)
-    end
-    return PolesSumBlock{A, B}(loc_out, wgt_out)
+    locs, wgts = _sort_merge_degenerate(locs, wgts)
+    return PolesSumBlock{A, B}(locs, wgts)
 end
 
 """
