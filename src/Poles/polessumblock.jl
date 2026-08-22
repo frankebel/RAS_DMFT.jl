@@ -225,47 +225,12 @@ function filling(P::PolesSumBlock{<:Any, B}, μ::Real = 0) where {B}
 end
 
 function Base.:+(A::PolesSumBlock{LA, WA}, B::PolesSumBlock{LB, WB}) where {LA, WA, LB, WB}
+    size(A) == size(B) || throw(DimensionMismatch("block sizes do not match"))
     L = promote_type(LA, LB)
     W = promote_type(WA, WB)
-    na, nb = length(A), length(B)
-    locs = Vector{L}(undef, na + nb)
-    wgts = Vector{Matrix{W}}(undef, na + nb)
-    ia = ib = 1
-    k = 1
-    @inbounds while ia <= na || ib <= nb
-        if ia > na
-            locs[k] = location(B, ib)
-            wgts[k] = Matrix{W}(weight(B, ib))
-            ib += 1
-            k += 1
-        elseif ib > nb
-            locs[k] = location(A, ia)
-            wgts[k] = Matrix{W}(weight(A, ia))
-            ia += 1
-            k += 1
-        elseif location(A, ia) < location(B, ib)
-            locs[k] = location(A, ia)
-            wgts[k] = Matrix{W}(weight(A, ia))
-            ia += 1
-            k += 1
-        elseif location(B, ib) < location(A, ia)
-            locs[k] = location(B, ib)
-            wgts[k] = Matrix{W}(weight(B, ib))
-            ib += 1
-            k += 1
-        else
-            # merge degenerate locations
-            locs[k] = location(A, ia)
-            w = Matrix{W}(weight(A, ia))
-            w .+= convert(Matrix{W}, weight(B, ib))
-            wgts[k] = w
-            ia += 1
-            ib += 1
-            k += 1
-        end
-    end
-    resize!(locs, k - 1)
-    resize!(wgts, k - 1)
+    locs, wgts = _sort_merge_degenerate(
+        vcat(locations(A), locations(B)), vcat(weights(A), weights(B))
+    )
     return PolesSumBlock{L, W}(locs, wgts)
 end
 

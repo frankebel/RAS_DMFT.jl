@@ -384,6 +384,11 @@ using Test
             P = A + B
             @test locations(P) == [1, 2, 3]
             @test weights(P) == [[1 0; 0 1], [4 5; 5 6], [2 1; 1 0]]
+
+            # block sizes must match
+            A = PolesSumBlock([1], [[1 0; 0 1]])
+            B = PolesSumBlock([1], [[1 0 0; 0 1 0; 0 0 1]])
+            @test_throws DimensionMismatch A + B
         end
 
         @testset "convert" begin
