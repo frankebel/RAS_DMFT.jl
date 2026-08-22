@@ -80,49 +80,15 @@ function PolesSum(P::PolesContinuedFraction)
 end
 
 function PolesContinuedFraction(P::PolesSum)
-    tol = sqrt(1000 * eps())
-    N = length(P)
-    A = Diagonal(locations(P)) # Lanczos on this matrix
-    # container for Lanzcos
-    a = Vector{Float64}(undef, N)
-    b = Vector{Float64}(undef, N - 1)
-    V = Matrix{Float64}(undef, N, N)
     # normalize starting vector
-    v_old = amplitudes(P)
-    s = norm(v_old)
-    v_old ./= s
+    N = length(P)
+    s = norm(amplitudes(P))
+    v = amplitudes(P) ./ s
     isapprox(s, 1; atol = 100 * eps()) && (s = one(s))
-    # first Lanczos step
-    V[:, 1] = v_old
-    v_new = A * v_old
-    a[1] = v_old ⋅ v_new
-    axpy!(-a[1], v_old, v_new)
-
-    # successive steps
-    for i in 2:N
-        b[i - 1] = norm(v_new)
-        if b[i - 1] < tol
-            # stop early
-            @info "Lanczos stopping early: b[$(i - 1)] = $(b[i - 1])."
-            deleteat!(a, i:N)
-            deleteat!(b, (i - 1):(N - 1))
-            break
-        end
-        rmul!(v_new, inv(b[i - 1]))
-        V[:, i] = v_new
-        mul!(v_new, A, view(V, :, i)) # new vector
-        for j in 1:(i - 1)
-            # Gram-Schmidt against all states excluding last
-            v_old = view(V, :, j)
-            axpy!(-(v_old ⋅ v_new), v_old, v_new)
-            axpy!(-(v_old ⋅ v_new), v_old, v_new) # twice as it is unstable
-        end
-        # Gram-Schmidt against last state
-        v_old = view(V, :, i)
-        a[i] = v_old ⋅ v_new
-        axpy!(-a[i], v_old, v_new)
-        axpy!(-(v_old ⋅ v_new), v_old, v_new) # twice as it is unstable
-    end
+    # Scalar Lanczos is the same as block version with q = 1.
+    A, B, _ = block_lanczos_full_ortho(Diagonal(locations(P)), reshape(v, N, 1), N)
+    a = map(only, A)
+    b = map(only, B)
     return PolesContinuedFraction(a, b, s)
 end
 
