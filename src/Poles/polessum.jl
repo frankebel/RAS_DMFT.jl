@@ -91,19 +91,16 @@ end
 
 function evaluate(P::PolesSum, z::Number)
     result = zero(complex(float(eltype(P))))
-    for (ϵ, w) in P
-        result += w / (z - ϵ)
+    for (loc, wgt) in P
+        result += wgt / (z - loc)
     end
     return result
 end
 
 function evaluate_gaussian(P::PolesSum, ω::Real, σ::Real)
     result = zero(complex(float(eltype(P))))
-    for (ϵ, w) in P
-        re = sqrt(2) / σ * dawson((ω - ϵ) / (sqrt(2) * σ))
-        im_part = pdf(Normal(ϵ, σ), ω)
-        z = re - im * π * im_part
-        result += w * z
+    for (loc, wgt) in P
+        result += wgt * _gaussian_broadened(ω, loc, σ)
     end
     return result
 end

@@ -103,6 +103,13 @@ See also [`weight`](@ref).
 """
 function weights end
 
+# Gaussian broadening of pole
+function _gaussian_broadened(ω, loc, σ)
+    re = sqrt(2) / σ * dawson((ω - loc) / (sqrt(2) * σ))
+    im_part = pdf(Normal(loc, σ), ω)
+    return re - im * π * im_part
+end
+
 function _show_poles(io::IO, P::AbstractPoles)
     print(io, summary(P), " with ", length(P), " poles")
     return nothing
