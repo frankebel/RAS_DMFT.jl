@@ -39,6 +39,18 @@ using Test
         @test E0_p ≈ E0_m rtol = 1.0e-13
         # shift destroys PHS
         @test !isapprox(E0_p, E0; rtol = 1.0e-9)
+
+        # short Lanczos runs with many restarts reach the same ground state
+        H_k, E0_k, ψ_k = init_system(
+            Δ, H_int, -μ, 0, L_v, L_c, p, var; n_kryl = 5, n_max_restart = 100
+        )
+        Hψk = H_k * ψ_k
+        @test Hψk ⋅ Hψk < var
+        @test E0_k ≈ E0_target rtol = 2.0e-15
+        # a single short restart cannot reach the variance
+        @test_logs (:warn,) init_system(
+            Δ, H_int, -μ, 0, L_v, L_c, p, var; n_kryl = 2, n_max_restart = 1
+        )
     end # init system
 
     @testset "Kondo temperature" begin

@@ -9,13 +9,18 @@
         L_v::Int,
         L_c::Int,
         p::Int,
-        var::Real,
+        var::Real;
+        n_kryl::Int = 50,
+        n_max_restart::Int = 20,
     )
 
 Return Hamiltonian, ground state energy, and ground state.
 
 `ϵ_imp` is the bare impurity level entering the Hamiltonian, `ϵ_mf` the mean-field
 level defining the basis, see [`natural_impurity_orbital`](@ref).
+
+The ground state is found by [`ground_state!`](@ref)
+with `n_kryl` Lanczos vectors per restart and at most `n_max_restart` restarts.
 """
 function init_system(
         Δ::PolesSum,
@@ -25,7 +30,9 @@ function init_system(
         L_v::Int,
         L_c::Int,
         p::Int,
-        var::Real,
+        var::Real;
+        n_kryl::Int = 50,
+        n_max_restart::Int = 20,
     )
     H_nat = natural_impurity_orbital(Δ, ϵ_mf)
     fs = FockSpace(Orbitals(2 + L_v + L_c), FermionicSpin(1 // 2))
@@ -33,7 +40,7 @@ function init_system(
     ψ_start = RASWavefunction_singlet(
         Dict{UInt64, Float64}, L_v, L_c, H.nfilled, H.nempty, p
     )
-    E0, ψ0 = ground_state!(H, ψ_start, 5, 100, var)
+    E0, ψ0 = ground_state!(H, ψ_start, n_kryl, n_max_restart, var)
     return H, E0, ψ0
 end
 
