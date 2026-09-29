@@ -48,7 +48,7 @@ using Test
     Σ = PolesSum(self_energy_schur(C), 1, 1)::PolesSum{Float64, Float64}
     merge_small_weight!(Σ, tol_wgt)
     @test moment(Σ, 0) ≈ U^2 / 4 atol = 2.0e2 * eps()
-    @test moment(Σ, 1) ≈ 0 atol = 1.0e4 * eps()
+    @test moment(Σ, 1) ≈ 0 atol = 8.0e3 * eps()
 
     # new hybridization function on the grid `W`
     Δ = update_hybridization_function(Δ0, μ, Σ_H, Σ)
@@ -57,6 +57,6 @@ using Test
     Δ_new = to_grid(Δ, W)
 
     @test locations(Δ_new) == W
-    @test moment(Δ_new, 0) ≈ 0.25 atol = 10 * eps()
-    @test moment(Δ_new, 1) ≈ 0.0 atol = sqrt(eps())
+    @test moment(Δ_new, 0) ≈ 0.25 atol = 3 * eps()
+    @test moment(Δ_new, 1) ≈ 0.0 atol = 2.0e-12
 end # DMFT cycle

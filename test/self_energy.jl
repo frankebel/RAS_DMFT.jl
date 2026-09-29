@@ -50,16 +50,16 @@ using Test
         G_imp = G_minus + G_plus
 
         Σ_H, Σ = self_energy_dyson(-μ, Δ0, G_imp, -5:0.02:5)
-        @test Σ_H ≈ U / 2 atol = 100 * eps() # half-filling
-        @test moment(Σ, 0) ≈ U^2 / 4 atol = 1.0e-5 # bad agreement
+        @test Σ_H ≈ U / 2 atol = 10 * eps() # half-filling
+        @test moment(Σ, 0) ≈ U^2 / 4 atol = 2.0e-11
         @test !any(iszero, locations(Σ)) # no pole at 0 for metal
     end # self_energy_dyson
 
     @testset "Schur" begin
         Σ = PolesSum(self_energy_schur(C), 1, 1)
         merge_small_weight!(Σ, tol)
-        @test moment(Σ, 0) ≈ U^2 / 4 rtol = 1.0e3 * eps()
-        @test moment(Σ, 1) ≈ 0 atol = 1.0e-9
+        @test moment(Σ, 0) ≈ U^2 / 4 rtol = 80 * eps()
+        @test moment(Σ, 1) ≈ 0 atol = 5.0e-10
     end # Schur
 
     @testset "Schur block size four" begin

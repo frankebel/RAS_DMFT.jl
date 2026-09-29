@@ -57,7 +57,7 @@ using Test
             4.674798885164733
             6.074675831378591
         ]
-        @test norm(E - E_ref) < 3.0e3 * eps()
+        @test norm(E - E_ref) < 2.0e3 * eps()
     end # block_lanczos
 
     @testset "block_lanczos_full_ortho" begin

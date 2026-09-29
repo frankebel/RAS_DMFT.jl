@@ -25,7 +25,7 @@ using Test
         Hψ = H * ψ0
         variance = Hψ ⋅ Hψ
         @test variance < var
-        @test E0 ≈ E0_target rtol = 2.0e-13
+        @test E0 ≈ E0_target rtol = 2.0e-15
 
         # no PHS by setting ϵ_mf ≠ 0
         H_p, E0_p, ψ_p = init_system(Δ, H_int, -μ, 0.5, L_v, L_c, p, var)
@@ -36,7 +36,7 @@ using Test
         Hψm = H_m * ψ_m
         variance_minus = Hψm ⋅ Hψm
         @test variance_minus < var
-        @test E0_p ≈ E0_m rtol = 1.0e-13
+        @test E0_p ≈ E0_m rtol = 2.0e-15
         # shift destroys PHS
         @test !isapprox(E0_p, E0; rtol = 1.0e-9)
 
