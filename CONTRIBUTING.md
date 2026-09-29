@@ -54,8 +54,17 @@ julia --project=. --eval 'using Pkg; Pkg.test()'
 - A new feature comes with its tests.
 - A bug fix comes with a test that fails on the unfixed version.
 - Prefer hardcoded expected values over comparing a function to itself.
-- Set a tolerance on random data by rounding the worst deviation you measure up,
+- Set a tolerance by rounding the worst deviation you measure up,
   otherwise the test goes flaky on another machine.
+  Measure it at different thread counts,
+  as threaded sums change the rounding,
+  on every Julia version of the CI matrix,
+  and on the CPU of the CI runner
+  (`OPENBLAS_CORETYPE=Haswell julia -C haswell`),
+  as SIMD width changes it too.
+  Round 1.2 times the worst deviation up to one significant digit
+  (`2`, `30`, `8.0e3` times `eps()`),
+  and use a few ulp where you measured exactly zero.
 
 ## Commits
 
